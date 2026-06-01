@@ -15,19 +15,19 @@
 | CMS | nove-c.com (WP REST + Rank Math) | WordPress | produzione | — | `WP_USER` + `WP_APP_PASSWORD` (Secret) | crea SOLO bozze (cat. 3) |
 | Repo | github.com/danielcarta9c/n8n | GitHub | — | — | — | da rinominare? (vedi Next) |
 
-> Stato attuale: ancora su **n8n (a pagamento)**, workflow `s8ZB19pBRYeDADBU`
-> "NoveC SEO Blog - v2", `active: false`. Resta la sorgente di verità
-> funzionale (`n8nesistente`) finché la versione Actions non è validata.
+> Stato attuale: la versione **GitHub Actions è live e validata** (run reale ok).
+> Il flusso **n8n** (`s8ZB19pBRYeDADBU`, "NoveC SEO Blog - v2") resta solo come
+> riferimento/backup e va **dismesso** quando Daniel è sereno (poi si valuta la
+> cancellazione del canone). `n8nesistente` resta la sorgente di verità funzionale.
 
 ## Now (max 3)
 
-- [x] Roadmap a fasi definita (`ROADMAP.md`).
-- [x] MVP1 codice: `generate.mjs` + workflow Actions (pipeline verificata offline).
-- [x] Workflow allineato a §35: launch via file-trigger (`ops/run.trigger`)
-      + auto-commit log (`ops/out/*.log`) per leggere l'esito via `git pull`.
-- [x] **MVP1 validato live**: run dal main → tutto verde, articolo corretto su WP.
-      Fix: il template "Blog Post (Nuovo)" (`single-blog-nuovo.php`) ora è
-      impostato dallo script (prima restava "predefinito"). In PR #2.
+- [x] **MVP1 CHIUSO**: pipeline n8n→Actions live su `main`, validata con run
+      reale (bozza id 5412, diagnostica pulita 0 warning, template corretto).
+      Cron settimanale attivo. Lancio §35 (file-trigger + auto-commit log) ok.
+- ❓ **Decisione PM**: prossima fase MVP2 (email) o MVP3 (robustezza +
+      `topics.json`)? Daniel ci pensa con calma.
+- [ ] Dismettere il flusso n8n + valutare cancellazione canone (quando sereno).
 
 ## Next (per priorità)
 
@@ -52,9 +52,15 @@ editabile, C2 pin topic settimanale.
 
 ## Done log
 
-- _(in corso)_ MVP1 codice: `generate.mjs` (7 nodi n8n, fetch nativo, zero deps) +
+- **MVP1 validato live** (run #2, push event): bozza WP id 5412, 2080 parole,
+  7 H2, FK 15x densità 0.72%, 2 link esterni + 3 interni, 0 warning. Template
+  `single-blog-nuovo.php` impostato dallo script. Loop §35 confermato:
+  lanciato da git (file-trigger), esito letto da `ops/out/*.log` auto-committato.
+- MVP1 codice: `generate.mjs` (7 nodi n8n, fetch nativo, zero deps) +
   workflow Actions (cron lun 02:00 UTC + dispatch) + `RUNBOOK.md`. Pipeline
   verificata offline (status draft, cat 3, pulizia HTML, meta Rank Math).
+- Workflow allineato a §35 (PR #2): launch file-trigger + auto-commit log.
+- Fix template "Blog Post (Nuovo)" = `single-blog-nuovo.php` nel patch_body.
 - _(in corso)_ Roadmap a fasi (`ROADMAP.md`): MVP1 bozza WP, MVP2 email,
   MVP3 robustezza+controllo editoriale, MVP4 contenuto. Scope MVP3 deciso
   dal PM (Robustezza A + Controllo editoriale C).
