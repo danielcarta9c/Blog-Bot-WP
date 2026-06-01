@@ -21,22 +21,21 @@
 
 ## Now (max 3)
 
-- [x] Analisi del flusso n8n esistente (`n8nesistente`) — mappati 7 nodi.
-- [x] Scaffold doc lean (CLAUDE.md, PROJECT_STATE.md, ADR-0001).
-- [x] Roadmap a fasi definita (`ROADMAP.md`): MVP1→MVP4 con test di accettazione.
+- [x] Roadmap a fasi definita (`ROADMAP.md`).
+- [x] MVP1 codice: `generate.mjs` + workflow Actions (pipeline verificata offline).
+- [ ] **MVP1 validazione**: Daniel configura i 4 secret (vedi `RUNBOOK.md`),
+      poi run manuale da Actions → verificare bozza su WP. ⬅ qui ora.
 
 ## Next (per priorità)
 
 > Roadmap completa con obiettivi e test di accettazione in `ROADMAP.md`.
 
 **MVP1 — bozza su WP:**
-1. Script Node `generate.mjs` che replica i 7 nodi: topic rotation →
-   Brave → Claude → parsing/diagnostica → POST bozza WP → Rank Math meta.
-2. Workflow `.github/workflows/seo-blog.yml`: cron notte dom→lun
-   (`0 2 * * 1` UTC ≈ 03-04 ora IT) + `workflow_dispatch`.
-3. RUNBOOK breve dei Secret da configurare + configurarli.
-4. Run manuale di validazione → verificare bozza su WP.
-5. Disattivare/dismettere il flusso n8n + valutare cancellazione canone.
+1. [x] Script `generate.mjs` (7 nodi replicati, senza dipendenze).
+2. [x] Workflow `.github/workflows/seo-blog.yml` (cron + dispatch).
+3. [x] `RUNBOOK.md` con i 4 secret e la procedura di run.
+4. [ ] Configurare i secret + run manuale di validazione → bozza su WP.
+5. [ ] Disattivare/dismettere il flusso n8n + valutare cancellazione canone.
 
 **MVP2 — email:** notifica di riepilogo + diagnostica SEO.
 
@@ -50,6 +49,9 @@ editabile, C2 pin topic settimanale.
 
 ## Done log
 
+- _(in corso)_ MVP1 codice: `generate.mjs` (7 nodi n8n, fetch nativo, zero deps) +
+  workflow Actions (cron lun 02:00 UTC + dispatch) + `RUNBOOK.md`. Pipeline
+  verificata offline (status draft, cat 3, pulizia HTML, meta Rank Math).
 - _(in corso)_ Roadmap a fasi (`ROADMAP.md`): MVP1 bozza WP, MVP2 email,
   MVP3 robustezza+controllo editoriale, MVP4 contenuto. Scope MVP3 deciso
   dal PM (Robustezza A + Controllo editoriale C).
