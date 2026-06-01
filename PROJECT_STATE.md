@@ -23,24 +23,35 @@
 
 - [x] Analisi del flusso n8n esistente (`n8nesistente`) — mappati 7 nodi.
 - [x] Scaffold doc lean (CLAUDE.md, PROJECT_STATE.md, ADR-0001).
-- [x] Visibilità repo decisa dal PM: **pubblico** (URL/email non sono
-      segreti; condivisibile con società amiche). Segreti veri solo in
-      GitHub Secrets. Su repo pubblico vale: mai stampare segreti nei log
-      (GitHub li maschera) + secret scanning/push protection attivi.
+- [x] Roadmap a fasi definita (`ROADMAP.md`): MVP1→MVP4 con test di accettazione.
 
 ## Next (per priorità)
 
+> Roadmap completa con obiettivi e test di accettazione in `ROADMAP.md`.
+
+**MVP1 — bozza su WP:**
 1. Script Node `generate.mjs` che replica i 7 nodi: topic rotation →
    Brave → Claude → parsing/diagnostica → POST bozza WP → Rank Math meta.
 2. Workflow `.github/workflows/seo-blog.yml`: cron notte dom→lun
    (`0 2 * * 1` UTC ≈ 03-04 ora IT) + `workflow_dispatch`.
-3. Documentare i Secret da configurare (RUNBOOK breve) e configurarli.
-4. Run manuale di validazione (`workflow_dispatch`) → verificare bozza su WP.
+3. RUNBOOK breve dei Secret da configurare + configurarli.
+4. Run manuale di validazione → verificare bozza su WP.
 5. Disattivare/dismettere il flusso n8n + valutare cancellazione canone.
-6. (MVP2) Notifica email di riepilogo + diagnostica SEO.
-7. (Cosmesi) Rinominare il repo (`n8n` → es. `novec-seo-blog`).
+
+**MVP2 — email:** notifica di riepilogo + diagnostica SEO.
+
+**MVP3 — robustezza + controllo:** A1 output strutturato, A2 error
+handling+notifica, A3 quality gate, A4 anti-doppioni, C1 `topics.json`
+editabile, C2 pin topic settimanale.
+
+**MVP4 — contenuto:** B1 immagini, B2 link interni reali, D1 log storico.
+
+**Cosmesi:** rinominare il repo (`n8n` → es. `novec-seo-blog`).
 
 ## Done log
 
+- _(in corso)_ Roadmap a fasi (`ROADMAP.md`): MVP1 bozza WP, MVP2 email,
+  MVP3 robustezza+controllo editoriale, MVP4 contenuto. Scope MVP3 deciso
+  dal PM (Robustezza A + Controllo editoriale C).
 - _(in corso)_ Scaffold iniziale del progetto: analisi flusso n8n + doc lean
   (CLAUDE.md, PROJECT_STATE.md, ADR-0001 migrazione n8n→GitHub Actions).
