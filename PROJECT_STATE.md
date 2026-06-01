@@ -9,7 +9,7 @@
 
 | Componente | Dove gira | Provider | Branch/Env | Piano | Segreti (dove vivono) | Note |
 |---|---|---|---|---|---|---|
-| Scheduler | GitHub Actions | GitHub | `main` (cron) | da definire (pub/priv) | GitHub Secrets repo | cron settimanale + run manuale |
+| Scheduler | GitHub Actions | GitHub | `main` (cron) | repo pubblico | GitHub Secrets repo | cron settimanale + run manuale; Actions illimitate |
 | AI | API Anthropic | Anthropic | — | Claude Pro Max / API | `ANTHROPIC_API_KEY` (Secret) | modello `claude-sonnet-4-6` |
 | Ricerca | Brave Search API | Brave | — | — | `BRAVE_API_KEY` (Secret) | header `X-Subscription-Token` |
 | CMS | nove-c.com (WP REST + Rank Math) | WordPress | produzione | — | `WP_USER` + `WP_APP_PASSWORD` (Secret) | crea SOLO bozze (cat. 3) |
@@ -23,10 +23,10 @@
 
 - [x] Analisi del flusso n8n esistente (`n8nesistente`) — mappati 7 nodi.
 - [x] Scaffold doc lean (CLAUDE.md, PROJECT_STATE.md, ADR-0001).
-- ❓ **Visibilità del repo** (decisione PM): pubblico o privato? Impatta
-      (a) esposizione di URL WP + email nel codice/log, (b) minuti Actions
-      (pubblico = illimitati; privato = 2000/mese, ampiamente sufficienti).
-      Default proposto: **privato**. In attesa di conferma.
+- [x] Visibilità repo decisa dal PM: **pubblico** (URL/email non sono
+      segreti; condivisibile con società amiche). Segreti veri solo in
+      GitHub Secrets. Su repo pubblico vale: mai stampare segreti nei log
+      (GitHub li maschera) + secret scanning/push protection attivi.
 
 ## Next (per priorità)
 
