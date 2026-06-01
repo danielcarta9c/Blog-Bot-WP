@@ -25,8 +25,9 @@
 - [x] MVP1 codice: `generate.mjs` + workflow Actions (pipeline verificata offline).
 - [x] Workflow allineato a §35: launch via file-trigger (`ops/run.trigger`)
       + auto-commit log (`ops/out/*.log`) per leggere l'esito via `git pull`.
-- [ ] **MVP1 validazione**: secret configurati ✅; manca il primo run live
-      (Daniel lo lancia) → leggere log → verificare bozza su WP. ⬅ qui ora.
+- [x] **MVP1 validato live**: run dal main → tutto verde, articolo corretto su WP.
+      Fix: il template "Blog Post (Nuovo)" (`single-blog-nuovo.php`) ora è
+      impostato dallo script (prima restava "predefinito"). In PR #2.
 
 ## Next (per priorità)
 
