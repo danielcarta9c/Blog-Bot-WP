@@ -1,0 +1,26 @@
+name: NoveC SEO Blog
+
+# Genera un articolo SEO in bozza su WordPress.
+# Cron: lunedì 02:00 UTC (~03-04 ora italiana) -> notte tra domenica e lunedì,
+# così la bozza è pronta quando Daniel la rivede lunedì mattina.
+# workflow_dispatch: per lanciare un run manuale di validazione.
+on:
+  schedule:
+    - cron: "0 2 * * 1"
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Genera articolo e crea bozza WP
+        run: node generate.mjs
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
+          WP_USER: ${{ secrets.WP_USER }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
