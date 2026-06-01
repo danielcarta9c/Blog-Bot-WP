@@ -23,8 +23,11 @@
 
 - [x] Roadmap a fasi definita (`ROADMAP.md`).
 - [x] MVP1 codice: `generate.mjs` + workflow Actions (pipeline verificata offline).
-- [ ] **MVP1 validazione**: Daniel configura i 4 secret (vedi `RUNBOOK.md`),
-      poi run manuale da Actions → verificare bozza su WP. ⬅ qui ora.
+- [x] Workflow allineato a §35: launch via file-trigger (`ops/run.trigger`)
+      + auto-commit log (`ops/out/*.log`) per leggere l'esito via `git pull`.
+- [x] **MVP1 validato live**: run dal main → tutto verde, articolo corretto su WP.
+      Fix: il template "Blog Post (Nuovo)" (`single-blog-nuovo.php`) ora è
+      impostato dallo script (prima restava "predefinito"). In PR #2.
 
 ## Next (per priorità)
 

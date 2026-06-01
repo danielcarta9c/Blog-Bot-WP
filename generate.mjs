@@ -17,6 +17,9 @@ const WP_APP_PASSWORD = requireEnv("WP_APP_PASSWORD");
 
 const WP_BASE = "https://nove-c.com";
 const MODEL = "claude-sonnet-4-6";
+// Template del post (Attributi articolo -> Template = "Blog Post (Nuovo)").
+// Valore = filename del template come esposto dalla REST API WP.
+const WP_POST_TEMPLATE = "single-blog-nuovo.php";
 
 function requireEnv(name) {
   const v = process.env[name];
@@ -269,6 +272,7 @@ function parseArticle(message) {
     status: "draft",
     title: parsed.titolo_seo || parsed.h1 || "Articolo Nove C",
     slug: slug,
+    template: WP_POST_TEMPLATE,
     categories: [3],
     featured_media: 5026,
     excerpt: parsed.meta_description || "",

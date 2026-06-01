@@ -15,14 +15,20 @@ Crea questi 4 secret (i valori NON vanno mai nel codice):
 > Nota: `WP_APP_PASSWORD` è una password applicativa generata da WordPress
 > (formato `xxxx xxxx xxxx xxxx`). Si incolla con gli spazi.
 
-## 2. Run manuale (validazione MVP1)
+## 2. Lanciare un run (3 modi, pattern §35)
 
-Repo → tab **Actions** → workflow **NoveC SEO Blog** → **Run workflow**.
-Al termine, nei log dello step "Genera articolo" trovi:
-- la diagnostica SEO,
-- il link admin alla bozza creata su WordPress.
+1. **File-trigger (modo "da git", anche per l'agente)**: bumpa il numero in
+   `ops/run.trigger` e committa su `main`. Ogni push che modifica quel file
+   fa partire il workflow — non serve il permesso di dispatch.
+2. **UI**: tab **Actions** → **NoveC SEO Blog** → **Run workflow**.
+3. **Automatico**: cron (vedi sotto).
 
-Verifica: la bozza appare in WP (`nove-c.com/wp-admin`), categoria 3,
+**Dove leggo l'esito (auto-commit log §35):** il run scrive l'output in
+`ops/out/<timestamp>.log` e lo ricommitta su `main` (con `[skip ci]`). Quindi
+basta un `git pull` per leggere diagnostica SEO + link admin alla bozza,
+senza copia-incolla dai log delle Actions.
+
+Verifica MVP1: la bozza appare in WP (`nove-c.com/wp-admin`), categoria 3,
 con focus keyword / titolo / meta description su Rank Math.
 
 ## 3. Run automatico
