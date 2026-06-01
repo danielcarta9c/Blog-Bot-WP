@@ -1,0 +1,332 @@
+{
+  "name": "NoveC SEO Blog - v2",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "daysInterval": 7,
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "id": "8b16bad1-aa7b-4aaa-81d2-1f252dc68567",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -288,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.search.brave.com/res/v1/web/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $('Code in JavaScript - Topic').first().json.topic.focusKeyword }} {{ $now.format('yyyy') }} GSE normativa aggiornamenti"
+            },
+            {
+              "name": "count",
+              "value": "5"
+            },
+            {
+              "name": "country",
+              "value": "IT"
+            },
+            {
+              "name": "search_lang",
+              "value": "it"
+            },
+            {
+              "name": "freshness",
+              "value": "pm"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Accept-Encoding",
+              "value": "gzip"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "eb8684da-0c15-48ce-b346-28430c93f232",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        176,
+        -208
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "iBW02XOWUSm5uirq",
+          "name": "Brave Search API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-6"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=[ISTRUZIONI DI SISTEMA]\nSei un SEO copywriter esperto di Conto Termico 3.0 (D.M. 7 agosto 2025) per Nove C Ingegneria, ESCo certificata UNI CEI 11352 ed EPC Contractor. Scrivi SEMPRE e SOLO riferendoti al Conto Termico 3.0 (NON 2.0 che e superato). Usa interpretazione restrittiva della normativa. Output JSON stretto, nessun testo extra. Privilegia articoli riferiti all'ambito Privati (appartamenti, ville  e Condomini)\n\n[TASK]\nOggi e {{ $('Code in JavaScript - Topic').first().json.today }}.\n\nArgomento: {{ $('Code in JavaScript - Topic').first().json.topic.angle }}\nFocus keyword: {{ $('Code in JavaScript - Topic').first().json.topic.focusKeyword }}\nTitolo H1 proposto: {{ $('Code in JavaScript - Topic').first().json.topic.title }}\nTemplate strutturale: {{ $('Code in JavaScript - Topic').first().json.template.name }}\nStruttura: {{ $('Code in JavaScript - Topic').first().json.template.structure }}\nTono: {{ $('Code in JavaScript - Topic').first().json.template.tone }}\n\nRicerca Brave (usa SOLO per contesto aggiornato, NON copiare):\n{{ JSON.stringify($json) }}\n\nScrivi un articolo di 1500-2000 parole in HTML puro (solo tag ammessi: p, h2, strong, em, ul, li, a). IMPORTANTE: negli attributi HTML usa SOLO apici singoli (es: <a href='https://url'>), MAI virgolette doppie, perche l'output e JSON e le virgolette doppie rompono il parsing.\n\nRequisiti SEO TASSATIVI:\n- Focus keyword ESATTA \"{{ $('Code in JavaScript - Topic').first().json.topic.focusKeyword }}\" nel primo paragrafo (primi 100 caratteri)\n- Focus keyword in almeno 2 H2 su 5-6 totali\n- DENSITA FOCUS KEYWORD: la focus keyword esatta deve comparire almeno 12-18 volte nel testo (target 0.8-1.5%). Ripetila naturalmente in ogni sezione. Questo e CRITICO per il punteggio Rank Math.\n- Almeno 4 H2 distinte\n- 1 H2 \"Domande frequenti\" con 4-5 Q&A in <p><strong>...</strong></p>\n- LINK ESTERNI OBBLIGATORI: inserisci almeno 2 link esterni dofollow a fonti istituzionali autorevoli. Usa <a href=\"URL\">testo ancora</a> (SENZA rel=\"nofollow\"). Fonti consigliate: https://www.gse.it (Portale GSE Conto Termico), https://www.mase.gov.it (Ministero Ambiente), https://www.gazzettaufficiale.it (Gazzetta Ufficiale per D.M.). Esempio: <a href=\"https://www.gse.it/servizi-per-te/conto-termico\">portale Conto Termico del GSE</a>\n- LINK INTERNI: inserisci almeno 2 link interni a pagine Nove C. Usa: <a href=\"https://nove-c.com/soluzioni/conto-termico-3-0-incentivi-fino-al-65-senza-anticipo/\">scopri il servizio Conto Termico 3.0 di Nove C</a> e <a href=\"https://nove-c.com/chi-siamo/\">Nove C Ingegneria ESCo certificata</a>\n- CTA finale con riferimento a Nove C Ingegneria ESCo certificata e link alla pagina servizio\n- Cita D.M. 7 agosto 2025, articoli rilevanti, stato corrente Portaltermico GSE\n- NON citare anni precedenti all'anno corrente come \"attuali\"\n- TITOLO SEO: deve contenere una \"power word\" persuasiva (es: Guida, Completa, Definitiva, Essenziale, Esclusiva, Vantaggi, Risparmi, Segreti, Novita). Questo migliora il CTR.\n- SLUG: deve contenere la focus keyword completa separata da trattini, max 60 caratteri\n\nRispondi SOLO con JSON valido (NO markdown, NO code fence, NO testo prima o dopo):\n{\n \"titolo_seo\": \"...\",\n \"focus_keyword\": \"{{ $('Code in JavaScript - Topic').first().json.topic.focusKeyword }}\",\n \"meta_description\": \"... (150-160 char, con focus keyword)\",\n \"slug\": \"...\",\n \"estratto\": \"... (120-160 char per ACF estratto)\",\n \"h1\": \"{{ $('Code in JavaScript - Topic').first().json.topic.title }}\",\n \"content_html\": \"<p>...</p><h2>...</h2>...\"\n}"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 8000
+        }
+      },
+      "id": "89e75817-9cbb-44c4-9357-08583dabee6d",
+      "name": "Message a model",
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        368,
+        -208
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "tp26yRDGTxuiFesx",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse Claude output - v3 robust\nconst item = $input.first().json;\nlet raw = \"\";\nif (item.content && Array.isArray(item.content) && item.content[0] && item.content[0].text) {\n  raw = item.content[0].text;\n} else if (typeof item.text === \"string\") {\n  raw = item.text;\n} else if (typeof item.output === \"string\") {\n  raw = item.output;\n} else {\n  raw = JSON.stringify(item);\n}\n\n// Strip markdown fences\nlet cleaned = raw.trim();\nif (cleaned.startsWith(\"```\")) {\n  const first = cleaned.indexOf(\"\\n\");\n  if (first > -1) cleaned = cleaned.slice(first + 1);\n  if (cleaned.endsWith(\"```\")) cleaned = cleaned.slice(0, -3);\n  cleaned = cleaned.trim();\n}\n\n// Replace newlines with spaces\ncleaned = cleaned.replace(/[\\r\\n]+/g, \" \");\n\n// Fix unescaped double quotes in HTML attributes\n// Replace =\"value\" patterns with ='value' to avoid breaking JSON\ncleaned = cleaned.replace(/=\\\"([^\\\"]{0,500}?)\\\"/g, \"='$1'\");\n\n// Parse JSON\nlet parsed;\ntry {\n  parsed = JSON.parse(cleaned);\n} catch (e1) {\n  const m = cleaned.match(/\\{[\\s\\S]*\\}/);\n  if (!m) throw new Error(\"No JSON found. Start: \" + raw.substring(0, 300));\n  try {\n    parsed = JSON.parse(m[0]);\n  } catch (e2) {\n    throw new Error(\"JSON parse fail: \" + e2.message + \" near: \" + cleaned.substring(Math.max(0, parseInt(e2.message.match(/position (\\d+)/)?.[1] || 0) - 30), parseInt(e2.message.match(/position (\\d+)/)?.[1] || 0) + 30));\n  }\n}\n\n// Sanitize HTML\nlet html = (parsed.content_html || \"\").trim();\nhtml = html.replace(/<h1[^>]*>[\\s\\S]*?<\\/h1>/gi, \"\");\nhtml = html.replace(/<\\/?(div|span|br|img|script|style|iframe|form)[^>]*>/gi, \"\");\n\n// SEO diagnostics\nconst plainText = html.replace(/<[^>]+>/g, \" \").replace(/\\s+/g, \" \").trim();\nconst wordCount = plainText.split(\" \").filter(Boolean).length;\nconst h2Count = (html.match(/<h2/gi) || []).length;\nconst focusKw = parsed.focus_keyword || \"\";\nconst kwRegex = focusKw ? new RegExp(focusKw.replace(/[.*+?^${}()|[\\]\\\\]/g, \"\\\\$&\"), \"gi\") : null;\nconst kwCount = kwRegex ? (plainText.match(kwRegex) || []).length : 0;\nconst first200 = plainText.substring(0, 200).toLowerCase();\nconst kwInFirst = focusKw ? first200.includes(focusKw.toLowerCase()) : false;\nconst kwDensity = wordCount > 0 ? (kwCount / wordCount * 100).toFixed(2) : \"0.00\";\nconst extLinks = (html.match(/<a\\s[^>]*href=[\"']https?:\\/\\/(?!nove-c\\.com)[^\"']+[\"'][^>]*>/gi) || []).length;\nconst intLinks = (html.match(/<a\\s[^>]*href=[\"']https?:\\/\\/nove-c\\.com[^\"']*[\"'][^>]*>/gi) || []).length;\n\n// Slug from focus keyword if too short\nlet slug = parsed.slug || \"\";\nif (slug.length < 10 && focusKw) {\n  slug = focusKw.toLowerCase().replace(/[^a-z0-9\\s-]/g, \"\").replace(/\\s+/g, \"-\").substring(0, 60);\n}\n\nconst ctaHtml = '<a href=\"https://nove-c.com/soluzioni/conto-termico-3-0-incentivi-fino-al-65-senza-anticipo/\" style=\"font-weight:bold;\">Contatta Nove C per una verifica di ammissibilita gratuita e scopri quanto puoi risparmiare con il Conto Termico 3.0</a>';\n\nconst patch_body = {\n  status: \"draft\",\n  title: parsed.titolo_seo || parsed.h1 || \"Articolo Nove C\",\n  slug: slug,\n  categories: [3],\n  featured_media: 5026,\n  excerpt: parsed.meta_description || \"\",\n  acf: {\n    titoli: { titolo_h2: \"\", testo: html, testo_call_to_action: ctaHtml },\n    estratto: parsed.estratto || parsed.meta_description || \"\"\n  }\n};\n\nreturn [{\n  json: {\n    titolo_seo: patch_body.title,\n    focus_keyword: focusKw,\n    meta_description: parsed.meta_description || \"\",\n    slug: slug,\n    patch_body_json: JSON.stringify(patch_body),\n    diagnostics: {\n      wordCount, h2Count, kwCount, kwInFirst, kwDensity, extLinks, intLinks,\n      warnings: [\n        wordCount < 1500 ? \"Word count basso: \" + wordCount : null,\n        h2Count < 4 ? \"H2 insufficienti: \" + h2Count : null,\n        !kwInFirst ? \"FK assente nei primi 200 char\" : null,\n        (parseFloat(kwDensity) < 0.5 || parseFloat(kwDensity) > 2.5) ? \"Densita: \" + kwDensity + \"%\" : null,\n        extLinks < 1 ? \"No link esterni\" : null,\n        intLinks < 1 ? \"No link interni\" : null\n      ].filter(Boolean)\n    }\n  }\n}];"
+      },
+      "id": "184b9310-6d9f-40d1-9c5f-ee9a2462619c",
+      "name": "Code in JavaScript",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        -208
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://nove-c.com/wp-json/wp/v2/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $('Code in JavaScript').first().json.patch_body_json }}",
+        "options": {}
+      },
+      "id": "658c5217-e263-42d5-b034-103d30d337b1",
+      "name": "Crea Post WordPress",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        112,
+        64
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "x9px2g3KhOiWd0hJ",
+          "name": "Unnamed credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://nove-c.com/wp-json/rankmath/v1/updateMeta",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"objectType\": \"post\",\n  \"objectID\": {{ $json.id }},\n  \"meta\": {\n    \"rank_math_focus_keyword\": \"{{ $('Code in JavaScript').first().json.focus_keyword }}\",\n    \"rank_math_title\": \"{{ $('Code in JavaScript').first().json.titolo_seo }} | Nove C\",\n    \"rank_math_description\": \"{{ $('Code in JavaScript').first().json.meta_description }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "47fb8906-8c32-4ef5-bc83-f324d4835725",
+      "name": "Rank Math updateMeta",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        368,
+        64
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "x9px2g3KhOiWd0hJ",
+          "name": "Unnamed credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "danielcarta@nove-c.com",
+        "subject": "=📝 Bozza SEO pronta per revisione: {{ $(\"Code in JavaScript\").item.json.titolo_seo }}",
+        "message": "=<h2>{{ $('Code in JavaScript').first().json.titolo_seo }}</h2>\n<p><strong>Focus keyword</strong>: {{ $('Code in JavaScript').first().json.focus_keyword }}</p>\n<p><strong>Slug</strong>: {{ $('Code in JavaScript').first().json.slug }}</p>\n<p><strong>Meta description</strong>: {{ $('Code in JavaScript').first().json.meta_description }}</p>\n<hr />\n<h3>Diagnostica SEO</h3>\n<ul>\n  <li>Parole: {{ $('Code in JavaScript').first().json.diagnostics.wordCount }}</li>\n  <li>H2: {{ $('Code in JavaScript').first().json.diagnostics.h2Count }}</li>\n  <li>Densita focus keyword: {{ $('Code in JavaScript').first().json.diagnostics.kwDensity }}%</li>\n  <li>Focus keyword nei primi 200 caratteri: {{ $('Code in JavaScript').first().json.diagnostics.kwInFirst ? 'SI' : 'NO' }}</li>\n</ul>\n<h3>Warning</h3>\n<p>{{ $('Code in JavaScript').first().json.diagnostics.warnings.join(' — ') || 'Nessun warning' }}</p>\n<hr />\n<p><a href=\"https://nove-c.com/wp-admin/post.php?post={{ $('Crea Post WordPress').first().json.id }}&action=edit\">Apri in WordPress</a></p>\n<p><a href=\"https://nove-c.com/?p={{ $('Crea Post WordPress').first().json.id }}&preview=true\">Anteprima frontend</a></p>",
+        "options": {}
+      },
+      "id": "7fc6e77c-47d9-4681-96ff-9ee98e9c06de",
+      "name": "Send a message",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        560,
+        64
+      ],
+      "webhookId": "ca0af34e-f1d4-47b9-a6c7-143545b0e0ad",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "SiP2bxRuVYiKS3Cl",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const topics = [\n  // === MOTORE 1: VILLETTE CT 3.0 ===\n  { \n    slug:'sostituzione-caldaia-pompa-di-calore-villa', \n    focusKeyword:'sostituzione caldaia con pompa di calore villa', \n    title:'Sostituire la Caldaia con una Pompa di Calore in Villa: Guida {{year}}', \n    angle:'Iter completo per villa indipendente: verifica fattibilità, dimensionamento, sostituzione del generatore, integrazione con i radiatori esistenti, sconto in fattura sempre garantito CT 3.0 fino a 15.000€. Il cliente paga solo il netto, l\\'incentivo lo gestiamo noi. Tempistiche reali dalla firma all\\'incasso (circa 2,5 mesi).' \n  },\n  { \n    slug:'pompa-di-calore-condominio-caldaia-centralizzata', \n    focusKeyword:'pompa di calore condominio caldaia centralizzata', \n    title:'Pompa di Calore in Condominio: Sostituire la Caldaia Centralizzata {{year}}', \n    angle:'Sostituzione della caldaia centralizzata con pompa di calore idronica in condominio, a Milano e a Roma. Iter assemblea condominiale, dimensionamento sui consumi reali (non su tabelle), integrazione con i radiatori esistenti, sconto in fattura applicato al condominio, ruolo dell\\'amministratore nel processo. Casi reali nel milanese.' \n  },\n  { \n    slug:'sconto-in-fattura-pompa-di-calore-privati', \n    focusKeyword:'sconto in fattura pompa di calore', \n    title:'Sconto in Fattura Pompa di Calore: Cosa Paga Davvero il Cliente {{year}}', \n    angle:'Lo sconto in fattura sempre garantito da ESCo certificata: il cliente paga solo il netto, l\\'incentivo GSE lo gestisce direttamente Nove C. Differenza tra sconto in fattura e cessione del credito, perché serve un Soggetto Responsabile certificato UNI CEI 11352, cosa anticipa il cliente e cosa no, in quanti giorni si chiude la pratica.' \n  },\n  { \n    slug:'pompa-di-calore-acqua-acqua-falda', \n    focusKeyword:'pompa di calore acqua-acqua falda', \n    title:'Pompa di Calore Acqua-Acqua con Acqua di Falda: Quando Conviene {{year}}', \n    angle:'Pompa di calore geotermica a ciclo aperto su falda. COP elevati e stabili tutto l\\'anno (4,5-5,5), iter autorizzativo provinciale, costi dei pozzi vs risparmio energetico, applicazioni residenziali e per il terziario. Quando ha senso davvero a Roma e Milano (Pianura Padana, Lazio costiero).' \n  },\n  { \n    slug:'quanto-si-risparmia-pompa-di-calore-villa', \n    focusKeyword:'quanto si risparmia con la pompa di calore', \n    title:'Quanto si Risparmia Davvero con la Pompa di Calore in Villa {{year}}', \n    angle:'Confronto bolletta gas vs pompa di calore su villa 180-250 mq. COP stagionale reale, costo del kWh elettrico vs gas a tariffa attuale, payback con e senza CT 3.0, esempio numerico completo. Numeri-first: cifre prima, narrazione dopo.' \n  },\n  { \n    slug:'pompa-di-calore-condominio-centrale-termica-interrata', \n    focusKeyword:'pompa di calore condominio centrale termica interrata', \n    title:'Pompa di Calore in Condominio con Centrale Termica Interrata: Le Due Soluzioni {{year}}', \n    angle:'Quando la centrale termica condominiale è in un locale interrato e portare una dorsale fino alle unità esterne in copertura non è fattibile o non conviene, ci sono due soluzioni che funzionano davvero. Soluzione 1: piccole pompe di calore aria-acqua esterne abbinate a un booster acqua-acqua installato nella centrale interrata, che lavora a temperatura più alta verso i radiatori. Soluzione 2: pompe di calore aria-acqua installate direttamente nel locale interrato e canalizzate per gestire l\\'aria di rinnovo e l\\'espulsione. Quando scegliere l\\'una o l\\'altra, vincoli di rumorosità e ricambi d\\'aria, sicurezza refrigerante (EN 378), sconto in fattura sempre garantito anche su queste configurazioni.' \n  },\n  { \n    slug:'fotovoltaico-pompa-di-calore-abbinamento-villa', \n    focusKeyword:'fotovoltaico e pompa di calore', \n    title:'Fotovoltaico e Pompa di Calore: l\\'Abbinamento che Massimizza l\\'Autoconsumo {{year}}', \n    angle:'Pompa di calore + fotovoltaico in villa: dimensionamento del FV in funzione del fabbisogno della PdC (3-6 kWp tipici), batteria sì o no, copertura annua reale, ritorno dell\\'investimento combinato. Sconto in fattura CT 3.0 sulla pompa di calore + detrazione separata sul fotovoltaico. Cenno alle CER per chi non riesce ad autoconsumare tutto.' \n  },\n  { \n    slug:'pompa-di-calore-ibrida-perche-non-conviene', \n    focusKeyword:'pompa di calore ibrida non conviene', \n    title:'Perché la Pompa di Calore Ibrida Non Conviene Più: Il Full Electric è Sempre Possibile {{year}}', \n    angle:'L\\'ibrido viene venduto come compromesso quando il full electric \"non è fattibile\". Non è vero. Tre problemi reali dell\\'ibrido: il gas continua a costare tantissimo e tutto fa pensare che continuerà così; la logica di switch automatico in molti impianti reali finisce per privilegiare il gas più di quanto dovrebbe, vanificando il risparmio promesso; il cliente paga due generatori invece di uno e ne mantiene due. La soluzione full electric esiste sempre: pompe di calore aria-acqua più piccole, in cascata o in parallelo, abbinate a un booster acqua-acqua che usa il circuito delle aria-acqua come sorgente. Si raggiungono le temperature di mandata necessarie ai radiatori esistenti, senza bruciare un grammo di gas. Esempio reale e configurazione tipica.' \n  },\n  { \n    slug:'pompa-di-calore-piscine-strutture-sportive', \n    focusKeyword:'pompa di calore piscina', \n    title:'Pompa di Calore per Piscine e Strutture Sportive {{year}}', \n    angle:'Riscaldamento della vasca e dell\\'acqua calda sanitaria degli spogliatoi con pompe di calore dedicate. Dimensionamento sul volume della vasca e sui ricambi d\\'aria, deumidificazione integrata, abbinamento al fotovoltaico per coprire i consumi estivi. Incentivi disponibili per circoli e gestori sportivi, esempio di dimensionamento reale.' \n  },\n  { \n    slug:'esco-certificata-pompa-di-calore-perche', \n    focusKeyword:'ESCo certificata pompa di calore', \n    title:'Perché Affidare la Pompa di Calore a una ESCo Certificata {{year}}', \n    angle:'Differenza tra installatore, studio tecnico ed ESCo certificata UNI CEI 11352. Solo l\\'ESCo può essere Soggetto Responsabile CT 3.0, gestire la pratica GSE in modo diretto e garantire al cliente lo sconto in fattura sempre, senza incertezze sui tempi del GSE. Cosa rischia il cliente che si affida a chi non è ESCo: incentivo non riconosciuto, lavori sospesi, costi imprevisti.' \n  }\n];\nconst templates = [\n  { name:'problem-solution', structure:'Intro con problema -> Contesto normativo / Cosa cambia / Chi puo accedere / Come si ottiene / Tempistiche / FAQ -> CTA', tone:'consulenziale diretto' },\n  { name:'how-to-guide', structure:'Intro -> Step 1 Verifica / Step 2 Diagnosi / Step 3 Progettazione / Step 4 Realizzazione / Step 5 Pratica GSE / Step 6 Incasso -> FAQ -> CTA', tone:'operativo pratico' },\n  { name:'faq-driven', structure:'Intro 3 domande -> 5 H2 risposta / Perche Nove C / FAQ / CTA', tone:'domanda-risposta rassicurante' },\n  { name:'numbers-first', structure:'Intro con cifre (900M, 65%, 100%, 35 kW, 15000EUR) -> 5 H2 con numeri / Esempio di calcolo / Nove C / FAQ / CTA', tone:'data-driven autorevole' },\n  { name:'comparison', structure:'Intro -> CT 2.0 vs 3.0 / Accesso diretto vs prenotazione / Privati vs PA / PdC vs ibrido vs biomassa / CT 3.0 vs altri -> Nove C / FAQ / CTA', tone:'analitico comparativo' }\n];\nconst now = new Date();\nconst year = now.getFullYear();\nconst weekNumber = Math.floor((now - new Date(year,0,1)) / (7*24*60*60*1000));\nconst topic = { ...topics[weekNumber % topics.length] };\nconst template = templates[weekNumber % templates.length];\ntopic.title = topic.title.replace('{{year}}', year);\nreturn [{ json: { topic, template, year, weekNumber, today: now.toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}) } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -96,
+        -240
+      ],
+      "id": "9ba75ea0-eb28-42d8-938a-350c41d53d2f",
+      "name": "Code in JavaScript - Topic"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript - Topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript - Topic": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Crea Post WordPress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crea Post WordPress": {
+      "main": [
+        [
+          {
+            "node": "Rank Math updateMeta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rank Math updateMeta": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "versionId": "56f790c8-8436-4e43-84e3-ef77e2860546",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ccd32988f00d859867cdd48d968a98ac3f20ae543596a7295fb92350f12d8855"
+  },
+  "id": "s8ZB19pBRYeDADBU",
+  "tags": []
+}
