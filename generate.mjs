@@ -64,15 +64,23 @@ function readOverride() {
   return null;
 }
 
-// Svuota next.json dopo aver consumato l'override (preserva le istruzioni).
+// Svuota next.json dopo aver consumato l'override (preserva le note di aiuto).
 function clearOverride() {
   const stub = {
-    _come_si_usa:
-      "Per forzare UN articolo specifico (es. una novità normativa) al posto della rotazione: compila 'titolo' (e idealmente 'focus_keyword'). Committa questo file su main: parte un run che usa questo titolo, poi il file si SVUOTA da solo. Lascia 'titolo' vuoto per tornare alla normale rotazione settimanale. Campi: titolo (obbligatorio per attivare), focus_keyword (consigliato, la frase chiave SEO esatta), brief (taglio/angolo dell'articolo), template (uno tra: problem-solution, how-to-guide, faq-driven, numbers-first, comparison; vuoto = problem-solution).",
+    _leggimi:
+      "Compila i 4 campi sotto per forzare UN articolo specifico (es. una novità), poi committa su main: parte un run con quel titolo. A run riuscito il file si SVUOTA da solo e torna la rotazione. Lascia 'titolo' vuoto = rotazione normale. Le righe che iniziano con _ sono solo note di aiuto: non vengono lette dallo script, non toccarle.",
     titolo: "",
+    _aiuto_titolo:
+      "Titolo H1 dell'articolo. Metti una power word (Guida, Conviene, Completa, Definitiva...) e la parola chiave. {{year}} diventa l'anno corrente. Es: Elettrificazione dei Carichi con Pompa di Calore: Perche Conviene {{year}}",
     focus_keyword: "",
+    _aiuto_focus_keyword:
+      "La frase chiave SEO esatta, 2-4 parole, quella per cui vuoi posizionarti su Google. Es: elettrificazione dei carichi",
     brief: "",
-    template: ""
+    _aiuto_brief:
+      "Il taglio/tesi dell'articolo in 2-4 frasi: cosa deve sostenere e quali punti toccare. Piu sei specifico, meglio scrive Claude.",
+    stile: "",
+    _aiuto_stile:
+      "Schema del testo. Valori possibili: problem-solution (problema -> soluzione) | how-to-guide (guida a step operativi) | faq-driven (tutto domande e risposte) | numbers-first (costruito su numeri/bollette/cifre) | comparison (confronti X vs Y). Vuoto = problem-solution."
   };
   writeFileSync(NEXT_PATH, JSON.stringify(stub, null, 2) + "\n");
 }
@@ -85,7 +93,7 @@ function clearOverride() {
 function selectTopic() {
   const data = JSON.parse(readFileSync(TOPICS_PATH, "utf8"));
   const topics = data.topics;
-  const templates = data.templates;
+  const stili = data.stili;
 
   const now = new Date();
   const year = now.getFullYear();
@@ -102,12 +110,12 @@ function selectTopic() {
       angle: (ov.brief || "").trim() || `Approfondimento specifico richiesto dalla redazione: ${ov.titolo.trim()}`
     };
     const template =
-      templates.find((t) => t.name === (ov.template || "").trim()) || templates[0];
+      stili.find((s) => s.name === (ov.stile || "").trim()) || stili[0];
     return { topic, template, year, weekNumber, today, override: true };
   }
 
   const topic = { ...topics[weekNumber % topics.length] };
-  const template = templates[weekNumber % templates.length];
+  const template = stili[weekNumber % stili.length];
   topic.title = topic.title.replace("{{year}}", year);
   return { topic, template, year, weekNumber, today, override: false };
 }
