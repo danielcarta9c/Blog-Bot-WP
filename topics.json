@@ -1,5 +1,5 @@
 {
-  "_come_si_usa": "Lista degli argomenti della rotazione settimanale e dei template. Aggiungi/togli/riordina i 'topics' liberamente: ogni settimana ne viene scelto uno a rotazione. {{year}} nei titoli viene sostituito con l'anno corrente. Per forzare un titolo specifico una tantum NON toccare qui: usa next.json.",
+  "_come_si_usa": "Lista degli argomenti della rotazione settimanale ('topics') e degli stili di scrittura ('stili'). Aggiungi/togli/riordina i 'topics' liberamente: ogni settimana ne viene scelto uno a rotazione. {{year}} nei titoli viene sostituito con l'anno corrente. Per forzare un titolo specifico una tantum NON toccare qui: usa next.json.",
   "topics": [
     {
       "slug": "sostituzione-caldaia-pompa-di-calore-villa",
@@ -62,7 +62,7 @@
       "angle": "Differenza tra installatore, studio tecnico ed ESCo certificata UNI CEI 11352. Solo l'ESCo può essere Soggetto Responsabile CT 3.0, gestire la pratica GSE in modo diretto e garantire al cliente lo sconto in fattura sempre, senza incertezze sui tempi del GSE. Cosa rischia il cliente che si affida a chi non è ESCo: incentivo non riconosciuto, lavori sospesi, costi imprevisti."
     }
   ],
-  "templates": [
+  "stili": [
     { "name": "problem-solution", "structure": "Intro con problema -> Contesto normativo / Cosa cambia / Chi puo accedere / Come si ottiene / Tempistiche / FAQ -> CTA", "tone": "consulenziale diretto" },
     { "name": "how-to-guide", "structure": "Intro -> Step 1 Verifica / Step 2 Diagnosi / Step 3 Progettazione / Step 4 Realizzazione / Step 5 Pratica GSE / Step 6 Incasso -> FAQ -> CTA", "tone": "operativo pratico" },
     { "name": "faq-driven", "structure": "Intro 3 domande -> 5 H2 risposta / Perche Nove C / FAQ / CTA", "tone": "domanda-risposta rassicurante" },

@@ -39,7 +39,11 @@ viene scelto uno a rotazione. `{{year}}` nei titoli diventa l'anno corrente.
 
 **Forzare un articolo specifico (una novità) una tantum** → file `next.json`:
 1. Apri `next.json`, scrivi il `titolo` (e idealmente `focus_keyword`, la
-   frase chiave SEO esatta). Opzionali: `brief` (taglio) e `template`.
+   frase chiave SEO esatta). Opzionali: `brief` (taglio) e `stile` (schema del
+   testo: problem-solution | how-to-guide | faq-driven | numbers-first |
+   comparison). Ogni campo ha accanto una nota `_aiuto_...` che spiega cosa scrivere.
+   NB: lo `stile` è lo schema del TESTO, non il template grafico WordPress
+   (quello lo mette lo script in automatico).
 2. Committa su `main`. Parte un run che usa **quel** titolo invece della rotazione.
 3. A run riuscito `next.json` **si svuota da solo** → la settimana dopo torna
    la rotazione normale. Niente da ripulire a mano.
