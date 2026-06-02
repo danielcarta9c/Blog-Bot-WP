@@ -4,11 +4,21 @@
 // (vedi `n8nesistente`). Gira da GitHub Actions una volta a settimana e crea
 // un articolo come BOZZA su WordPress. Nessuna pubblicazione automatica.
 //
-// MVP1: 7 nodi n8n replicati, MENO la notifica email (-> MVP2).
+// MVP1:   7 nodi n8n replicati, MENO la notifica email (-> MVP2).
+// MVP1.1: lista argomenti editabile in topics.json (C1) + override one-off
+//         in next.json, consumato e svuotato dopo il run (C2).
 // Stack: solo `fetch` nativo (Node 20+), nessuna dipendenza npm.
 //
 // Segreti letti da env (GitHub Secrets):
 //   ANTHROPIC_API_KEY, BRAVE_API_KEY, WP_USER, WP_APP_PASSWORD
+
+import { readFileSync, writeFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+
+const ROOT = dirname(fileURLToPath(import.meta.url));
+const TOPICS_PATH = join(ROOT, "topics.json");
+const NEXT_PATH = join(ROOT, "next.json");
 
 const ANTHROPIC_API_KEY = requireEnv("ANTHROPIC_API_KEY");
 const BRAVE_API_KEY = requireEnv("BRAVE_API_KEY");
@@ -31,86 +41,75 @@ function requireEnv(name) {
 }
 
 // ---------------------------------------------------------------------------
-// NODO: "Code in JavaScript - Topic" — rotazione settimanale topic + template
+// Slug da una frase: minuscolo, senza accenti/punteggiatura, trattini.
+// ---------------------------------------------------------------------------
+function slugify(s) {
+  return s
+    .toLowerCase()
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .substring(0, 60)
+    .replace(/-+$/, "");
+}
+
+// Legge l'override one-off da next.json. Ritorna null se assente o senza titolo.
+function readOverride() {
+  try {
+    const ov = JSON.parse(readFileSync(NEXT_PATH, "utf8"));
+    if (ov && typeof ov.titolo === "string" && ov.titolo.trim()) return ov;
+  } catch {
+    // next.json mancante o malformato -> nessun override
+  }
+  return null;
+}
+
+// Svuota next.json dopo aver consumato l'override (preserva le istruzioni).
+function clearOverride() {
+  const stub = {
+    _come_si_usa:
+      "Per forzare UN articolo specifico (es. una novità normativa) al posto della rotazione: compila 'titolo' (e idealmente 'focus_keyword'). Committa questo file su main: parte un run che usa questo titolo, poi il file si SVUOTA da solo. Lascia 'titolo' vuoto per tornare alla normale rotazione settimanale. Campi: titolo (obbligatorio per attivare), focus_keyword (consigliato, la frase chiave SEO esatta), brief (taglio/angolo dell'articolo), template (uno tra: problem-solution, how-to-guide, faq-driven, numbers-first, comparison; vuoto = problem-solution).",
+    titolo: "",
+    focus_keyword: "",
+    brief: "",
+    template: ""
+  };
+  writeFileSync(NEXT_PATH, JSON.stringify(stub, null, 2) + "\n");
+}
+
+// ---------------------------------------------------------------------------
+// NODO: "Code in JavaScript - Topic" — rotazione settimanale topic + template.
+// MVP1.1: topic/template letti da topics.json; se next.json ha un titolo,
+//         quello vince (override one-off).
 // ---------------------------------------------------------------------------
 function selectTopic() {
-  const topics = [
-    // === MOTORE 1: VILLETTE CT 3.0 ===
-    {
-      slug: 'sostituzione-caldaia-pompa-di-calore-villa',
-      focusKeyword: 'sostituzione caldaia con pompa di calore villa',
-      title: 'Sostituire la Caldaia con una Pompa di Calore in Villa: Guida {{year}}',
-      angle: 'Iter completo per villa indipendente: verifica fattibilità, dimensionamento, sostituzione del generatore, integrazione con i radiatori esistenti, sconto in fattura sempre garantito CT 3.0 fino a 15.000€. Il cliente paga solo il netto, l\'incentivo lo gestiamo noi. Tempistiche reali dalla firma all\'incasso (circa 2,5 mesi).'
-    },
-    {
-      slug: 'pompa-di-calore-condominio-caldaia-centralizzata',
-      focusKeyword: 'pompa di calore condominio caldaia centralizzata',
-      title: 'Pompa di Calore in Condominio: Sostituire la Caldaia Centralizzata {{year}}',
-      angle: 'Sostituzione della caldaia centralizzata con pompa di calore idronica in condominio, a Milano e a Roma. Iter assemblea condominiale, dimensionamento sui consumi reali (non su tabelle), integrazione con i radiatori esistenti, sconto in fattura applicato al condominio, ruolo dell\'amministratore nel processo. Casi reali nel milanese.'
-    },
-    {
-      slug: 'sconto-in-fattura-pompa-di-calore-privati',
-      focusKeyword: 'sconto in fattura pompa di calore',
-      title: 'Sconto in Fattura Pompa di Calore: Cosa Paga Davvero il Cliente {{year}}',
-      angle: 'Lo sconto in fattura sempre garantito da ESCo certificata: il cliente paga solo il netto, l\'incentivo GSE lo gestisce direttamente Nove C. Differenza tra sconto in fattura e cessione del credito, perché serve un Soggetto Responsabile certificato UNI CEI 11352, cosa anticipa il cliente e cosa no, in quanti giorni si chiude la pratica.'
-    },
-    {
-      slug: 'pompa-di-calore-acqua-acqua-falda',
-      focusKeyword: 'pompa di calore acqua-acqua falda',
-      title: 'Pompa di Calore Acqua-Acqua con Acqua di Falda: Quando Conviene {{year}}',
-      angle: 'Pompa di calore geotermica a ciclo aperto su falda. COP elevati e stabili tutto l\'anno (4,5-5,5), iter autorizzativo provinciale, costi dei pozzi vs risparmio energetico, applicazioni residenziali e per il terziario. Quando ha senso davvero a Roma e Milano (Pianura Padana, Lazio costiero).'
-    },
-    {
-      slug: 'quanto-si-risparmia-pompa-di-calore-villa',
-      focusKeyword: 'quanto si risparmia con la pompa di calore',
-      title: 'Quanto si Risparmia Davvero con la Pompa di Calore in Villa {{year}}',
-      angle: 'Confronto bolletta gas vs pompa di calore su villa 180-250 mq. COP stagionale reale, costo del kWh elettrico vs gas a tariffa attuale, payback con e senza CT 3.0, esempio numerico completo. Numeri-first: cifre prima, narrazione dopo.'
-    },
-    {
-      slug: 'pompa-di-calore-condominio-centrale-termica-interrata',
-      focusKeyword: 'pompa di calore condominio centrale termica interrata',
-      title: 'Pompa di Calore in Condominio con Centrale Termica Interrata: Le Due Soluzioni {{year}}',
-      angle: 'Quando la centrale termica condominiale è in un locale interrato e portare una dorsale fino alle unità esterne in copertura non è fattibile o non conviene, ci sono due soluzioni che funzionano davvero. Soluzione 1: piccole pompe di calore aria-acqua esterne abbinate a un booster acqua-acqua installato nella centrale interrata, che lavora a temperatura più alta verso i radiatori. Soluzione 2: pompe di calore aria-acqua installate direttamente nel locale interrato e canalizzate per gestire l\'aria di rinnovo e l\'espulsione. Quando scegliere l\'una o l\'altra, vincoli di rumorosità e ricambi d\'aria, sicurezza refrigerante (EN 378), sconto in fattura sempre garantito anche su queste configurazioni.'
-    },
-    {
-      slug: 'fotovoltaico-pompa-di-calore-abbinamento-villa',
-      focusKeyword: 'fotovoltaico e pompa di calore',
-      title: 'Fotovoltaico e Pompa di Calore: l\'Abbinamento che Massimizza l\'Autoconsumo {{year}}',
-      angle: 'Pompa di calore + fotovoltaico in villa: dimensionamento del FV in funzione del fabbisogno della PdC (3-6 kWp tipici), batteria sì o no, copertura annua reale, ritorno dell\'investimento combinato. Sconto in fattura CT 3.0 sulla pompa di calore + detrazione separata sul fotovoltaico. Cenno alle CER per chi non riesce ad autoconsumare tutto.'
-    },
-    {
-      slug: 'pompa-di-calore-ibrida-perche-non-conviene',
-      focusKeyword: 'pompa di calore ibrida non conviene',
-      title: 'Perché la Pompa di Calore Ibrida Non Conviene Più: Il Full Electric è Sempre Possibile {{year}}',
-      angle: 'L\'ibrido viene venduto come compromesso quando il full electric "non è fattibile". Non è vero. Tre problemi reali dell\'ibrido: il gas continua a costare tantissimo e tutto fa pensare che continuerà così; la logica di switch automatico in molti impianti reali finisce per privilegiare il gas più di quanto dovrebbe, vanificando il risparmio promesso; il cliente paga due generatori invece di uno e ne mantiene due. La soluzione full electric esiste sempre: pompe di calore aria-acqua più piccole, in cascata o in parallelo, abbinate a un booster acqua-acqua che usa il circuito delle aria-acqua come sorgente. Si raggiungono le temperature di mandata necessarie ai radiatori esistenti, senza bruciare un grammo di gas. Esempio reale e configurazione tipica.'
-    },
-    {
-      slug: 'pompa-di-calore-piscine-strutture-sportive',
-      focusKeyword: 'pompa di calore piscina',
-      title: 'Pompa di Calore per Piscine e Strutture Sportive {{year}}',
-      angle: 'Riscaldamento della vasca e dell\'acqua calda sanitaria degli spogliatoi con pompe di calore dedicate. Dimensionamento sul volume della vasca e sui ricambi d\'aria, deumidificazione integrata, abbinamento al fotovoltaico per coprire i consumi estivi. Incentivi disponibili per circoli e gestori sportivi, esempio di dimensionamento reale.'
-    },
-    {
-      slug: 'esco-certificata-pompa-di-calore-perche',
-      focusKeyword: 'ESCo certificata pompa di calore',
-      title: 'Perché Affidare la Pompa di Calore a una ESCo Certificata {{year}}',
-      angle: 'Differenza tra installatore, studio tecnico ed ESCo certificata UNI CEI 11352. Solo l\'ESCo può essere Soggetto Responsabile CT 3.0, gestire la pratica GSE in modo diretto e garantire al cliente lo sconto in fattura sempre, senza incertezze sui tempi del GSE. Cosa rischia il cliente che si affida a chi non è ESCo: incentivo non riconosciuto, lavori sospesi, costi imprevisti.'
-    }
-  ];
-  const templates = [
-    { name: 'problem-solution', structure: 'Intro con problema -> Contesto normativo / Cosa cambia / Chi puo accedere / Come si ottiene / Tempistiche / FAQ -> CTA', tone: 'consulenziale diretto' },
-    { name: 'how-to-guide', structure: 'Intro -> Step 1 Verifica / Step 2 Diagnosi / Step 3 Progettazione / Step 4 Realizzazione / Step 5 Pratica GSE / Step 6 Incasso -> FAQ -> CTA', tone: 'operativo pratico' },
-    { name: 'faq-driven', structure: 'Intro 3 domande -> 5 H2 risposta / Perche Nove C / FAQ / CTA', tone: 'domanda-risposta rassicurante' },
-    { name: 'numbers-first', structure: 'Intro con cifre (900M, 65%, 100%, 35 kW, 15000EUR) -> 5 H2 con numeri / Esempio di calcolo / Nove C / FAQ / CTA', tone: 'data-driven autorevole' },
-    { name: 'comparison', structure: 'Intro -> CT 2.0 vs 3.0 / Accesso diretto vs prenotazione / Privati vs PA / PdC vs ibrido vs biomassa / CT 3.0 vs altri -> Nove C / FAQ / CTA', tone: 'analitico comparativo' }
-  ];
+  const data = JSON.parse(readFileSync(TOPICS_PATH, "utf8"));
+  const topics = data.topics;
+  const templates = data.templates;
+
   const now = new Date();
   const year = now.getFullYear();
   const weekNumber = Math.floor((now - new Date(year, 0, 1)) / (7 * 24 * 60 * 60 * 1000));
+  const today = now.toLocaleDateString("it-IT", { day: "2-digit", month: "long", year: "numeric" });
+
+  const ov = readOverride();
+  if (ov) {
+    const focusKeyword = (ov.focus_keyword || "").trim() || ov.titolo.trim();
+    const topic = {
+      slug: slugify(focusKeyword),
+      focusKeyword,
+      title: ov.titolo.replace("{{year}}", year).trim(),
+      angle: (ov.brief || "").trim() || `Approfondimento specifico richiesto dalla redazione: ${ov.titolo.trim()}`
+    };
+    const template =
+      templates.find((t) => t.name === (ov.template || "").trim()) || templates[0];
+    return { topic, template, year, weekNumber, today, override: true };
+  }
+
   const topic = { ...topics[weekNumber % topics.length] };
   const template = templates[weekNumber % templates.length];
-  topic.title = topic.title.replace('{{year}}', year);
-  return { topic, template, year, weekNumber, today: now.toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' }) };
+  topic.title = topic.title.replace("{{year}}", year);
+  return { topic, template, year, weekNumber, today, override: false };
 }
 
 // ---------------------------------------------------------------------------
@@ -355,7 +354,11 @@ async function updateRankMath(postId, article) {
 // ---------------------------------------------------------------------------
 async function main() {
   const ctx = selectTopic();
-  console.log(`Topic settimana ${ctx.weekNumber}: ${ctx.topic.focusKeyword}`);
+  if (ctx.override) {
+    console.log(`Override one-off (next.json): "${ctx.topic.title}"`);
+  } else {
+    console.log(`Topic settimana ${ctx.weekNumber} (rotazione): ${ctx.topic.focusKeyword}`);
+  }
   console.log(`Template: ${ctx.template.name}`);
 
   const braveResults = await braveSearch(ctx.topic, ctx.year);
@@ -372,6 +375,13 @@ async function main() {
 
   await updateRankMath(post.id, article);
   console.log("Rank Math: meta impostati");
+
+  // Override consumato solo a run riuscito: svuota next.json (il workflow
+  // committa il file ripulito). Su errore l'override resta per il retry.
+  if (ctx.override) {
+    clearOverride();
+    console.log("Override consumato: next.json svuotato (torna in rotazione).");
+  }
 
   console.log(`\nFatto. Bozza pronta per la revisione:`);
   console.log(`  Admin:     ${WP_BASE}/wp-admin/post.php?post=${post.id}&action=edit`);

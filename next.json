@@ -1,0 +1,7 @@
+{
+  "_come_si_usa": "Per forzare UN articolo specifico (es. una novità normativa) al posto della rotazione: compila 'titolo' (e idealmente 'focus_keyword'). Committa questo file su main: parte un run che usa questo titolo, poi il file si SVUOTA da solo. Lascia 'titolo' vuoto per tornare alla normale rotazione settimanale. Campi: titolo (obbligatorio per attivare), focus_keyword (consigliato, la frase chiave SEO esatta), brief (taglio/angolo dell'articolo), template (uno tra: problem-solution, how-to-guide, faq-driven, numbers-first, comparison; vuoto = problem-solution).",
+  "titolo": "",
+  "focus_keyword": "",
+  "brief": "",
+  "template": ""
+}
