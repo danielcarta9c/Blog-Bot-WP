@@ -22,11 +22,11 @@
 
 ## Now (max 3)
 
-- [x] **MVP1 CHIUSO**: pipeline live e validata (bozza 5412, 0 warning).
-- [x] **MVP1.1** (in PR): `topics.json` lista editabile (C1) + `next.json`
-      override one-off auto-svuotante (C2). Testato offline (rotazione + override).
+- [x] **MVP1 + MVP1.1 CHIUSI e validati live**: rotazione (bozza 5412) e
+      override one-off (bozza 5422, "elettrificazione dei carichi", 0 warning,
+      next.json auto-svuotato). Campo `stile` con guida per-campo in next.json.
 - ❓ **Decisione PM**: prossima fase MVP2 (email) o MVP3 (resto robustezza
-      A1-A4)? Daniel ci pensa con calma. + dismettere n8n quando sereno.
+      A1-A4)? + dismettere n8n quando sereno. Daniel decide con calma.
 
 ## Next (per priorità)
 
@@ -51,9 +51,14 @@ editabile, C2 pin topic settimanale.
 
 ## Done log
 
-- **MVP1.1** (PR): argomenti editabili in `topics.json` (C1) + override
-  one-off in `next.json` consumato e svuotato a fine run (C2). Niente MCP
-  (overkill, scartato col PM). Testato offline: rotazione + override + auto-clear.
+- **MVP1.1 validato live**: override one-off testato dal PM → bozza 5422
+  "Elettrificazione dei Carichi con Pompa di Calore" (stile numbers-first,
+  1644 parole, FK 25x densità 1.52%, 3 link est + 3 int, 0 warning),
+  next.json auto-svuotato. Campo rinominato `template`→`stile` + guida
+  per-campo (_aiuto_) in next.json.
+- **MVP1.1** (C1+C2): argomenti editabili in `topics.json` + override one-off
+  in `next.json` consumato e svuotato a fine run. Niente MCP (overkill,
+  scartato col PM). Testato offline: rotazione + override + auto-clear.
 - **MVP1 validato live** (run #2, push event): bozza WP id 5412, 2080 parole,
   7 H2, FK 15x densità 0.72%, 2 link esterni + 3 interni, 0 warning. Template
   `single-blog-nuovo.php` impostato dallo script. Loop §35 confermato:
