@@ -59,3 +59,6 @@ mattina. Nessuna pubblicazione automatica: lo stato è sempre `draft`.
 
 > GitHub disabilita i cron dopo 60 giorni di inattività del repo: se il repo
 > resta fermo a lungo, riattiva il workflow dal tab Actions.
+
+> Se un run **fallisce**, il workflow apre in automatico una **issue** sul repo
+> (con link al run e coda di log): GitHub ti notifica, niente email da gestire.

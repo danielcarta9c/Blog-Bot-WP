@@ -40,12 +40,15 @@ contenuti senza toccare la logica.
 - Modifico `topics.json`, lancio il run, e l'articolo usa i nuovi topic.
 - Un doppio run manuale **non** crea due bozze duplicate.
 
-**Scope:**
-- **A1** Output strutturato Claude (tool use / JSON schema) al posto della
-  regex che scambia le virgolette → elimina la fragilità del parsing.
-- **A2** Gestione errori + notifica fallimento (mail o GitHub issue).
-- **A3** Quality gate SEO: rigenera una volta se la diagnostica è sotto soglia.
-- **A4** Anti-doppioni: check slug su WP prima di creare la bozza.
+**Scope (MVP3 "slim" deciso dal PM — fatto A1 + A2; A3/A4 opzionali):**
+- **A1** ✅ Output strutturato Claude via **tool use**: l'articolo arriva già
+  come oggetto (tool_use.input), niente più strip fence / swap virgolette /
+  JSON.parse del testo. Eliminata la fragilità del parsing.
+- **A2** ✅ Su fallimento del run il workflow apre una **issue GitHub**
+  (niente email, come da preferenza PM) con link al run + coda di log.
+- **A3** _(opzionale, rimandato)_ Quality gate SEO: rigenera una volta se
+  la diagnostica è sotto soglia.
+- **A4** _(opzionale, rimandato)_ Anti-doppioni: check slug su WP prima di creare.
 - ~~**C1** `topics.json` editabile~~ → anticipato a **MVP1.1** (fatto).
 - ~~**C2** override one-off della rotazione~~ → anticipato a **MVP1.1**
   (`next.json` auto-svuotante, fatto).

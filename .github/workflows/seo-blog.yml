@@ -21,9 +21,10 @@ on:
       - "ops/run.trigger"
       - "next.json"
 
-# Serve per ricommittare il log su main.
+# contents: ricommit del log su main. issues: apre una issue su fallimento (A2).
 permissions:
   contents: write
+  issues: write
 
 # Un solo run alla volta: evita code/stallo sul free tier (§35).
 concurrency:
@@ -70,3 +71,25 @@ jobs:
             echo "push respinto, retry $i"; sleep $((2 ** i))
           done
           echo "push del log fallito dopo 3 tentativi"; exit 1
+
+      # A2 (MVP3): se il run fallisce, apri una issue cosi' Daniel viene
+      # notificato da GitHub (niente email). Si attiva solo on failure.
+      - name: Apri issue su fallimento
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          {
+            echo "Il run automatico del blog SEO **è fallito**. La bozza di questa settimana potrebbe non essere stata creata."
+            echo ""
+            echo "- Run: $RUN_URL"
+            echo ""
+            echo "Ultime righe di log:"
+            echo '```'
+            tail -n 30 "$OUT" 2>/dev/null || echo "(log non disponibile: errore prima della generazione)"
+            echo '```'
+          } > /tmp/issue_body.md
+          gh issue create \
+            --title "SEO blog: run fallito $(date -u +%Y-%m-%d)" \
+            --body-file /tmp/issue_body.md

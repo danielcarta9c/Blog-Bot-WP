@@ -22,11 +22,11 @@
 
 ## Now (max 3)
 
-- [x] **MVP1 + MVP1.1 CHIUSI e validati live**: rotazione (bozza 5412) e
-      override one-off (bozza 5422, "elettrificazione dei carichi", 0 warning,
-      next.json auto-svuotato). Campo `stile` con guida per-campo in next.json.
-- ❓ **Decisione PM**: prossima fase MVP2 (email) o MVP3 (resto robustezza
-      A1-A4)? + dismettere n8n quando sereno. Daniel decide con calma.
+- [x] **MVP1 + MVP1.1 validati live**: rotazione (5412) + override one-off (5422).
+- [x] **MVP3 slim** (in PR): A1 output strutturato (tool use) + A2 issue su
+      fallimento (no email). Testato offline (tool use + failure path). MVP2
+      email saltato (scelta PM). A3/A4 opzionali rimandati.
+- [ ] Dismettere n8n + valutare cancellazione canone (incasso del risparmio).
 
 ## Next (per priorità)
 
@@ -51,6 +51,9 @@ editabile, C2 pin topic settimanale.
 
 ## Done log
 
+- **MVP3 slim** (PR): A1 output strutturato di Claude via tool use (addio
+  parsing fragile) + A2 issue GitHub automatica su run fallito (no email,
+  scelta PM). A3/A4 rimandati come opzionali. Testato offline.
 - **MVP1.1 validato live**: override one-off testato dal PM → bozza 5422
   "Elettrificazione dei Carichi con Pompa di Calore" (stile numbers-first,
   1644 parole, FK 25x densità 1.52%, 3 link est + 3 int, 0 warning),
