@@ -177,7 +177,8 @@ Requisiti SEO TASSATIVI:
 - CTA finale con riferimento a Nove C Ingegneria ESCo certificata e link alla pagina servizio
 - Cita D.M. 7 agosto 2025, articoli rilevanti, stato corrente Portaltermico GSE
 - NON citare anni precedenti all'anno corrente come "attuali"
-- TITOLO SEO: deve contenere una "power word" persuasiva (es: Guida, Completa, Definitiva, Essenziale, Esclusiva, Vantaggi, Risparmi, Segreti, Novita). Questo migliora il CTR.
+- TITOLO SEO (campo titolo_seo): deve INIZIARE con la focus keyword esatta "${t.focusKeyword}" e contenere una "power word" persuasiva (Guida, Completa, Definitiva, Conviene, Risparmi, Novita...). Esempio: "${t.focusKeyword}: Guida Completa".
+- META DESCRIPTION (campo meta_description): 150-160 caratteri e DEVE contenere la focus keyword esatta "${t.focusKeyword}", preferibilmente all'inizio.
 - SLUG: deve contenere la focus keyword completa separata da trattini, max 60 caratteri
 
 Per restituire l'articolo CHIAMA il tool "pubblica_articolo" compilando TUTTI i suoi campi. La focus_keyword deve essere esattamente "${t.focusKeyword}" e l'h1 esattamente "${t.title}". Non scrivere altro testo fuori dal tool.`;
@@ -203,9 +204,9 @@ async function callClaude(prompt) {
           input_schema: {
             type: "object",
             properties: {
-              titolo_seo: { type: "string", description: "Titolo SEO con power word persuasiva" },
+              titolo_seo: { type: "string", description: "Titolo SEO che INIZIA con la focus keyword esatta e contiene una power word (Guida, Completa, Conviene...)" },
               focus_keyword: { type: "string", description: "Focus keyword esatta" },
-              meta_description: { type: "string", description: "Meta description 150-160 caratteri, con focus keyword" },
+              meta_description: { type: "string", description: "Meta description 150-160 caratteri che CONTIENE la focus keyword esatta, preferibilmente all'inizio" },
               slug: { type: "string", description: "Slug con la focus keyword, max 60 caratteri" },
               estratto: { type: "string", description: "Estratto 120-160 caratteri" },
               h1: { type: "string", description: "Titolo H1" },
@@ -223,6 +224,44 @@ async function callClaude(prompt) {
     throw new Error(`Anthropic ha risposto ${res.status}: ${await res.text()}`);
   }
   return await res.json();
+}
+
+// ---------------------------------------------------------------------------
+// Garanzie SEO su titolo e meta (Rank Math). Il modello a volte non mette la
+// focus keyword nel titolo SEO / meta: qui lo forziamo in modo deterministico.
+// NB: ottimizziamo SOLO il titolo SEO (tag <title>), non il titolo visibile.
+// ---------------------------------------------------------------------------
+const POWER_WORDS = ["guida", "completa", "definitiva", "essenziale", "esclusiva", "vantaggi", "risparmi", "risparmiare", "segreti", "novità", "novita", "conviene", "scopri", "quanto"];
+function hasPowerWord(s) {
+  const l = (s || "").toLowerCase();
+  return POWER_WORDS.some((p) => l.includes(p));
+}
+function capFirst(s) {
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+}
+// Titolo SEO con focus keyword all'inizio + una power word.
+function buildSeoTitle(titoloSeo, focusKw) {
+  const year = new Date().getFullYear();
+  let t = (titoloSeo || "").trim();
+  const fk = (focusKw || "").trim();
+  if (!fk) return t;
+  if (!t.toLowerCase().startsWith(fk.toLowerCase())) {
+    t = t ? `${capFirst(fk)}: ${t}` : `${capFirst(fk)} ${year}`;
+  }
+  if (!hasPowerWord(t)) {
+    t = `${t} - Guida ${year}`;
+  }
+  return t;
+}
+// Meta description con focus keyword garantita (150-160 char).
+function ensureKwInMeta(meta, focusKw) {
+  const fk = (focusKw || "").trim();
+  let m = (meta || "").trim();
+  if (!fk) return m;
+  if (m.toLowerCase().includes(fk.toLowerCase())) return m;
+  m = m ? `${capFirst(fk)}: ${m}` : `${capFirst(fk)}: la guida di Nove C Ingegneria.`;
+  if (m.length > 160) m = m.slice(0, 157).trimEnd() + "...";
+  return m;
 }
 
 // ---------------------------------------------------------------------------
@@ -268,6 +307,10 @@ function parseArticle(message) {
 
   const ctaHtml = '<a href="https://nove-c.com/soluzioni/conto-termico-3-0-incentivi-fino-al-65-senza-anticipo/" style="font-weight:bold;">Contatta Nove C per una verifica di ammissibilita gratuita e scopri quanto puoi risparmiare con il Conto Termico 3.0</a>';
 
+  // Garanzie SEO (Rank Math): titolo SEO keyword-led + power word, FK nella meta.
+  const seoTitle = buildSeoTitle(parsed.titolo_seo, focusKw);
+  const metaDescription = ensureKwInMeta(parsed.meta_description, focusKw);
+
   const patch_body = {
     status: "draft",
     title: parsed.titolo_seo || parsed.h1 || "Articolo Nove C",
@@ -275,17 +318,18 @@ function parseArticle(message) {
     template: WP_POST_TEMPLATE,
     categories: [3],
     featured_media: 5026,
-    excerpt: parsed.meta_description || "",
+    excerpt: metaDescription,
     acf: {
       titoli: { titolo_h2: "", testo: html, testo_call_to_action: ctaHtml },
-      estratto: parsed.estratto || parsed.meta_description || ""
+      estratto: parsed.estratto || metaDescription
     }
   };
 
   return {
     titolo_seo: patch_body.title,
+    seo_title: seoTitle,
     focus_keyword: focusKw,
-    meta_description: parsed.meta_description || "",
+    meta_description: metaDescription,
     slug: slug,
     patch_body: patch_body,
     diagnostics: {
@@ -339,7 +383,7 @@ async function updateRankMath(postId, article) {
       objectID: postId,
       meta: {
         rank_math_focus_keyword: article.focus_keyword,
-        rank_math_title: `${article.titolo_seo} | Nove C`,
+        rank_math_title: `${article.seo_title} | Nove C`,
         rank_math_description: article.meta_description
       }
     })
