@@ -40,6 +40,38 @@ function requireEnv(name) {
   return v;
 }
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// fetch + parse JSON robusto: ritenta sui glitch transitori (5xx, 429, o body
+// non-JSON tipo pagina HTML di cache/WAF), ed esce con errore CHIARO sul resto.
+async function fetchJson(url, options, label) {
+  let lastErr;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    let res;
+    try {
+      res = await fetch(url, options);
+    } catch (e) {
+      lastErr = new Error(`${label}: errore di rete (${e.message})`);
+      await sleep(2000 * attempt);
+      continue;
+    }
+    const text = await res.text();
+    if (!res.ok) {
+      lastErr = new Error(`${label} ha risposto ${res.status}: ${text.slice(0, 300)}`);
+      if (res.status >= 500 || res.status === 429) { await sleep(2000 * attempt); continue; }
+      throw lastErr; // 4xx: errore reale, inutile ritentare
+    }
+    try {
+      return JSON.parse(text);
+    } catch {
+      // status 2xx ma body non-JSON (es. pagina HTML transitoria): ritenta
+      lastErr = new Error(`${label}: risposta non-JSON (status ${res.status}): ${text.slice(0, 200)}`);
+      await sleep(2000 * attempt);
+    }
+  }
+  throw lastErr;
+}
+
 // ---------------------------------------------------------------------------
 // Slug da una frase: minuscolo, senza accenti/punteggiatura, trattini.
 // ---------------------------------------------------------------------------
@@ -131,16 +163,11 @@ async function braveSearch(topic, year) {
     search_lang: "it",
     freshness: "pm"
   });
-  const res = await fetch(`https://api.search.brave.com/res/v1/web/search?${params}`, {
-    headers: {
-      "Accept": "application/json",
-      "X-Subscription-Token": BRAVE_API_KEY
-    }
-  });
-  if (!res.ok) {
-    throw new Error(`Brave Search ha risposto ${res.status}: ${await res.text()}`);
-  }
-  return await res.json();
+  return await fetchJson(
+    `https://api.search.brave.com/res/v1/web/search?${params}`,
+    { headers: { "Accept": "application/json", "X-Subscription-Token": BRAVE_API_KEY } },
+    "Brave Search"
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -185,7 +212,7 @@ Per restituire l'articolo CHIAMA il tool "pubblica_articolo" compilando TUTTI i 
 }
 
 async function callClaude(prompt) {
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
+  return await fetchJson("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
       "x-api-key": ANTHROPIC_API_KEY,
@@ -219,11 +246,7 @@ async function callClaude(prompt) {
       tool_choice: { type: "tool", name: "pubblica_articolo" },
       messages: [{ role: "user", content: prompt }]
     })
-  });
-  if (!res.ok) {
-    throw new Error(`Anthropic ha risposto ${res.status}: ${await res.text()}`);
-  }
-  return await res.json();
+  }, "Anthropic");
 }
 
 // ---------------------------------------------------------------------------
@@ -354,30 +377,20 @@ function wpAuthHeader() {
 }
 
 async function createDraft(patch_body) {
-  const res = await fetch(`${WP_BASE}/wp-json/wp/v2/posts`, {
+  return await fetchJson(`${WP_BASE}/wp-json/wp/v2/posts`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": wpAuthHeader()
-    },
+    headers: { "Content-Type": "application/json", "Authorization": wpAuthHeader() },
     body: JSON.stringify(patch_body)
-  });
-  if (!res.ok) {
-    throw new Error(`WordPress (crea post) ha risposto ${res.status}: ${await res.text()}`);
-  }
-  return await res.json();
+  }, "WordPress (crea post)");
 }
 
 // ---------------------------------------------------------------------------
 // NODO: "Rank Math updateMeta" — imposta i meta SEO
 // ---------------------------------------------------------------------------
 async function updateRankMath(postId, article) {
-  const res = await fetch(`${WP_BASE}/wp-json/rankmath/v1/updateMeta`, {
+  return await fetchJson(`${WP_BASE}/wp-json/rankmath/v1/updateMeta`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": wpAuthHeader()
-    },
+    headers: { "Content-Type": "application/json", "Authorization": wpAuthHeader() },
     body: JSON.stringify({
       objectType: "post",
       objectID: postId,
@@ -387,11 +400,7 @@ async function updateRankMath(postId, article) {
         rank_math_description: article.meta_description
       }
     })
-  });
-  if (!res.ok) {
-    throw new Error(`Rank Math (updateMeta) ha risposto ${res.status}: ${await res.text()}`);
-  }
-  return await res.json();
+  }, "Rank Math (updateMeta)");
 }
 
 // ---------------------------------------------------------------------------
