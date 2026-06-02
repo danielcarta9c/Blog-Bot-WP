@@ -23,10 +23,11 @@
 ## Now (max 3)
 
 - [x] **MVP1 + MVP1.1 validati live**: rotazione (5412) + override one-off (5422).
-- [x] **MVP3 slim** (in PR): A1 output strutturato (tool use) + A2 issue su
-      fallimento (no email). Testato offline (tool use + failure path). MVP2
-      email saltato (scelta PM). A3/A4 opzionali rimandati.
+- [x] **MVP3 slim live**: A1 output strutturato (tool use) validato con run
+      reale (bozza 5427, 2352 parole, 0 warning). A2 issue su fallimento in
+      place (scatta solo su errore reale, logica testata offline). No email.
 - [ ] Dismettere n8n + valutare cancellazione canone (incasso del risparmio).
+- [ ] (Opzionale) MVP4 immagini + link interni reali; A3/A4 se servono.
 
 ## Next (per priorità)
 
