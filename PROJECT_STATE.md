@@ -22,12 +22,11 @@
 
 ## Now (max 3)
 
-- [x] **MVP1 CHIUSO**: pipeline n8n→Actions live su `main`, validata con run
-      reale (bozza id 5412, diagnostica pulita 0 warning, template corretto).
-      Cron settimanale attivo. Lancio §35 (file-trigger + auto-commit log) ok.
-- ❓ **Decisione PM**: prossima fase MVP2 (email) o MVP3 (robustezza +
-      `topics.json`)? Daniel ci pensa con calma.
-- [ ] Dismettere il flusso n8n + valutare cancellazione canone (quando sereno).
+- [x] **MVP1 CHIUSO**: pipeline live e validata (bozza 5412, 0 warning).
+- [x] **MVP1.1** (in PR): `topics.json` lista editabile (C1) + `next.json`
+      override one-off auto-svuotante (C2). Testato offline (rotazione + override).
+- ❓ **Decisione PM**: prossima fase MVP2 (email) o MVP3 (resto robustezza
+      A1-A4)? Daniel ci pensa con calma. + dismettere n8n quando sereno.
 
 ## Next (per priorità)
 
@@ -52,6 +51,9 @@ editabile, C2 pin topic settimanale.
 
 ## Done log
 
+- **MVP1.1** (PR): argomenti editabili in `topics.json` (C1) + override
+  one-off in `next.json` consumato e svuotato a fine run (C2). Niente MCP
+  (overkill, scartato col PM). Testato offline: rotazione + override + auto-clear.
 - **MVP1 validato live** (run #2, push event): bozza WP id 5412, 2080 parole,
   7 H2, FK 15x densità 0.72%, 2 link esterni + 3 interni, 0 warning. Template
   `single-blog-nuovo.php` impostato dallo script. Loop §35 confermato:

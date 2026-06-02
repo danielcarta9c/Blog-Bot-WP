@@ -31,6 +31,22 @@ senza copia-incolla dai log delle Actions.
 Verifica MVP1: la bozza appare in WP (`nove-c.com/wp-admin`), categoria 3,
 con focus keyword / titolo / meta description su Rank Math.
 
+## 2.bis Gestire gli argomenti (MVP1.1)
+
+**Cambiare la lista della rotazione** → file `topics.json`. Apri da GitHub
+(anche da iPhone), modifica/aggiungi/riordina i `topics`. Ogni settimana ne
+viene scelto uno a rotazione. `{{year}}` nei titoli diventa l'anno corrente.
+
+**Forzare un articolo specifico (una novità) una tantum** → file `next.json`:
+1. Apri `next.json`, scrivi il `titolo` (e idealmente `focus_keyword`, la
+   frase chiave SEO esatta). Opzionali: `brief` (taglio) e `template`.
+2. Committa su `main`. Parte un run che usa **quel** titolo invece della rotazione.
+3. A run riuscito `next.json` **si svuota da solo** → la settimana dopo torna
+   la rotazione normale. Niente da ripulire a mano.
+
+> Lasciare `titolo` vuoto = rotazione normale. Se un run fallisce, l'override
+> resta in `next.json` per il tentativo successivo.
+
 ## 3. Run automatico
 
 Parte da solo ogni **lunedì 02:00 UTC** (~03-04 ora italiana), cioè nella

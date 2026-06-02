@@ -46,8 +46,9 @@ contenuti senza toccare la logica.
 - **A2** Gestione errori + notifica fallimento (mail o GitHub issue).
 - **A3** Quality gate SEO: rigenera una volta se la diagnostica è sotto soglia.
 - **A4** Anti-doppioni: check slug su WP prima di creare la bozza.
-- **C1** `topics.json` editabile (topic + template fuori dal codice).
-- **C2** Pin: override della rotazione per fissare il topic della settimana.
+- ~~**C1** `topics.json` editabile~~ → anticipato a **MVP1.1** (fatto).
+- ~~**C2** override one-off della rotazione~~ → anticipato a **MVP1.1**
+  (`next.json` auto-svuotante, fatto).
 
 ## MVP4 — Arricchimento contenuto
 
