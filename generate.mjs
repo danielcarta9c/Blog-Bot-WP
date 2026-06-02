@@ -164,7 +164,7 @@ Tono: ${ctx.template.tone}
 Ricerca Brave (usa SOLO per contesto aggiornato, NON copiare):
 ${JSON.stringify(braveResults)}
 
-Scrivi un articolo di 1500-2000 parole in HTML puro (solo tag ammessi: p, h2, strong, em, ul, li, a). IMPORTANTE: negli attributi HTML usa SOLO apici singoli (es: <a href='https://url'>), MAI virgolette doppie, perche l'output e JSON e le virgolette doppie rompono il parsing.
+Scrivi un articolo di 1500-2000 parole in HTML puro (solo tag ammessi: p, h2, strong, em, ul, li, a). Negli attributi HTML usa pure le normali virgolette doppie (es: <a href="https://url">): l'output passa da un tool strutturato, quindi non ci sono problemi di escaping.
 
 Requisiti SEO TASSATIVI:
 - Focus keyword ESATTA "${t.focusKeyword}" nel primo paragrafo (primi 100 caratteri)
@@ -180,16 +180,7 @@ Requisiti SEO TASSATIVI:
 - TITOLO SEO: deve contenere una "power word" persuasiva (es: Guida, Completa, Definitiva, Essenziale, Esclusiva, Vantaggi, Risparmi, Segreti, Novita). Questo migliora il CTR.
 - SLUG: deve contenere la focus keyword completa separata da trattini, max 60 caratteri
 
-Rispondi SOLO con JSON valido (NO markdown, NO code fence, NO testo prima o dopo):
-{
- "titolo_seo": "...",
- "focus_keyword": "${t.focusKeyword}",
- "meta_description": "... (150-160 char, con focus keyword)",
- "slug": "...",
- "estratto": "... (120-160 char per ACF estratto)",
- "h1": "${t.title}",
- "content_html": "<p>...</p><h2>...</h2>..."
-}`;
+Per restituire l'articolo CHIAMA il tool "pubblica_articolo" compilando TUTTI i suoi campi. La focus_keyword deve essere esattamente "${t.focusKeyword}" e l'h1 esattamente "${t.title}". Non scrivere altro testo fuori dal tool.`;
 }
 
 async function callClaude(prompt) {
@@ -203,6 +194,28 @@ async function callClaude(prompt) {
     body: JSON.stringify({
       model: MODEL,
       max_tokens: 8000,
+      // A1: forziamo l'output strutturato via tool use -> niente parsing
+      // fragile del testo (addio regex sulle virgolette).
+      tools: [
+        {
+          name: "pubblica_articolo",
+          description: "Restituisce l'articolo SEO completo, pronto per la bozza WordPress.",
+          input_schema: {
+            type: "object",
+            properties: {
+              titolo_seo: { type: "string", description: "Titolo SEO con power word persuasiva" },
+              focus_keyword: { type: "string", description: "Focus keyword esatta" },
+              meta_description: { type: "string", description: "Meta description 150-160 caratteri, con focus keyword" },
+              slug: { type: "string", description: "Slug con la focus keyword, max 60 caratteri" },
+              estratto: { type: "string", description: "Estratto 120-160 caratteri" },
+              h1: { type: "string", description: "Titolo H1" },
+              content_html: { type: "string", description: "Corpo dell'articolo in HTML puro (solo tag p, h2, strong, em, ul, li, a)" }
+            },
+            required: ["titolo_seo", "focus_keyword", "meta_description", "slug", "estratto", "h1", "content_html"]
+          }
+        }
+      ],
+      tool_choice: { type: "tool", name: "pubblica_articolo" },
       messages: [{ role: "user", content: prompt }]
     })
   });
@@ -213,41 +226,21 @@ async function callClaude(prompt) {
 }
 
 // ---------------------------------------------------------------------------
-// NODO: "Code in JavaScript" — parsing output Claude + diagnostica SEO
-// (logica replicata fedelmente dal workflow n8n; A1 robustezza -> MVP3)
+// NODO: "Code in JavaScript" — estrae l'articolo dall'output strutturato + diagnostica SEO.
+// A1 (MVP3): l'articolo arriva come tool_use.input gia' parsato dall'API,
+// quindi niente piu' strip fence / swap virgolette / JSON.parse del testo.
 // ---------------------------------------------------------------------------
 function parseArticle(message) {
-  let raw = "";
-  if (message.content && Array.isArray(message.content) && message.content[0] && message.content[0].text) {
-    raw = message.content[0].text;
-  } else {
-    raw = JSON.stringify(message);
+  const block = Array.isArray(message.content)
+    ? message.content.find((b) => b.type === "tool_use" && b.name === "pubblica_articolo")
+    : null;
+  if (!block || !block.input) {
+    throw new Error(
+      "Claude non ha restituito il tool 'pubblica_articolo'. Risposta: " +
+        JSON.stringify(message).substring(0, 300)
+    );
   }
-
-  // Strip markdown fences
-  let cleaned = raw.trim();
-  if (cleaned.startsWith("```")) {
-    const first = cleaned.indexOf("\n");
-    if (first > -1) cleaned = cleaned.slice(first + 1);
-    if (cleaned.endsWith("```")) cleaned = cleaned.slice(0, -3);
-    cleaned = cleaned.trim();
-  }
-
-  // Replace newlines with spaces
-  cleaned = cleaned.replace(/[\r\n]+/g, " ");
-
-  // Fix unescaped double quotes in HTML attributes: ="value" -> ='value'
-  cleaned = cleaned.replace(/="([^"]{0,500}?)"/g, "='$1'");
-
-  // Parse JSON
-  let parsed;
-  try {
-    parsed = JSON.parse(cleaned);
-  } catch (e1) {
-    const m = cleaned.match(/\{[\s\S]*\}/);
-    if (!m) throw new Error("Nessun JSON trovato. Inizio: " + raw.substring(0, 300));
-    parsed = JSON.parse(m[0]);
-  }
+  const parsed = block.input;
 
   // Sanitize HTML
   let html = (parsed.content_html || "").trim();
