@@ -5,7 +5,10 @@
 > prima di aprire la successiva (§16). Lo stato operativo vive in
 > `PROJECT_STATE.md`; qui sta il **cosa** e il **perché**, non il giorno-giorno.
 
-## MVP1 — Bozza su WordPress (core)
+> **Stato (Release 1):** ✅ MVP1 · ✅ MVP1.1 · ⏭️ MVP2 saltato (scelta PM) ·
+> ✅ MVP3 "slim" (A1+A2; A3/A4 opzionali) · ⬜ MVP4 rimandato. n8n dismesso.
+
+## MVP1 — Bozza su WordPress (core) — ✅ FATTO
 
 **Obiettivo:** il job gira da GitHub Actions ogni notte tra domenica e
 lunedì e crea l'articolo come **bozza** su WP (`nove-c.com`, categoria 3)

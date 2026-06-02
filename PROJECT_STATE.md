@@ -13,46 +13,41 @@
 | AI | API Anthropic | Anthropic | — | Claude Pro Max / API | `ANTHROPIC_API_KEY` (Secret) | modello `claude-sonnet-4-6` |
 | Ricerca | Brave Search API | Brave | — | — | `BRAVE_API_KEY` (Secret) | header `X-Subscription-Token` |
 | CMS | nove-c.com (WP REST + Rank Math) | WordPress | produzione | — | `WP_USER` + `WP_APP_PASSWORD` (Secret) | crea SOLO bozze (cat. 3) |
-| Repo | github.com/danielcarta9c/n8n | GitHub | — | — | — | da rinominare? (vedi Next) |
+| Repo | github.com/danielcarta9c/n8n | GitHub | `main` | pubblico | — | nome storico "n8n"; rinomina = cosmesi (vedi backlog) |
+| ~~n8n~~ | ~~cloud n8n~~ | ~~n8n (a pagamento)~~ | — | **DISMESSO** | — | flusso staccato; canone da disdire/disdetto |
 
-> Stato attuale: la versione **GitHub Actions è live e validata** (run reale ok).
-> Il flusso **n8n** (`s8ZB19pBRYeDADBU`, "NoveC SEO Blog - v2") resta solo come
-> riferimento/backup e va **dismesso** quando Daniel è sereno (poi si valuta la
-> cancellazione del canone). `n8nesistente` resta la sorgente di verità funzionale.
+> **Stato: Release 1 in produzione.** Il sistema gira su **GitHub Actions**
+> (cron settimanale → bozza su WordPress) ed è validato live. Il flusso **n8n
+> è stato staccato** da Daniel: obiettivo del progetto (eliminare il canone)
+> raggiunto. `n8nesistente` resta nel repo come riferimento funzionale storico.
 
 ## Now (max 3)
 
-- [x] **MVP1 + MVP1.1 validati live**: rotazione (5412) + override one-off (5422).
-- [x] **MVP3 slim CHIUSO e validato live**: A1 (tool use) ok; A2 confermato
-      dal vivo (issue #7 auto-aperta su un fallimento); fix titolo SEO/meta
-      (Rank Math tornato a **80/100**, 4 check verdi su bozza 5429); robustezza
-      HTTP (retry su glitch transitori WP). No email (scelta PM).
-- [ ] Dismettere n8n + valutare cancellazione canone (incasso del risparmio).
-- [ ] (Opzionale) MVP4 immagini + link interni reali; A3/A4 se servono.
+- [x] **RELEASE 1 SPEDITA** e in produzione: n8n staccato (canone eliminato),
+      sistema live su GitHub Actions. MVP1 + MVP1.1 + MVP3 validati, Rank Math 80/100.
+- [ ] **Periodo di rodaggio**: Daniel usa MVP3 in produzione; raccoglie
+      eventuali bug/feature → si fa tutto insieme nella **prossima release**.
+- [ ] Sessione chiusa: vedi `HANDOFF.md` per ripartire.
 
-## Next (per priorità)
+## Next (backlog prossima release — per priorità)
 
 > Roadmap completa con obiettivi e test di accettazione in `ROADMAP.md`.
+> MVP1 / MVP1.1 / MVP3 = FATTI (vedi Done log). MVP2 (email) = saltato (scelta PM).
 
-**MVP1 — bozza su WP:**
-1. [x] Script `generate.mjs` (7 nodi replicati, senza dipendenze).
-2. [x] Workflow `.github/workflows/seo-blog.yml` (cron + dispatch).
-3. [x] `RUNBOOK.md` con i 4 secret e la procedura di run.
-4. [ ] Configurare i secret + run manuale di validazione → bozza su WP.
-5. [ ] Disattivare/dismettere il flusso n8n + valutare cancellazione canone.
-
-**MVP2 — email:** notifica di riepilogo + diagnostica SEO.
-
-**MVP3 — robustezza + controllo:** A1 output strutturato, A2 error
-handling+notifica, A3 quality gate, A4 anti-doppioni, C1 `topics.json`
-editabile, C2 pin topic settimanale.
-
-**MVP4 — contenuto:** B1 immagini, B2 link interni reali, D1 log storico.
-
-**Cosmesi:** rinominare il repo (`n8n` → es. `novec-seo-blog`).
+1. **Bug/feature dal rodaggio**: raccogliere quanto emerge dall'uso reale di
+   MVP3 e affrontarlo in blocco (richiesta esplicita del PM).
+2. **MVP4 — contenuto**: B1 immagini featured (chiude anche il check "alt
+   immagini" di Rank Math), B2 link interni reali (da REST WP), D1 log storico.
+3. **A3 / A4** (opzionali): quality gate SEO con rigenerazione; anti-doppioni
+   (check slug su WP) — A4 risolverebbe il flag "keyword già usata".
+4. **Cosmesi**: rinominare il repo (`n8n` → es. `novec-seo-blog`).
 
 ## Done log
 
+- **RELEASE 1 — n8n DISMESSO**: Daniel ha staccato il flusso n8n. Obiettivo
+  del progetto raggiunto: canone eliminato, generazione SEO migrata su GitHub
+  Actions. Sistema in produzione. Restore point: branch `mvp1.1`. Sessione
+  chiusa con `HANDOFF.md`.
 - **Fix regressione SEO + robustezza** (PR #6, #8): dopo A1 il punteggio Rank
   Math era calato (40) per titolo SEO/meta senza focus keyword + power word.
   Fix deterministico (titolo SEO keyword-led, FK in meta, titolo visibile

@@ -1,5 +1,10 @@
 # CLAUDE.md — NoveC SEO Blog (ops automation)
 
+> ⭐ **PRIMA LETTURA: `HANDOFF.md`** (poi `PROJECT_STATE.md`). Contiene lo
+> stato vivo, come funziona il sistema e le trappole da non ripetere — pensato
+> per ripartire senza fare domande. Quando l'hai consumato, puoi rimuovere
+> questa riga e l'handoff (§32.5).
+
 > Adattamento di `AGENT_BOOTSTRAP.md` del kit `nove-c-kit` per **questo**
 > progetto. Questo NON è un SaaS: è **ops automation** (§35 del Playbook),
 > un singolo job schedulato che genera un articolo SEO in bozza su
@@ -16,21 +21,24 @@ dici; se sei incerto lo dichiari.
 ## Cosa è questo progetto
 
 Migrazione del flusso **"NoveC SEO Blog - v2"** da **n8n (a pagamento)** a
-**GitHub Actions (cron settimanale)**. Obiettivo: dismettere il canone n8n
-— l'unico flusso attivo lì (Playbook §12 prevede esplicitamente questa
-dismissione).
+**GitHub Actions (cron settimanale)**. Obiettivo: dismettere il canone n8n.
+**STATO: fatto.** Release 1 in produzione, n8n staccato (vedi `PROJECT_STATE.md`).
 
-**Definition of done (MVP1):** ogni notte tra domenica e lunedì il job
+**Definition of done (raggiunta):** ogni notte tra domenica e lunedì il job
 gira, genera l'articolo come **bozza** su WordPress (`nove-c.com`,
 categoria 3) con meta Rank Math impostati. Daniel lo rivede lunedì mattina
 nell'admin WP. **Nessuna pubblicazione automatica.**
 
-**MVP2 (cosmesi, nice-to-have):** notifica email di riepilogo +
-diagnostica SEO. Non bloccante.
+**Fatto oltre l'MVP1:** MVP1.1 (lista argomenti editabile `topics.json` +
+override one-off `next.json`), MVP3 slim (output strutturato via tool use,
+issue automatica su fallimento, garanzie SEO su titolo/meta, retry HTTP).
+**MVP2 (email) saltato** per scelta del PM. **MVP4** (immagini, link interni
+reali) rimandato. Dettagli in `ROADMAP.md`.
 
 ## Stack effettivo
 
-- **Runtime**: Node.js (script unico, `fetch` nativo + `@anthropic-ai/sdk`).
+- **Runtime**: Node.js 20 (script unico `generate.mjs`, `fetch` nativo,
+  **zero dipendenze npm**; Anthropic chiamata via REST, non via SDK).
 - **Scheduler**: GitHub Actions, `on: schedule` (cron) + `workflow_dispatch`
   per run manuale.
 - **Segreti**: GitHub Secrets (mai nel codice). Vedi `PROJECT_STATE.md`
