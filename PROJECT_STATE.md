@@ -23,9 +23,10 @@
 ## Now (max 3)
 
 - [x] **MVP1 + MVP1.1 validati live**: rotazione (5412) + override one-off (5422).
-- [x] **MVP3 slim live**: A1 output strutturato (tool use) validato con run
-      reale (bozza 5427, 2352 parole, 0 warning). A2 issue su fallimento in
-      place (scatta solo su errore reale, logica testata offline). No email.
+- [x] **MVP3 slim CHIUSO e validato live**: A1 (tool use) ok; A2 confermato
+      dal vivo (issue #7 auto-aperta su un fallimento); fix titolo SEO/meta
+      (Rank Math tornato a **80/100**, 4 check verdi su bozza 5429); robustezza
+      HTTP (retry su glitch transitori WP). No email (scelta PM).
 - [ ] Dismettere n8n + valutare cancellazione canone (incasso del risparmio).
 - [ ] (Opzionale) MVP4 immagini + link interni reali; A3/A4 se servono.
 
@@ -52,7 +53,13 @@ editabile, C2 pin topic settimanale.
 
 ## Done log
 
-- **MVP3 slim** (PR): A1 output strutturato di Claude via tool use (addio
+- **Fix regressione SEO + robustezza** (PR #6, #8): dopo A1 il punteggio Rank
+  Math era calato (40) per titolo SEO/meta senza focus keyword + power word.
+  Fix deterministico (titolo SEO keyword-led, FK in meta, titolo visibile
+  naturale) → **80/100, 4 check verdi** (bozza 5429). Aggiunto `fetchJson`
+  con retry su risposte transitorie WP (HTML/5xx). A2 confermato live: issue
+  #7 aperta in automatico su un run fallito, poi chiusa.
+- **MVP3 slim** (PR #5): A1 output strutturato di Claude via tool use (addio
   parsing fragile) + A2 issue GitHub automatica su run fallito (no email,
   scelta PM). A3/A4 rimandati come opzionali. Testato offline.
 - **MVP1.1 validato live**: override one-off testato dal PM → bozza 5422
