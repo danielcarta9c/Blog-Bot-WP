@@ -1,11 +1,11 @@
 {
   "_leggimi": "Compila i 4 campi sotto per forzare UN articolo specifico (es. una novità), poi committa su main: parte un run con quel titolo. A run riuscito il file si SVUOTA da solo e torna la rotazione. Lascia 'titolo' vuoto = rotazione normale. Le righe che iniziano con _ sono solo note di aiuto: non vengono lette dallo script, non toccarle.",
-  "titolo": "Elettrificazione dei Carichi con Pompa di Calore: Perché Conviene Anche Senza Fotovoltaico {{year}}",
+  "titolo": "",
   "_aiuto_titolo": "Titolo H1 dell'articolo. Metti una power word (Guida, Conviene, Completa, Definitiva...) e la parola chiave. {{year}} diventa l'anno corrente. Es: Elettrificazione dei Carichi con Pompa di Calore: Perche Conviene {{year}}",
-  "focus_keyword": "elettrificazione dei carichi",
+  "focus_keyword": "",
   "_aiuto_focus_keyword": "La frase chiave SEO esatta, 2-4 parole, quella per cui vuoi posizionarti su Google. Es: elettrificazione dei carichi",
-  "brief": "Tesi dell'articolo: elettrificare i carichi domestici è la scelta giusta per risparmiare, ANCHE senza impianto fotovoltaico. Spiega che passando al full electric con pompa di calore si elimina la seconda bolletta (il gas) e i suoi costi fissi alti (quota fissa, oneri, trasporto): si paga una sola bolletta elettrica, su tariffe più convenienti. Punto chiave economico: grazie al COP della pompa di calore il costo del calore per kWh utile è inferiore al gas, e l'azzeramento dei costi fissi del contatore gas pesa molto sul totale annuo. Confronta lo scenario 'due bollette (gas + luce)' vs 'una bolletta elettrica', con esempio numerico su una villa/appartamento tipo. Cita il Conto Termico 3.0 (D.M. 7 agosto 2025) come leva che abbatte l'investimento iniziale con lo sconto in fattura garantito da Nove C (ESCo certificata UNI CEI 11352). Tono tecnico ma comprensibile, ambito Privati",
+  "brief": "",
   "_aiuto_brief": "Il taglio/tesi dell'articolo in 2-4 frasi: cosa deve sostenere e quali punti toccare. Piu sei specifico, meglio scrive Claude.",
-  "stile": "numbers-first",
+  "stile": "",
   "_aiuto_stile": "Schema del testo. Valori possibili: problem-solution (problema -> soluzione) | how-to-guide (guida a step operativi) | faq-driven (tutto domande e risposte) | numbers-first (costruito su numeri/bollette/cifre) | comparison (confronti X vs Y). Vuoto = problem-solution."
 }
