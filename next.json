@@ -1,11 +1,11 @@
 {
   "_leggimi": "Compila i 4 campi sotto per forzare UN articolo specifico (es. una novità), poi committa su main: parte un run con quel titolo. A run riuscito il file si SVUOTA da solo e torna la rotazione. Lascia 'titolo' vuoto = rotazione normale. Le righe che iniziano con _ sono solo note di aiuto: non vengono lette dallo script, non toccarle.",
-  "titolo": "",
+  "titolo": "transizione fiscale 2026",
   "_aiuto_titolo": "Titolo H1 dell'articolo. Metti una power word (Guida, Conviene, Completa, Definitiva...) e la parola chiave. {{year}} diventa l'anno corrente. Es: Elettrificazione dei Carichi con Pompa di Calore: Perche Conviene {{year}}",
-  "focus_keyword": "",
+  "focus_keyword": "guida definitiva 2026",
   "_aiuto_focus_keyword": "La frase chiave SEO esatta, 2-4 parole, quella per cui vuoi posizionarti su Google. Es: elettrificazione dei carichi",
-  "brief": "",
+  "brief": "articolo spiega i vantaggi della transizione fiscale 2026 per gli imprenditori italiani che fatturano piu' di 300.000 euro",
   "_aiuto_brief": "Il taglio/tesi dell'articolo in 2-4 frasi: cosa deve sostenere e quali punti toccare. Piu sei specifico, meglio scrive Claude.",
-  "stile": "",
+  "stile": "how-to-guide",
   "_aiuto_stile": "Schema del testo. Valori possibili: problem-solution (problema -> soluzione) | how-to-guide (guida a step operativi) | faq-driven (tutto domande e risposte) | numbers-first (costruito su numeri/bollette/cifre) | comparison (confronti X vs Y). Vuoto = problem-solution."
 }
