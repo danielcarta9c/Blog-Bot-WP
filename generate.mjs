@@ -2,7 +2,8 @@
 //
 // Replica in un singolo script Node del workflow n8n "NoveC SEO Blog - v2"
 // (vedi `n8nesistente`). Gira da GitHub Actions una volta a settimana e crea
-// un articolo come BOZZA su WordPress. Nessuna pubblicazione automatica.
+// un articolo con publish PROGRAMMATO (status: future) su WordPress: va online
+// da solo a meta' mattina, con finestra di veto per Daniel. Mai publish immediato.
 //
 // MVP1:   7 nodi n8n replicati, MENO la notifica email (-> MVP2).
 // MVP1.1: lista argomenti editabile in topics.json (C1) + override one-off
@@ -97,6 +98,29 @@ function slugify(s) {
     .replace(/\s+/g, "-")
     .substring(0, 60)
     .replace(/-+$/, "");
+}
+
+// Accorcia lo slug (URL) tagliando su confine di parola. Preserva il piu
+// possibile la focus keyword (che di solito e in testa allo slug).
+function shortenSlug(s, max = 60) {
+  s = (s || "").toLowerCase().replace(/-+$/, "");
+  if (s.length <= max) return s;
+  const cut = s.slice(0, max);
+  const lastDash = cut.lastIndexOf("-");
+  return (lastDash > 20 ? cut.slice(0, lastDash) : cut).replace(/-+$/, "");
+}
+
+// Data di pubblicazione programmata (publish differito con finestra di veto).
+// Prossime 09:00 UTC (~10-11 ora italiana) ad almeno 4h da ora: il job gira
+// lunedi notte -> l'articolo va live lunedi tarda mattina, e Daniel ha la
+// mattinata per cestinarlo se sbagliato. Ritorna ISO senza millisecondi.
+function scheduledPublishGmt() {
+  const now = new Date();
+  let target = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 9, 0, 0));
+  if (target.getTime() - now.getTime() < 4 * 3600 * 1000) {
+    target = new Date(target.getTime() + 24 * 3600 * 1000);
+  }
+  return target.toISOString().replace(/\.\d{3}Z$/, "");
 }
 
 // Legge l'override one-off da next.json. Ritorna null se assente o senza titolo.
@@ -349,6 +373,7 @@ function parseArticle(message) {
   if (slug.length < 10 && focusKw) {
     slug = focusKw.toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").substring(0, 60);
   }
+  slug = shortenSlug(slug, 60); // URL corta (Rank Math preferisce slug brevi)
 
   const ctaHtml = '<a href="https://nove-c.com/soluzioni/conto-termico-3-0-incentivi-fino-al-65-senza-anticipo/" style="font-weight:bold;">Contatta Nove C per una verifica di ammissibilita gratuita e scopri quanto puoi risparmiare con il Conto Termico 3.0</a>';
 
@@ -357,7 +382,10 @@ function parseArticle(message) {
   const metaDescription = ensureKwInMeta(parsed.meta_description, focusKw);
 
   const patch_body = {
-    status: "draft",
+    // Publish PROGRAMMATO (non piu' draft): va online da solo a scheduledPublishGmt(),
+    // ma Daniel ha la finestra del mattino per cestinarlo. Mai publish immediato.
+    status: "future",
+    date_gmt: scheduledPublishGmt(),
     title: parsed.titolo_seo || parsed.h1 || "Articolo Nove C",
     slug: slug,
     template: WP_POST_TEMPLATE,
@@ -393,7 +421,7 @@ function parseArticle(message) {
 }
 
 // ---------------------------------------------------------------------------
-// NODO: "Crea Post WordPress" — crea la bozza
+// NODO: "Crea Post WordPress" — crea il post (programmato)
 // ---------------------------------------------------------------------------
 function wpAuthHeader() {
   return "Basic " + Buffer.from(`${WP_USER}:${WP_APP_PASSWORD}`).toString("base64");
@@ -500,7 +528,7 @@ async function main() {
   }
 
   const post = await createDraft(article.patch_body);
-  console.log(`Bozza WordPress creata: id ${post.id}`);
+  console.log(`Articolo creato (${post.status}): id ${post.id}, publish previsto ${article.patch_body.date_gmt} UTC`);
 
   await updateRankMath(post.id, article);
   console.log("Rank Math: meta impostati");
@@ -512,7 +540,7 @@ async function main() {
     console.log("Override consumato: next.json svuotato (torna in rotazione).");
   }
 
-  console.log(`\nFatto. Bozza pronta per la revisione:`);
+  console.log(`\nFatto. Articolo programmato (rivedi o cestina entro la mattina):`);
   console.log(`  Admin:     ${WP_BASE}/wp-admin/post.php?post=${post.id}&action=edit`);
   console.log(`  Anteprima: ${WP_BASE}/?p=${post.id}&preview=true`);
 }
