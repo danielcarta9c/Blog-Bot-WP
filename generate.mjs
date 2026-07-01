@@ -7,10 +7,13 @@
 // MVP1:   7 nodi n8n replicati, MENO la notifica email (-> MVP2).
 // MVP1.1: lista argomenti editabile in topics.json (C1) + override one-off
 //         in next.json, consumato e svuotato dopo il run (C2).
+// MVP3:   output strutturato (tool use) + garanzie SEO titolo/meta + retry HTTP.
+// MVP4/B1: immagine in evidenza generata (OpenAI) + upload su WP con alt text.
 // Stack: solo `fetch` nativo (Node 20+), nessuna dipendenza npm.
 //
 // Segreti letti da env (GitHub Secrets):
 //   ANTHROPIC_API_KEY, BRAVE_API_KEY, WP_USER, WP_APP_PASSWORD
+//   OPENAI_API_KEY (opzionale: se manca, immagine saltata, articolo comunque ok)
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -30,6 +33,17 @@ const MODEL = "claude-sonnet-4-6";
 // Template del post (Attributi articolo -> Template = "Blog Post (Nuovo)").
 // Valore = filename del template come esposto dalla REST API WP.
 const WP_POST_TEMPLATE = "single-blog-nuovo.php";
+// Immagine in evidenza fallback (ID media WP) se la generazione fallisce.
+const FEATURED_MEDIA_FALLBACK = 5026;
+
+// MVP4/B1 — immagine in evidenza generata (OpenAI). Non bloccante: se manca la
+// key o fallisce, l'articolo esce lo stesso con l'immagine fallback.
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
+const IMAGE_QUALITY = "medium"; // resa/costo bilanciati per un articolo/settimana
+// Stile fotografico costante: dà realismo e coerenza. Il SOGGETTO/registro lo
+// sceglie Claude (brief_immagine); qui fissiamo COME va fotografato.
+const STILE_IMMAGINE =
+  "Fotografia editoriale fotorealistica, reflex full-frame 35mm, obiettivo 50mm f/1.8, luce naturale morbida, profondita di campo ridotta, momento candido e non in posa, leggera grana pellicola, texture e imperfezioni realistiche, atmosfera italiana calda e autentica. Niente testo, loghi o watermark. Le persone vanno riprese di spalle o di tre quarti da dietro, a media o lunga distanza, mai frontali ne ravvicinate; nelle scene di lavoro inquadratura ampia sull'ambiente e sul gesto.";
 
 function requireEnv(name) {
   const v = process.env[name];
@@ -207,6 +221,13 @@ Requisiti SEO TASSATIVI:
 - TITOLO SEO (campo titolo_seo): deve INIZIARE con la focus keyword esatta "${t.focusKeyword}" e contenere una "power word" persuasiva (Guida, Completa, Definitiva, Conviene, Risparmi, Novita...). Esempio: "${t.focusKeyword}: Guida Completa".
 - META DESCRIPTION (campo meta_description): 150-160 caratteri e DEVE contenere la focus keyword esatta "${t.focusKeyword}", preferibilmente all'inizio.
 - SLUG: deve contenere la focus keyword completa separata da trattini, max 60 caratteri
+- IMMAGINE IN EVIDENZA (campo brief_immagine): descrivi in 1-2 frasi la SCENA ideale per l'immagine dell'articolo, scegliendo il REGISTRO piu adatto a QUESTO pezzo (varia in base all'articolo, non fare sempre lo stesso tipo):
+  * installazione/tecnico-umano (es. un installatore che monta la pompa di calore, cantiere, gesto di lavoro) -> per articoli how-to / iter / installazione;
+  * comfort/vendita (interno di casa caldo e accogliente, benessere, serenita) -> per articoli su risparmio / comfort;
+  * prodotto (la pompa di calore ben fotografata) -> quando l'articolo e sul prodotto/configurazione;
+  * architettura (villa o condominio) -> per articoli su edifici;
+  * fiducia/professionale (tecnici al lavoro in centrale termica) -> per articoli su ESCo / perche sceglierci.
+  Orienta la scena all'EMOZIONE e al beneficio per il cliente, non al tecnicismo. NON descrivere lo stile fotografico (luci, obiettivo, ecc.): a quello pensa il sistema.
 
 Per restituire l'articolo CHIAMA il tool "pubblica_articolo" compilando TUTTI i suoi campi. La focus_keyword deve essere esattamente "${t.focusKeyword}" e l'h1 esattamente "${t.title}". Non scrivere altro testo fuori dal tool.`;
 }
@@ -237,9 +258,10 @@ async function callClaude(prompt) {
               slug: { type: "string", description: "Slug con la focus keyword, max 60 caratteri" },
               estratto: { type: "string", description: "Estratto 120-160 caratteri" },
               h1: { type: "string", description: "Titolo H1" },
-              content_html: { type: "string", description: "Corpo dell'articolo in HTML puro (solo tag p, h2, strong, em, ul, li, a)" }
+              content_html: { type: "string", description: "Corpo dell'articolo in HTML puro (solo tag p, h2, strong, em, ul, li, a)" },
+              brief_immagine: { type: "string", description: "Scena per l'immagine in evidenza (1-2 frasi), registro adatto all'articolo, orientata all'emozione/beneficio. NON descrivere lo stile fotografico." }
             },
-            required: ["titolo_seo", "focus_keyword", "meta_description", "slug", "estratto", "h1", "content_html"]
+            required: ["titolo_seo", "focus_keyword", "meta_description", "slug", "estratto", "h1", "content_html", "brief_immagine"]
           }
         }
       ],
@@ -340,7 +362,7 @@ function parseArticle(message) {
     slug: slug,
     template: WP_POST_TEMPLATE,
     categories: [3],
-    featured_media: 5026,
+    featured_media: FEATURED_MEDIA_FALLBACK,
     excerpt: metaDescription,
     acf: {
       titoli: { titolo_h2: "", testo: html, testo_call_to_action: ctaHtml },
@@ -354,6 +376,7 @@ function parseArticle(message) {
     focus_keyword: focusKw,
     meta_description: metaDescription,
     slug: slug,
+    brief_immagine: (parsed.brief_immagine || "").trim(),
     patch_body: patch_body,
     diagnostics: {
       wordCount, h2Count, kwCount, kwInFirst, kwDensity, extLinks, intLinks,
@@ -404,6 +427,45 @@ async function updateRankMath(postId, article) {
 }
 
 // ---------------------------------------------------------------------------
+// MVP4/B1 — Immagine in evidenza: genera con OpenAI, carica su WP, imposta l'alt.
+// Il SOGGETTO/registro arriva da Claude (brief_immagine); qui aggiungiamo lo
+// stile fotografico fisso e gestiamo generazione + upload.
+// ---------------------------------------------------------------------------
+async function generateImage(brief) {
+  if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY non configurata");
+  const prompt = `${brief} ${STILE_IMMAGINE}`;
+  const data = await fetchJson("https://api.openai.com/v1/images/generations", {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ model: "gpt-image-1", prompt, size: "1536x1024", quality: IMAGE_QUALITY, n: 1 })
+  }, "OpenAI immagine");
+  const b64 = data.data && data.data[0] && data.data[0].b64_json;
+  if (!b64) throw new Error("nessuna immagine nella risposta OpenAI");
+  return Buffer.from(b64, "base64");
+}
+
+async function uploadFeaturedImage(pngBuffer, focusKeyword, slug) {
+  const filename = ((slug || "immagine").replace(/[^a-z0-9-]/gi, "-").slice(0, 60)) + ".png";
+  // 1) upload binario nella media library
+  const media = await fetchJson(`${WP_BASE}/wp-json/wp/v2/media`, {
+    method: "POST",
+    headers: {
+      "Authorization": wpAuthHeader(),
+      "Content-Type": "image/png",
+      "Content-Disposition": `attachment; filename="${filename}"`
+    },
+    body: pngBuffer
+  }, "WordPress (upload media)");
+  // 2) alt text con la focus keyword (chiude il check Rank Math sull'alt)
+  await fetchJson(`${WP_BASE}/wp-json/wp/v2/media/${media.id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": wpAuthHeader() },
+    body: JSON.stringify({ alt_text: capFirst(focusKeyword), title: capFirst(focusKeyword) })
+  }, "WordPress (alt media)");
+  return media.id;
+}
+
+// ---------------------------------------------------------------------------
 // Orchestrazione
 // ---------------------------------------------------------------------------
 async function main() {
@@ -423,6 +485,19 @@ async function main() {
 
   const article = parseArticle(message);
   console.log("Diagnostica SEO:", JSON.stringify(article.diagnostics));
+
+  // Immagine in evidenza (non bloccante): se generazione/upload falliscono,
+  // l'articolo esce comunque con l'immagine fallback.
+  if (article.brief_immagine) {
+    try {
+      const png = await generateImage(article.brief_immagine);
+      const mediaId = await uploadFeaturedImage(png, article.focus_keyword, article.slug);
+      article.patch_body.featured_media = mediaId;
+      console.log(`Immagine in evidenza generata: media id ${mediaId}`);
+    } catch (e) {
+      console.error(`Immagine saltata (non bloccante): ${e.message}`);
+    }
+  }
 
   const post = await createDraft(article.patch_body);
   console.log(`Bozza WordPress creata: id ${post.id}`);
