@@ -26,8 +26,8 @@
 - [x] **In produzione e validati live**: Release 1 (n8n staccato) + MVP4/B1
       (immagine in evidenza) + **publish PROGRAMMATO** (status future, veto la
       mattina) + **URL corta** (slug ≤60). Articolo 5466 programmato = prova ok.
-- [ ] **Power word**: Daniel aggiunge la lista IT in Rank Math (quando al PC),
-      poi allineo la lista nel codice. + eventuale A3 (densità).
+- [ ] **Prossima feature (spec pronta)**: rotazione argomenti tracciata →
+      `docs/feature-rotazione-tracciata.md`. Sviluppo demandato a nuova sessione.
 - [ ] Rodaggio → prossima release (B2 link interni, D1 log). Ripartenza: `HANDOFF.md`.
 
 ## Next (backlog prossima release — per priorità)
@@ -35,12 +35,16 @@
 > Roadmap completa con obiettivi e test di accettazione in `ROADMAP.md`.
 > MVP1 / MVP1.1 / MVP3 = FATTI (vedi Done log). MVP2 (email) = saltato (scelta PM).
 
-1. **Bug/feature dal rodaggio**: raccogliere quanto emerge dall'uso reale di
-   MVP3 e affrontarlo in blocco (richiesta esplicita del PM).
+0. ⭐ **Rotazione argomenti TRACCIATA** — la **prima** cosa alla ripresa. Spec
+   pronta: `docs/feature-rotazione-tracciata.md`. Oggi la scelta topic è
+   `weekNumber % len` (cieca → ripete ogni ~10 settimane → cannibalizzazione
+   SEO). Progettata col PM, sviluppo demandato a una nuova sessione.
+1. **Bug/feature dal rodaggio**: raccogliere quanto emerge dall'uso reale e
+   affrontarlo in blocco (richiesta esplicita del PM).
 2. **MVP4 — contenuto**: ~~B1 immagini featured~~ FATTO. Restano: B2 link
    interni reali (da REST WP), D1 log storico. Eventuale scelta quality high vs medium.
 3. **A3 / A4** (opzionali): quality gate SEO con rigenerazione; anti-doppioni
-   (check slug su WP) — A4 risolverebbe il flag "keyword già usata".
+   (check slug su WP). NB: il flag "keyword già usata" lo risolve la rotazione tracciata.
 4. **Power word Rank Math** (config WP di Daniel) + allineo lista codice.
 
 ## Done log
