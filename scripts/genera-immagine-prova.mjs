@@ -1,22 +1,25 @@
-// scripts/genera-immagine-prova.mjs  (batch v2)
-// Prova one-off (MVP4/B1): genera 3 immagini "hero" orientate all'emozione/
-// vendita (non al prodotto), con stile fotografico realistico. Le salva in
-// ops/out/prova-1..3.png. NON tocca WordPress. Da rimuovere dopo la valutazione.
+// scripts/genera-immagine-prova.mjs  (batch v3 - mix di registri)
+// Prova (MVP4/B1): dimostra che l'immagine si adatta al TIPO di articolo.
+// 3 topic reali da topics.json, 3 registri diversi. Salva prova-1..3.png.
+// NON tocca WordPress. Da rimuovere dopo la valutazione.
 
 import { writeFileSync, mkdirSync } from "node:fs";
 
 const KEY = process.env.OPENAI_API_KEY;
 if (!KEY) { console.error("Manca OPENAI_API_KEY nei Secret."); process.exit(1); }
 
-// Stile fotografico costante (leva "realismo + coerenza", fissata in codice).
+// Realismo fotografico costante (leva fissa in codice).
 const STILE =
-  "Fotografia editoriale lifestyle fotorealistica, scattata con reflex full-frame 35mm, obiettivo 50mm f/1.8, luce naturale morbida da finestra, profondita di campo ridotta, momento candido e non in posa, leggera grana pellicola, texture e imperfezioni realistiche, casa italiana calda e accogliente, premium ma autentica. Niente testo, niente loghi, niente watermark. Persone solo di spalle o a media distanza, mai volti in primo piano.";
+  "Fotografia editoriale fotorealistica, reflex full-frame 35mm, obiettivo 50mm f/1.8, luce naturale, profondita di campo ridotta, momento candido e non in posa, leggera grana pellicola, texture e imperfezioni realistiche. Niente testo, loghi o watermark. Eventuali volti non in primo piano.";
 
-// Brief "emozionali" (leva "varieta + pertinenza"): 3 angoli diversi.
+// 3 topic reali + registro adatto (in produzione lo sceglie Claude).
 const BRIEF = [
-  "Salotto moderno italiano in inverno, coperta morbida sul divano, una mano che regge una tazza calda, piante, fuori dalla finestra fa freddo: senso di comfort e calore domestico.",
-  "Luminoso ambiente cucina-soggiorno italiano al mattino, atmosfera familiare rilassata, luce del sole, senso di calma e serenita (anche economica), casa ordinata e benessere.",
-  "Elegante facciata di un condominio residenziale italiano moderno all'imbrunire, luci calde alle finestre, architettura pulita, atmosfera serale aspirazionale ma realistica."
+  // sostituzione-caldaia-pompa-di-calore-villa -> INSTALLAZIONE
+  "Un installatore in tuta da lavoro sta montando l'unita esterna di una moderna pompa di calore aria-acqua sulla parete esterna di una villa italiana. Inquadratura sul gesto e sulle mani, attrezzi da lavoro, cantiere ordinato, giornata di sole. Taglio documentaristico concreto e professionale.",
+  // quanto-si-risparmia -> COMFORT / VENDITA
+  "Interno di una casa italiana calda e accogliente in inverno: divano con plaid morbido, luce soffusa, tazza fumante, piante. Atmosfera di comfort e serenita, anche economica. Nessuna persona in primo piano.",
+  // esco-certificata -> FIDUCIA / PROFESSIONALE
+  "Due tecnici professionisti, a media distanza, controllano un impianto termico moderno in un locale tecnico pulito e ben illuminato. Atmosfera competente, affidabile, professionale. Focus sull'ambiente e sul lavoro."
 ];
 
 async function genOne(prompt, i) {
