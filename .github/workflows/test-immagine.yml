@@ -1,6 +1,6 @@
 name: Test immagine OpenAI (prova MVP4)
 
-# Prova one-off: genera un'immagine con OpenAI e la committa in ops/out/ per
+# Prova one-off: genera immagini con OpenAI e le committa in ops/out/ per
 # valutarne la resa. Si lancia committando lo script (push). Da rimuovere
 # dopo la valutazione. NON tocca WordPress.
 on:
@@ -20,20 +20,20 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - name: Genera immagine di prova
+      - name: Genera immagini di prova
         run: node scripts/genera-immagine-prova.mjs
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      - name: Commit immagine
+      - name: Commit immagini
         if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add ops/out/immagine-prova.png || true
-          git commit -m "prova immagine OpenAI [skip ci]" || { echo "niente da committare"; exit 0; }
+          git add ops/out/ || true
+          git commit -m "prova immagini OpenAI [skip ci]" || { echo "niente da committare"; exit 0; }
           for i in 1 2 3; do
             if git pull --rebase --autostash origin main && git push origin HEAD:main; then
-              echo "immagine committata"; exit 0
+              echo "immagini committate"; exit 0
             fi
             echo "retry $i"; sleep $((2 ** i))
           done
