@@ -54,6 +54,7 @@ jobs:
           BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
           WP_USER: ${{ secrets.WP_USER }}
           WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       # Auto-commit del log su main, anche se il run sopra è fallito.
       # Step eseguito da root (mai working-directory: §35 gotcha sul path doppio).
