@@ -23,6 +23,7 @@ import { dirname, join } from "node:path";
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const TOPICS_PATH = join(ROOT, "topics.json");
 const NEXT_PATH = join(ROOT, "next.json");
+const ROTATION_STATE_PATH = join(ROOT, "ops", "rotation-state.json");
 
 const ANTHROPIC_API_KEY = requireEnv("ANTHROPIC_API_KEY");
 const BRAVE_API_KEY = requireEnv("BRAVE_API_KEY");
@@ -156,9 +157,54 @@ function clearOverride() {
 }
 
 // ---------------------------------------------------------------------------
-// NODO: "Code in JavaScript - Topic" — rotazione settimanale topic + template.
-// MVP1.1: topic/template letti da topics.json; se next.json ha un titolo,
-//         quello vince (override one-off).
+// Rotazione TRACCIATA: stato in ops/rotation-state.json (slug -> data ultimo uso),
+// ri-committato su main dal workflow. Identita' per SLUG (stabile): riordinare,
+// aggiungere o rimuovere topic non corrompe la traccia. Sostituisce la vecchia
+// rotazione cieca `weekNumber % len` che ripeteva le keyword (cannibalizzazione SEO).
+// ---------------------------------------------------------------------------
+const ROTATION_README =
+  "Stato rotazione: quando ogni argomento e' stato pubblicato. Gestito dallo script, NON modificare a mano. Per scegliere il prossimo, riordina topics.json (il primo non ancora usato e' il prossimo).";
+
+function readRotationState() {
+  try {
+    const s = JSON.parse(readFileSync(ROTATION_STATE_PATH, "utf8"));
+    if (s && typeof s === "object" && s.usati && typeof s.usati === "object") {
+      return { usati: s.usati };
+    }
+  } catch {
+    // file assente o malformato -> stato vuoto (primo run: tutti unused)
+  }
+  return { usati: {} };
+}
+
+function writeRotationState(state) {
+  const out = { _leggimi: ROTATION_README, usati: state.usati || {} };
+  writeFileSync(ROTATION_STATE_PATH, JSON.stringify(out, null, 2) + "\n");
+}
+
+// Sceglie il topic: primo in ordine di lista il cui slug NON e' ancora usato.
+// Se sono tutti usati -> LRU (data piu' vecchia; tie-break: ordine di lista) e
+// segnala esaurito=true. Slug orfani (topic rimossi) sono ignorati: iteriamo
+// solo la lista corrente.
+function pickTopic(topics, state) {
+  const usati = state.usati || {};
+  const unused = topics.find((t) => !(t.slug in usati));
+  if (unused) return { topic: { ...unused }, esaurito: false };
+  let best = null;
+  for (const t of topics) {
+    const d = usati[t.slug] || "";
+    if (best === null || d < best.date) best = { topic: t, date: d };
+  }
+  return { topic: { ...best.topic }, esaurito: true };
+}
+
+// ---------------------------------------------------------------------------
+// NODO: "Code in JavaScript - Topic" — selezione topic tracciata + stile.
+// MVP1.1: topic/stile letti da topics.json; se next.json ha un titolo, quello
+//         vince (override one-off, FUORI rotazione: non tocca lo stato).
+// Feature rotazione tracciata: il TOPIC e' il primo non-usato (vedi pickTopic);
+//         lo STILE resta su `weekNumber % stili.length` (la ripetizione di stile
+//         non crea cannibalizzazione, quindi non si traccia).
 // ---------------------------------------------------------------------------
 function selectTopic() {
   const data = JSON.parse(readFileSync(TOPICS_PATH, "utf8"));
@@ -184,10 +230,11 @@ function selectTopic() {
     return { topic, template, year, weekNumber, today, override: true };
   }
 
-  const topic = { ...topics[weekNumber % topics.length] };
+  const state = readRotationState();
+  const { topic, esaurito } = pickTopic(topics, state);
   const template = stili[weekNumber % stili.length];
   topic.title = topic.title.replace("{{year}}", year);
-  return { topic, template, year, weekNumber, today, override: false };
+  return { topic, template, year, weekNumber, today, override: false, state, esaurito };
 }
 
 // ---------------------------------------------------------------------------
@@ -500,8 +547,10 @@ async function main() {
   const ctx = selectTopic();
   if (ctx.override) {
     console.log(`Override one-off (next.json): "${ctx.topic.title}"`);
+  } else if (ctx.esaurito) {
+    console.log(`Topic (rotazione, ARGOMENTI ESAURITI -> LRU): ${ctx.topic.focusKeyword}`);
   } else {
-    console.log(`Topic settimana ${ctx.weekNumber} (rotazione): ${ctx.topic.focusKeyword}`);
+    console.log(`Topic (rotazione tracciata): ${ctx.topic.focusKeyword}`);
   }
   console.log(`Template: ${ctx.template.name}`);
 
@@ -538,6 +587,18 @@ async function main() {
   if (ctx.override) {
     clearOverride();
     console.log("Override consumato: next.json svuotato (torna in rotazione).");
+  } else {
+    // Marca il topic come usato SOLO a pubblicazione riuscita (come clearOverride):
+    // su errore il topic resta disponibile per il retry. Lo stato viene
+    // ri-committato su main dal workflow (come next.json / log).
+    ctx.state.usati = ctx.state.usati || {};
+    ctx.state.usati[ctx.topic.slug] = new Date().toISOString().slice(0, 10);
+    writeRotationState(ctx.state);
+    console.log(`Rotazione: "${ctx.topic.slug}" segnato come usato.`);
+    // Marker per lo step di notifica nel workflow (issue "argomenti esauriti").
+    if (ctx.esaurito) {
+      console.log("ARGOMENTI_ESAURITI: tutti i topic sono gia' stati pubblicati; ripubblicato il meno recente (LRU). Aggiungi nuovi topic a topics.json.");
+    }
   }
 
   console.log(`\nFatto. Articolo programmato (rivedi o cestina entro la mattina):`);
