@@ -31,6 +31,10 @@ const WP_USER = requireEnv("WP_USER");
 const WP_APP_PASSWORD = requireEnv("WP_APP_PASSWORD");
 
 const WP_BASE = "https://nove-c.com";
+// User-Agent da browser reale sulle chiamate a WP: l'anti-bot di SiteGround
+// (sgcaptcha) sfida gli UA "sospetti" (il default di Node). Accesso legittimo
+// e autenticato al nostro sito; riduce i falsi positivi del WAF sull'API REST.
+const WP_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36";
 const MODEL = "claude-sonnet-4-6";
 // Template del post (Attributi articolo -> Template = "Blog Post (Nuovo)").
 // Valore = filename del template come esposto dalla REST API WP.
@@ -477,7 +481,7 @@ function wpAuthHeader() {
 async function createDraft(patch_body) {
   return await fetchJson(`${WP_BASE}/wp-json/wp/v2/posts`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "Authorization": wpAuthHeader() },
+    headers: { "Content-Type": "application/json", "Authorization": wpAuthHeader(), "User-Agent": WP_UA },
     body: JSON.stringify(patch_body)
   }, "WordPress (crea post)");
 }
@@ -488,7 +492,7 @@ async function createDraft(patch_body) {
 async function updateRankMath(postId, article) {
   return await fetchJson(`${WP_BASE}/wp-json/rankmath/v1/updateMeta`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "Authorization": wpAuthHeader() },
+    headers: { "Content-Type": "application/json", "Authorization": wpAuthHeader(), "User-Agent": WP_UA },
     body: JSON.stringify({
       objectType: "post",
       objectID: postId,
@@ -527,14 +531,15 @@ async function uploadFeaturedImage(pngBuffer, focusKeyword, slug) {
     headers: {
       "Authorization": wpAuthHeader(),
       "Content-Type": "image/png",
-      "Content-Disposition": `attachment; filename="${filename}"`
+      "Content-Disposition": `attachment; filename="${filename}"`,
+      "User-Agent": WP_UA
     },
     body: pngBuffer
   }, "WordPress (upload media)");
   // 2) alt text con la focus keyword (chiude il check Rank Math sull'alt)
   await fetchJson(`${WP_BASE}/wp-json/wp/v2/media/${media.id}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "Authorization": wpAuthHeader() },
+    headers: { "Content-Type": "application/json", "Authorization": wpAuthHeader(), "User-Agent": WP_UA },
     body: JSON.stringify({ alt_text: capFirst(focusKeyword), title: capFirst(focusKeyword) })
   }, "WordPress (alt media)");
   return media.id;
