@@ -7,9 +7,9 @@
 
 > Adattamento di `AGENT_BOOTSTRAP.md` del kit `nove-c-kit` per **questo**
 > progetto. Questo NON è un SaaS: è **ops automation** (§35 del Playbook),
-> un singolo job schedulato che genera un articolo SEO in bozza su
-> WordPress. Per questo lo stack SaaS di default (§12: `index.html` +
-> Supabase + Netlify + MCP) **non si applica** — vedi `docs/adr/0001`.
+> un singolo job schedulato che genera un articolo SEO su WordPress. Per
+> questo lo stack SaaS di default (§12: `index.html` + Supabase + Netlify +
+> MCP) **non si applica** — vedi `docs/adr/0001`.
 
 ## Identità
 
@@ -25,15 +25,18 @@ Migrazione del flusso **"NoveC SEO Blog - v2"** da **n8n (a pagamento)** a
 **STATO: fatto.** Release 1 in produzione, n8n staccato (vedi `PROJECT_STATE.md`).
 
 **Definition of done (raggiunta):** ogni notte tra domenica e lunedì il job
-gira, genera l'articolo come **bozza** su WordPress (`nove-c.com`,
-categoria 3) con meta Rank Math impostati. Daniel lo rivede lunedì mattina
-nell'admin WP. **Nessuna pubblicazione automatica.**
+gira e genera l'articolo su WordPress (`nove-c.com`, categoria 3) con meta
+Rank Math + immagine in evidenza. **Publish PROGRAMMATO** (status `future`,
+online ~metà mattina): Daniel ha la finestra del lunedì mattina per
+cestinare quello sbagliato. **Mai publish immediato** (decisione PM aggiornata:
+prima era "solo bozza"; ora publish differito con veto).
 
 **Fatto oltre l'MVP1:** MVP1.1 (lista argomenti editabile `topics.json` +
 override one-off `next.json`), MVP3 slim (output strutturato via tool use,
-issue automatica su fallimento, garanzie SEO su titolo/meta, retry HTTP).
-**MVP2 (email) saltato** per scelta del PM. **MVP4** (immagini, link interni
-reali) rimandato. Dettagli in `ROADMAP.md`.
+issue automatica su fallimento, garanzie SEO su titolo/meta, retry HTTP),
+MVP4/B1 (immagine in evidenza generata OpenAI + alt), publish programmato +
+URL corta. **MVP2 (email) saltato** per scelta del PM. Restano B2/D1 e la
+power word (config Rank Math). Dettagli in `ROADMAP.md` / `HANDOFF.md`.
 
 ## Stack effettivo
 
@@ -44,7 +47,7 @@ reali) rimandato. Dettagli in `ROADMAP.md`.
 - **Segreti**: GitHub Secrets (mai nel codice). Vedi `PROJECT_STATE.md`
   → Ambienti live per la lista (riferimenti, non valori).
 - **Integrazioni esterne**: Brave Search API, Anthropic API
-  (`claude-sonnet-4-6`), WordPress REST + Rank Math (Basic Auth).
+  (`claude-sonnet-4-6`), OpenAI (immagini), WordPress REST + Rank Math (Basic Auth).
 
 ## Profilo del PM (Daniel) — calibrazione autonomia
 
@@ -62,18 +65,22 @@ Sintesi (razionale completo: kit `AGENT_BOOTSTRAP.md` + Playbook §36):
     reversibili sullo script/workflow.
   - ❌ Fermati e chiedi: distruttivi (force push, reset hard), cambio
     stack/dipendenze non pianificate, qualunque cosa con effetto su
-    WordPress in **produzione** oltre la creazione di bozze.
+    WordPress in **produzione** oltre il flusso già approvato (articoli
+    programmati con veto).
 
 ## Regole non negoziabili (sottoinsieme applicabile)
 
-1. **Mai** committare segreti (chiavi Anthropic/Brave, Basic Auth WP).
+1. **Mai** committare segreti (chiavi Anthropic/Brave/OpenAI, Basic Auth WP).
    Solo riferimenti in `PROJECT_STATE.md`; i valori vivono in GitHub Secrets.
-2. **Mai** push diretto su `main`. Sempre branch `claude/<feature>` + PR.
-3. **Mai** far pubblicare al job articoli con `status: publish`. Solo
-   `draft`. La pubblicazione resta una decisione umana di Daniel.
+2. **Mai** push diretto su `main` per il **codice**: branch + PR (eccezione
+   sanzionata: il file-trigger §35 per lanciare i run). NB: dopo il rename del
+   repo il git proxy è rotto → le scritture passano dall'API/MCP (vedi HANDOFF).
+3. Publish **programmato** (status `future`), MAI immediato: l'articolo va
+   online da solo dopo una finestra di veto (mattino). Il differimento è la
+   rete di sicurezza — non toglierlo. (Aggiornamento PM: prima era "solo draft".)
 4. **Mai** aggiungere astrazioni/librerie "per il futuro" (§13). È uno
    script settimanale: tienilo monolitico e leggibile finché fa male.
-5. **Mai** chiedere a Daniel ciò che è già in `CLAUDE.md` /
+5. **Mai** chiedere a Daniel ciò che è già in `HANDOFF.md` / `CLAUDE.md` /
    `PROJECT_STATE.md` o detto in chat (audit del contesto, §32.1).
 
 ## Comunicazione (§23)
