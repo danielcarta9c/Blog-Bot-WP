@@ -1,10 +1,11 @@
 name: NoveC SEO Blog
 
-# Genera un articolo SEO in bozza su WordPress (status: draft, mai publish).
+# Genera un articolo SEO con publish PROGRAMMATO su WordPress (status: future,
+# online da solo a meta' mattina con finestra di veto). Mai publish immediato.
 #
 # Lancio (pattern §35 del Playbook Nove C):
 #   - schedule cron: lunedì 02:00 UTC (~03-04 ora IT), notte dom->lun;
-#     la bozza è pronta per la revisione del lunedì mattina.
+#     l'articolo e' pronto per la revisione del lunedì mattina.
 #   - workflow_dispatch: run manuale dal tab Actions.
 #   - push su ops/run.trigger: l'agente lancia il workflow committando/
 #     bumpando quel file, senza bisogno del permesso di dispatch.
@@ -56,6 +57,32 @@ jobs:
           WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
+      # Notifica "argomenti esauriti": se lo script segnala ARGOMENTI_ESAURITI
+      # (tutti i topic di topics.json gia' pubblicati -> ripubblicato il meno
+      # recente via LRU), apre una issue per ricordare di aggiungere nuovi topic.
+      # Analogo ad A2 ma su marker invece che su failure. Dedup: non riapre se
+      # esiste gia' una issue aperta con lo stesso titolo.
+      - name: Apri issue su argomenti esauriti
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if grep -q "ARGOMENTI_ESAURITI" "$OUT" 2>/dev/null; then
+            TITLE="SEO blog: argomenti esauriti, aggiungi nuovi topic"
+            if gh issue list --state open --search "$TITLE in:title" | grep -q .; then
+              echo "issue esaurimento gia' aperta: skip"; exit 0
+            fi
+            RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            {
+              echo "Tutti gli argomenti in \`topics.json\` sono gia' stati pubblicati almeno una volta. Questa settimana e' stato ripubblicato il meno recente (LRU)."
+              echo ""
+              echo "Aggiungi nuovi topic a \`topics.json\` per riprendere la rotazione normale."
+              echo ""
+              echo "- Run: $RUN_URL"
+            } > /tmp/esauriti_body.md
+            gh issue create --title "$TITLE" --body-file /tmp/esauriti_body.md
+          fi
+
       # Auto-commit del log su main, anche se il run sopra è fallito.
       # Step eseguito da root (mai working-directory: §35 gotcha sul path doppio).
       - name: Commit log su main
@@ -63,7 +90,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add ops/out/ next.json
+          git add ops/out/ next.json ops/rotation-state.json
           git commit -m "log run $(date -u +%Y%m%dT%H%M%SZ) [skip ci]" || { echo "niente da committare"; exit 0; }
           for i in 1 2 3; do
             if git pull --rebase --autostash origin main && git push origin HEAD:main; then
