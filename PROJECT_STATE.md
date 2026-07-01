@@ -12,23 +12,23 @@
 | Scheduler | GitHub Actions | GitHub | `main` (cron) | repo pubblico | GitHub Secrets repo | cron settimanale + run manuale; Actions illimitate |
 | AI | API Anthropic | Anthropic | — | Claude Pro Max / API | `ANTHROPIC_API_KEY` (Secret) | modello `claude-sonnet-4-6` |
 | Ricerca | Brave Search API | Brave | — | — | `BRAVE_API_KEY` (Secret) | header `X-Subscription-Token` |
-| CMS | nove-c.com (WP REST + Rank Math) | WordPress | produzione | — | `WP_USER` + `WP_APP_PASSWORD` (Secret) | crea SOLO bozze (cat. 3) |
+| CMS | nove-c.com (WP REST + Rank Math) | WordPress | produzione | — | `WP_USER` + `WP_APP_PASSWORD` (Secret) | publish PROGRAMMATO (status future, cat. 3). ⚠️ hosting SiteGround: l'anti-bot (sgcaptcha) puo' sfidare le API sotto molti run ravvicinati |
 | Repo | github.com/danielcarta9c/**Blog-Bot-WP** | GitHub | `main` | pubblico | — | rinominato da `n8n`. ⚠️ il git proxy di sessione resta agganciato al vecchio nome: scritture via API GitHub (MCP), non `git push` |
 | Immagini | API OpenAI | OpenAI | — | OpenAI Platform | `OPENAI_API_KEY` (Secret) | `gpt-image-1`, quality medium; immagine in evidenza |
 | ~~n8n~~ | ~~cloud n8n~~ | ~~n8n (a pagamento)~~ | — | **DISMESSO** | — | flusso staccato; canone da disdire/disdetto |
 
-> **Stato: Release 1 in produzione + MVP4/B1 (immagini) aggiunto.** Il sistema
-> gira su **GitHub Actions** (cron settimanale → bozza su WordPress) ed è
-> validato live. n8n staccato. `n8nesistente` resta come riferimento storico.
+> **Stato: Release 1 + MVP4/B1 + publish programmato, in produzione.** Il sistema
+> gira su **GitHub Actions** (cron settimanale → articolo PROGRAMMATO su WordPress
+> con immagine) ed è validato live. n8n staccato. `n8nesistente` = riferimento storico.
 
 ## Now (max 3)
 
-- [x] **RELEASE 1** in produzione: n8n staccato (canone eliminato). MVP1 +
-      MVP1.1 + MVP3 validati, Rank Math 80/100.
-- [x] **MVP4/B1 immagine in evidenza**: generata con OpenAI (registro scelto
-      da Claude, stile realistico) + upload WP + alt = focus keyword. Validata
-      live (bozza 5464, media 5463).
-- [ ] Rodaggio: raccogliere bug/feature → prossima release. Ripartenza: `HANDOFF.md`.
+- [x] **In produzione e validati live**: Release 1 (n8n staccato) + MVP4/B1
+      (immagine in evidenza) + **publish PROGRAMMATO** (status future, veto la
+      mattina) + **URL corta** (slug ≤60). Articolo 5466 programmato = prova ok.
+- [ ] **Power word**: Daniel aggiunge la lista IT in Rank Math (quando al PC),
+      poi allineo la lista nel codice. + eventuale A3 (densità).
+- [ ] Rodaggio → prossima release (B2 link interni, D1 log). Ripartenza: `HANDOFF.md`.
 
 ## Next (backlog prossima release — per priorità)
 
@@ -41,10 +41,18 @@
    interni reali (da REST WP), D1 log storico. Eventuale scelta quality high vs medium.
 3. **A3 / A4** (opzionali): quality gate SEO con rigenerazione; anti-doppioni
    (check slug su WP) — A4 risolverebbe il flag "keyword già usata".
-4. **Cosmesi**: repo rinominato in `Blog-Bot-WP` (fatto dal PM).
+4. **Power word Rank Math** (config WP di Daniel) + allineo lista codice.
 
 ## Done log
 
+- **Publish programmato + URL corta** (validato live, articolo 5466): patch_body
+  `status: future` + `date_gmt` = prossime 09:00 UTC (≥4h) → l'articolo va online
+  da solo a metà mattina, con finestra di veto per Daniel (mai più solo draft,
+  mai publish immediato). `shortenSlug()` taglia lo slug a ≤60 char su confine di
+  parola. **Scoperta**: i fallimenti "risposta non-JSON `<html>`" (anche la vecchia
+  issue #7) erano l'**anti-bot SiteGround (sgcaptcha)** che sfida le API sotto molti
+  run ravvicinati; a IP "raffreddato" (cadenza normale) funziona. Fix durevole se
+  ricapita: whitelist `/wp-json/` nell'Anti-Bot SiteGround.
 - **MVP4/B1 — immagine in evidenza** (validato live): Claude sceglie il
   registro adatto all'articolo (installazione/comfort/prodotto/architettura/
   fiducia) nel campo `brief_immagine`; lo script aggiunge lo stile fotografico
