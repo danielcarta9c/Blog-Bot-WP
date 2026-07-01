@@ -5,8 +5,8 @@
 > prima di aprire la successiva (§16). Lo stato operativo vive in
 > `PROJECT_STATE.md`; qui sta il **cosa** e il **perché**, non il giorno-giorno.
 
-> **Stato (Release 1):** ✅ MVP1 · ✅ MVP1.1 · ⏭️ MVP2 saltato (scelta PM) ·
-> ✅ MVP3 "slim" (A1+A2; A3/A4 opzionali) · ⬜ MVP4 rimandato. n8n dismesso.
+> **Stato:** ✅ MVP1 · ✅ MVP1.1 · ⏭️ MVP2 saltato (scelta PM) · ✅ MVP3 "slim"
+> (A1+A2) · ✅ MVP4/B1 immagini · ⬜ MVP4 B2+D1 da fare. n8n dismesso. Repo: `Blog-Bot-WP`.
 
 ## MVP1 — Bozza su WordPress (core) — ✅ FATTO
 
@@ -21,17 +21,18 @@ Rank Math. Il run manuale (`workflow_dispatch`) produce lo stesso risultato.
 **Scope:** replica 1:1 dei 7 nodi n8n (topic rotation → Brave → Claude →
 parsing/diagnostica → POST bozza WP → Rank Math meta). Niente email.
 
-## MVP2 — Notifica email (cosmesi)
+## MVP2 — Notifica email (cosmesi) — ⏭️ SALTATO (scelta PM)
 
 **Obiettivo:** ricevere una mail di riepilogo quando la bozza è pronta.
 
 **Test di accettazione:** dopo il run arriva a `danielcarta@nove-c.com` una
 mail con titolo, slug, focus keyword, diagnostica SEO e link "apri in WP".
 
-**Scope:** SMTP + App Password Gmail (o action di terze parti). Non
-bloccante per MVP1.
+**Scope:** SMTP + App Password Gmail (o action di terze parti). Se mai servisse,
+è uno step nel workflow esistente (no webhook, no infrastruttura). I fallimenti
+sono già coperti dalla issue automatica (A2).
 
-## MVP3 — Robustezza + Controllo editoriale
+## MVP3 — Robustezza + Controllo editoriale — ✅ FATTO ("slim")
 
 **Obiettivo:** il flusso smette di rompersi in silenzio e Daniel guida i
 contenuti senza toccare la logica.
@@ -39,9 +40,7 @@ contenuti senza toccare la logica.
 **Test di accettazione:**
 - Un output "sporco" o un errore di Claude/WP **non** crea una bozza rotta
   e **genera una notifica** (niente fallimento silenzioso).
-- Un articolo sotto soglia SEO viene **rigenerato una volta** prima del salvataggio.
 - Modifico `topics.json`, lancio il run, e l'articolo usa i nuovi topic.
-- Un doppio run manuale **non** crea due bozze duplicate.
 
 **Scope (MVP3 "slim" deciso dal PM — fatto A1 + A2; A3/A4 opzionali):**
 - **A1** ✅ Output strutturato Claude via **tool use**: l'articolo arriva già
@@ -56,7 +55,7 @@ contenuti senza toccare la logica.
 - ~~**C2** override one-off della rotazione~~ → anticipato a **MVP1.1**
   (`next.json` auto-svuotante, fatto).
 
-## MVP4 — Arricchimento contenuto
+## MVP4 — Arricchimento contenuto (B1 ✅ fatto)
 
 **Obiettivo:** alzare la qualità SEO e visiva dell'articolo.
 
@@ -65,8 +64,12 @@ link interni a post WP **reali** esistenti, ed esiste un log storico degli
 articoli generati.
 
 **Scope:**
-- **B1** Immagini: featured image generata (AI) o scelta da libreria →
-  upload su WP, al posto dell'ID hardcoded `5026`.
+- **B1** ✅ FATTO — Immagine in evidenza generata con OpenAI (`gpt-image-1`,
+  quality medium): registro scelto da Claude (`brief_immagine`) + stile
+  fotografico fisso (persone di spalle, media distanza), upload su WP con
+  alt = focus keyword, `featured_media` dinamico. Non bloccante (fallback
+  `5026`). Validato live. Aperto: valutare quality high vs medium; immagine
+  anche nel corpo articolo.
 - **B2** Link interni reali: pescati via REST dagli articoli esistenti su
   `nove-c.com`, al posto dei 2 URL fissi.
 - **D1** Log storico: riepilogo nel summary della Action + CSV degli
