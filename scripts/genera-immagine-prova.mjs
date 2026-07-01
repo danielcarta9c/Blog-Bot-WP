@@ -1,4 +1,4 @@
-// scripts/genera-immagine-prova.mjs
+// scripts/genera-immagine-prova.mjs  (batch v2)
 // Prova one-off (MVP4/B1): genera 3 immagini "hero" orientate all'emozione/
 // vendita (non al prodotto), con stile fotografico realistico. Le salva in
 // ops/out/prova-1..3.png. NON tocca WordPress. Da rimuovere dopo la valutazione.
@@ -10,7 +10,7 @@ if (!KEY) { console.error("Manca OPENAI_API_KEY nei Secret."); process.exit(1); 
 
 // Stile fotografico costante (leva "realismo + coerenza", fissata in codice).
 const STILE =
-  "Fotografia editoriale lifestyle fotorealistica, scattata con reflex full-frame 35mm, obiettivo 50mm f/1.8, luce naturale morbida da finestra, profondità di campo ridotta, momento candido e non in posa, leggera grana pellicola, texture e imperfezioni realistiche, casa italiana calda e accogliente, premium ma autentica. Niente testo, niente loghi, niente watermark. Persone solo di spalle o a media distanza, mai volti in primo piano.";
+  "Fotografia editoriale lifestyle fotorealistica, scattata con reflex full-frame 35mm, obiettivo 50mm f/1.8, luce naturale morbida da finestra, profondita di campo ridotta, momento candido e non in posa, leggera grana pellicola, texture e imperfezioni realistiche, casa italiana calda e accogliente, premium ma autentica. Niente testo, niente loghi, niente watermark. Persone solo di spalle o a media distanza, mai volti in primo piano.";
 
 // Brief "emozionali" (leva "varieta + pertinenza"): 3 angoli diversi.
 const BRIEF = [
