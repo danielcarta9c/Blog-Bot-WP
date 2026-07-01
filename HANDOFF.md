@@ -14,33 +14,34 @@
 
 ## 1. Stato attuale (dove siamo)
 
-- **Release 1 in produzione + MVP4/B1.** Il flusso n8n è stato **migrato a
-  GitHub Actions** e **staccato**: obiettivo (eliminare il canone) **raggiunto**.
-- Il sistema gira: ogni lunedì 02:00 UTC un job genera un articolo SEO come
-  **bozza** su WordPress (`nove-c.com`, categoria 3) con meta Rank Math e
-  **immagine in evidenza generata**. Mai pubblicazione automatica.
-- **Fatto e validato live:** MVP1 (bozza settimanale), MVP1.1 (argomenti
-  editabili + override one-off), MVP3 "slim" (output strutturato, issue su
-  fallimento, garanzie SEO titolo/meta, retry HTTP) → **Rank Math 80/100**,
-  MVP4/**B1** (immagine in evidenza OpenAI + alt = focus keyword).
-- **MVP2 (email) saltato** per scelta del PM. **Restano B2 (link interni reali)
-  e D1 (log storico); A3/A4 opzionali.**
+- **Release 1 in produzione + MVP4/B1 + publish programmato.** Il flusso n8n è
+  stato **migrato a GitHub Actions** e **staccato**: obiettivo (eliminare il canone) **raggiunto**.
+- Il sistema gira: ogni lunedì 02:00 UTC un job genera un articolo SEO
+  **programmato** (status `future`, online ~metà mattina) su WordPress
+  (`nove-c.com`, categoria 3) con meta Rank Math e **immagine in evidenza**.
+  Daniel ha la finestra del mattino per cestinarlo. Mai publish immediato.
+- **Fatto e validato live:** MVP1, MVP1.1 (argomenti editabili + override
+  one-off), MVP3 "slim" (output strutturato, issue su fallimento, garanzie SEO
+  titolo/meta, retry HTTP) → **Rank Math 80/100**, MVP4/**B1** (immagine +
+  alt = focus keyword), **publish programmato + URL corta** (slug ≤60).
+- **MVP2 (email) saltato** per scelta del PM. **Restano B2 (link interni reali),
+  D1 (log storico), power word (config Rank Math); A3/A4 opzionali.**
 - Tutto è su `main`. Branch **`mvp1.1`** = restore-point stabile (pre-MVP4).
 
 ## 2. Lavoro aperto (come riprendere)
 
-Daniel ora **usa MVP3 in produzione per un periodo di rodaggio**, raccoglie
-bug/feature emersi dall'uso reale e vuole affrontarli **tutti insieme nella
-prossima release** (non a spizzichi). Backlog ordinato in `PROJECT_STATE.md` →
-Next. In sintesi:
+Daniel **usa il sistema in produzione (rodaggio)**, raccoglie bug/feature e
+vuole affrontarli **tutti insieme nella prossima release**. Backlog in
+`PROJECT_STATE.md` → Next. In sintesi:
 1. Bug/feature dal rodaggio (da raccogliere).
-2. **MVP4**: ~~B1 immagini featured~~ FATTO (immagine generata + alt). Restano
-   **B2** link interni reali (pescati dalla REST di WP, al posto dei 2 fissi) e
-   **D1** log storico. Aperto anche: valutare quality immagine high vs medium;
-   immagine anche nel corpo articolo.
-3. **A3/A4** opzionali: quality gate SEO con rigenerazione; anti-doppioni
-   (check slug su WP) — A4 risolve il flag Rank Math "keyword già usata".
-4. ~~Cosmesi: rinominare il repo~~ FATTO (`n8n` → `Blog-Bot-WP`).
+2. **Power word Rank Math**: Daniel aggiunge la lista power word ITALIANE nelle
+   impostazioni di Rank Math (di default sono inglesi → il check resta rosso);
+   poi allinea la lista `POWER_WORDS` nel codice a quella.
+3. **MVP4**: ~~B1 immagini~~ FATTO. Restano **B2** link interni reali (dalla REST
+   WP, al posto dei 2 fissi) e **D1** log storico. Aperto: quality immagine high
+   vs medium; immagine anche nel corpo articolo.
+4. **A3/A4** opzionali: quality gate SEO con rigenerazione (chiuderebbe il warning
+   "densità bassa" su keyword lunghe); anti-doppioni (check slug su WP).
 
 ### Come funziona il sistema (così non chiedi a Daniel)
 
@@ -50,19 +51,23 @@ Next. In sintesi:
 - **Pipeline** (replica i 7 nodi n8n, l'export storico è in `n8nesistente`):
   scegli argomento → ricerca Brave → articolo con Claude (`claude-sonnet-4-6`,
   via **tool use** `pubblica_articolo`) → diagnostica SEO → [immagine OpenAI +
-  upload WP] → crea bozza WP (`POST /wp-json/wp/v2/posts`, `status:draft`,
-  `categories:[3]`, `template:single-blog-nuovo.php`) → meta Rank Math
+  upload WP] → crea post WP (`POST /wp-json/wp/v2/posts`, **`status:future`** +
+  `date_gmt`, `categories:[3]`, `template:single-blog-nuovo.php`) → meta Rank Math
   (`POST /wp-json/rankmath/v1/updateMeta`).
 - **Segreti** (GitHub → Settings → Secrets → Actions): `ANTHROPIC_API_KEY`,
   `BRAVE_API_KEY`, `WP_USER` (= username WP, non email), `WP_APP_PASSWORD`
   (= Application Password di WordPress, non la password di login),
   `OPENAI_API_KEY` (immagini; se manca, immagine saltata e articolo col fallback).
   Mai nel codice.
+- **Publish programmato**: `patch_body.status = "future"` + `date_gmt =
+  scheduledPublishGmt()` (prossime 09:00 UTC ad almeno 4h). Va online da solo,
+  con finestra di veto. `WP_USER` deve avere diritti di pubblicazione (confermato).
 - **Immagine in evidenza (B1)**: Claude compila `brief_immagine` col registro
   adatto all'articolo; `generateImage()` aggiunge lo stile fotografico fisso
   (persone di spalle/media distanza) e genera con OpenAI `gpt-image-1` quality
   medium; `uploadFeaturedImage()` carica su WP media + `alt_text` = focus keyword
   → `featured_media`. Non bloccante (try/catch: l'articolo esce comunque).
+- **URL corta**: `shortenSlug()` taglia lo slug a ≤60 char su confine di parola.
 - **Argomenti**: `topics.json` (lista rotazione settimanale + 5 "stili" di
   scrittura). Daniel lo edita per cambiare i temi.
 - **Articolo "su richiesta"**: `next.json`. Si compilano `titolo`,
@@ -73,12 +78,10 @@ Next. In sintesi:
   numbers-first | comparison), **NON** il template grafico WP.
 - **Lancio (pattern §35 del Playbook)**: 3 modi — cron; `workflow_dispatch`
   dalla UI; **file-trigger**: bumpare il numero in `ops/run.trigger` e
-  committare su `main` (è il modo "da git", l'unico che l'agente può usare
-  senza permessi di dispatch; ora via MCP per via del rename).
+  committare su `main` (è il modo "da git"; ora via MCP per via del rename).
 - **Osservabilità**: ogni run scrive `ops/out/<timestamp>.log` e lo
-  **ricommitta su `main`** (con `[skip ci]`) → leggi l'esito con `git pull`,
-  niente copia-incolla. Su **fallimento** il workflow apre **una issue GitHub**
-  automatica (A2) → Daniel notificato, niente email.
+  **ricommitta su `main`** (con `[skip ci]`) → leggi l'esito con `git pull`.
+  Su **fallimento** il workflow apre **una issue GitHub** automatica (A2).
 - **Garanzie SEO** (in `generate.mjs`): `buildSeoTitle()` forza la focus
   keyword a inizio titolo SEO + una power word; `ensureKwInMeta()` forza la
   focus keyword nella meta. Il **titolo visibile** del post resta naturale;
@@ -99,6 +102,15 @@ poi `git pull` e leggi il log. Per le Actions puoi usare i tool MCP
   `create_or_update_file`/`delete_file`, con `repo:"n8n"` che redirige). Le
   letture (`git fetch`/`pull`) funzionano ancora. Trigger di un run = commit su
   `ops/run.trigger` via MCP (i commit API autore Daniel FANNO da trigger).
+- **Anti-bot SiteGround (sgcaptcha)**: se un run fallisce con "risposta non-JSON
+  `<html>...sgcaptcha...`" NON è il codice: è l'hosting che scambia le API per un
+  bot quando ci sono **troppi run ravvicinati** (l'IP del runner viene flaggato).
+  A cadenza normale (1/settimana) non scatta. Se stai testando: **dirada i run**
+  (aspetta qualche minuto) e riprova. Fix durevole: whitelist `/wp-json/`
+  nell'Anti-Bot di SiteGround. (Era la causa anche della vecchia issue #7.)
+- **Publish PROGRAMMATO, non draft**: il post nasce `status: future` con
+  `date_gmt` alle prossime 09:00 UTC → va online da solo a metà mattina, veto di
+  Daniel nella finestra. NON reintrodurre `status: draft` o `publish` immediato.
 - **Il test di accettazione vero è il PUNTEGGIO RANK MATH** (lo legge Daniel
   in WP), NON le diagnostiche interne dello script (parole/densità/link).
   Una volta ho validato sulle mie metriche → tutte verdi ma Rank Math era a 40
@@ -123,7 +135,7 @@ poi `git pull` e leggi il log. Per le Actions puoi usare i tool MCP
 - **Niente MCP-server-di-prodotto** (valutato e scartato col PM: overkill, §13).
   Niente dipendenze/astrazioni "per il futuro". (Nota: i tool MCP di GitHub li
   usiamo solo come tramite git per via del rename, non è un pattern di prodotto.)
-- **Flag Rank Math non-bug**: "keyword già usata" compare se più bozze usano
+- **Flag Rank Math non-bug**: "keyword già usata" compare se più post usano
   la stessa focus keyword (artefatto dei run di test sulla stessa settimana).
   Non è una regressione.
 
@@ -131,8 +143,8 @@ poi `git pull` e leggi il log. Per le Actions puoi usare i tool MCP
 
 - **Background**: termotecnica + BIM. Confidenza architetturale alta, **non
   legge codice/diff/log/stack-trace**. Ha **ottime intuizioni di prodotto** —
-  verificarle, non liquidarle (ha individuato lui il problema dei titoli SEO e
-  l'immagine dell'operaio "troppo finta").
+  verificarle, non liquidarle (ha individuato lui il problema dei titoli SEO,
+  l'immagine dell'operaio "troppo finta", e che l'anti-bot era transitorio).
 - **Canale**: iPhone. **Risposte brevi** di default, PM-to-PM, perché prima
   del come, confidenza calibrata. Emoji moderate in chat, mai nei file.
 - **Cosa portargli**: business, costi (€), scope, priorità, rischio. **NON** il
@@ -143,11 +155,12 @@ poi `git pull` e leggi il log. Per le Actions puoi usare i tool MCP
   diretto su `main`** per il codice (eccezione sanzionata: il file-trigger §35
   per lanciare i run). **Fermati e chiedi** prima di: merge di PR di codice,
   distruttivi (force push, reset hard), cambi di stack/dipendenze, effetti su
-  WordPress in produzione oltre la creazione di **bozze**. Daniel concede
-  autorizzazioni a tempo ("pusha tu e fai merge"): valgono **fino al termine
-  dell'obiettivo dichiarato**, poi si torna alla regola base.
-- **Regole non negoziabili**: mai segreti nel codice; mai `status:publish`
-  (solo `draft`); il repo è **pubblico** (decisione PM: URL/email non sono
+  WordPress in produzione oltre il flusso approvato (articoli programmati con
+  veto). Daniel concede autorizzazioni a tempo ("pusha tu e fai merge"): valgono
+  **fino al termine dell'obiettivo dichiarato**, poi si torna alla regola base.
+- **Regole non negoziabili**: mai segreti nel codice; publish **programmato**
+  (status `future` con veto), mai publish immediato (aggiornamento PM: prima era
+  "solo draft"); il repo è **pubblico** (decisione PM: URL/email non sono
   segreti, le chiavi vivono nei GitHub Secrets).
 
 ## Riferimenti
