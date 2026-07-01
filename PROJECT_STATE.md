@@ -13,21 +13,22 @@
 | AI | API Anthropic | Anthropic | — | Claude Pro Max / API | `ANTHROPIC_API_KEY` (Secret) | modello `claude-sonnet-4-6` |
 | Ricerca | Brave Search API | Brave | — | — | `BRAVE_API_KEY` (Secret) | header `X-Subscription-Token` |
 | CMS | nove-c.com (WP REST + Rank Math) | WordPress | produzione | — | `WP_USER` + `WP_APP_PASSWORD` (Secret) | crea SOLO bozze (cat. 3) |
-| Repo | github.com/danielcarta9c/n8n | GitHub | `main` | pubblico | — | nome storico "n8n"; rinomina = cosmesi (vedi backlog) |
+| Repo | github.com/danielcarta9c/**Blog-Bot-WP** | GitHub | `main` | pubblico | — | rinominato da `n8n`. ⚠️ il git proxy di sessione resta agganciato al vecchio nome: scritture via API GitHub (MCP), non `git push` |
+| Immagini | API OpenAI | OpenAI | — | OpenAI Platform | `OPENAI_API_KEY` (Secret) | `gpt-image-1`, quality medium; immagine in evidenza |
 | ~~n8n~~ | ~~cloud n8n~~ | ~~n8n (a pagamento)~~ | — | **DISMESSO** | — | flusso staccato; canone da disdire/disdetto |
 
-> **Stato: Release 1 in produzione.** Il sistema gira su **GitHub Actions**
-> (cron settimanale → bozza su WordPress) ed è validato live. Il flusso **n8n
-> è stato staccato** da Daniel: obiettivo del progetto (eliminare il canone)
-> raggiunto. `n8nesistente` resta nel repo come riferimento funzionale storico.
+> **Stato: Release 1 in produzione + MVP4/B1 (immagini) aggiunto.** Il sistema
+> gira su **GitHub Actions** (cron settimanale → bozza su WordPress) ed è
+> validato live. n8n staccato. `n8nesistente` resta come riferimento storico.
 
 ## Now (max 3)
 
-- [x] **RELEASE 1 SPEDITA** e in produzione: n8n staccato (canone eliminato),
-      sistema live su GitHub Actions. MVP1 + MVP1.1 + MVP3 validati, Rank Math 80/100.
-- [ ] **Periodo di rodaggio**: Daniel usa MVP3 in produzione; raccoglie
-      eventuali bug/feature → si fa tutto insieme nella **prossima release**.
-- [ ] Sessione chiusa: vedi `HANDOFF.md` per ripartire.
+- [x] **RELEASE 1** in produzione: n8n staccato (canone eliminato). MVP1 +
+      MVP1.1 + MVP3 validati, Rank Math 80/100.
+- [x] **MVP4/B1 immagine in evidenza**: generata con OpenAI (registro scelto
+      da Claude, stile realistico) + upload WP + alt = focus keyword. Validata
+      live (bozza 5464, media 5463).
+- [ ] Rodaggio: raccogliere bug/feature → prossima release. Ripartenza: `HANDOFF.md`.
 
 ## Next (backlog prossima release — per priorità)
 
@@ -36,14 +37,21 @@
 
 1. **Bug/feature dal rodaggio**: raccogliere quanto emerge dall'uso reale di
    MVP3 e affrontarlo in blocco (richiesta esplicita del PM).
-2. **MVP4 — contenuto**: B1 immagini featured (chiude anche il check "alt
-   immagini" di Rank Math), B2 link interni reali (da REST WP), D1 log storico.
+2. **MVP4 — contenuto**: ~~B1 immagini featured~~ FATTO. Restano: B2 link
+   interni reali (da REST WP), D1 log storico. Eventuale scelta quality high vs medium.
 3. **A3 / A4** (opzionali): quality gate SEO con rigenerazione; anti-doppioni
    (check slug su WP) — A4 risolverebbe il flag "keyword già usata".
-4. **Cosmesi**: rinominare il repo (`n8n` → es. `novec-seo-blog`).
+4. **Cosmesi**: repo rinominato in `Blog-Bot-WP` (fatto dal PM).
 
 ## Done log
 
+- **MVP4/B1 — immagine in evidenza** (validato live): Claude sceglie il
+  registro adatto all'articolo (installazione/comfort/prodotto/architettura/
+  fiducia) nel campo `brief_immagine`; lo script aggiunge lo stile fotografico
+  fisso (persone di spalle, media distanza), genera con OpenAI `gpt-image-1`
+  (quality medium), carica su WP e imposta alt = focus keyword → `featured_media`.
+  Non bloccante (fallback 5026 se OPENAI_API_KEY manca/fallisce). Bozza 5464,
+  media 5463. Repo rinominato `n8n`→`Blog-Bot-WP` (git proxy → scritture via API).
 - **RELEASE 1 — n8n DISMESSO**: Daniel ha staccato il flusso n8n. Obiettivo
   del progetto raggiunto: canone eliminato, generazione SEO migrata su GitHub
   Actions. Sistema in produzione. Restore point: branch `mvp1.1`. Sessione
