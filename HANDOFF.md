@@ -33,6 +33,13 @@
 Daniel **usa il sistema in produzione (rodaggio)**, raccoglie bug/feature e
 vuole affrontarli **tutti insieme nella prossima release**. Backlog in
 `PROJECT_STATE.md` → Next. In sintesi:
+
+0. ⭐ **PROSSIMA FEATURE, spec pronta: rotazione argomenti TRACCIATA** →
+   `docs/feature-rotazione-tracciata.md`. Oggi la scelta topic è `weekNumber %
+   len` (cieca, ripete ogni ~10 settimane → cannibalizzazione SEO). La spec
+   descrive tutto (stato in `ops/rotation-state.json`, selezione "primo non
+   usato", issue a esaurimento, `next.json` invariato e prioritario).
+   Implementala per prima (la sessione è stata chiusa apposta per svilupparla a fresco).
 1. Bug/feature dal rodaggio (da raccogliere).
 2. **Power word Rank Math**: Daniel aggiunge la lista power word ITALIANE nelle
    impostazioni di Rank Math (di default sono inglesi → il check resta rosso);
@@ -136,7 +143,7 @@ poi `git pull` e leggi il log. Per le Actions puoi usare i tool MCP
   Niente dipendenze/astrazioni "per il futuro". (Nota: i tool MCP di GitHub li
   usiamo solo come tramite git per via del rename, non è un pattern di prodotto.)
 - **Flag Rank Math non-bug**: "keyword già usata" compare se più post usano
-  la stessa focus keyword (artefatto dei run di test sulla stessa settimana).
+  la stessa focus keyword (sarà risolto dalla feature rotazione tracciata).
   Non è una regressione.
 
 ## 4. Profilo del PM (Daniel) — per tarare comunicazione e autonomia
