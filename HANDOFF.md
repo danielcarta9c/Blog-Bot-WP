@@ -30,8 +30,8 @@
   non solo CT 3.0), **ToC** (plugin WP). Ultima prova: art. **5480 → Rank Math 88**.
 - **MVP2 (email) saltato**, **power word FATTA**, **ToC FATTO** (plugin WP),
   **B2 (link interni reali) FATTA** (PR #20, prova live ok: art. 5484, RM 85).
-  **A4 (anti-doppioni) + D1 (registro storico) in PR #21** (da validare al run
-  di lunedi'). **Restano:** immagine inline nel corpo (per l'alt sulle
+  **A4 (anti-doppioni) + D1 (registro storico) MERGIATI (PR #21)**, da validare
+  al run di lunedi'. **Restano:** immagine inline nel corpo (per l'alt sulle
   immagini di contenuto), nuovi topic.
 - Tutto è su `main`. Branch **`mvp1.1`** = restore-point stabile (pre-MVP4).
 
@@ -51,7 +51,7 @@ vuole affrontarli **tutti insieme nella prossima release**. Backlog in
    **NB emerso dalla prova:** sul sito esistono articoli NON tracciati dalla
    rotazione (es. `pompa-di-calore-ibrida-non-conviene`, `pompa-di-calore-piscina-...`,
    probabilmente da override `next.json`, che NON marca la rotazione) → l'art.
-   5484 era un quasi-doppione editoriale. **Cura strutturale = A4, in PR #21:**
+   5484 era un quasi-doppione editoriale. **Cura strutturale = A4, mergiata (PR #21):**
    topic gia' online saltati e segnati in rotazione con la data del pezzo live
    (stato auto-riparante). Validazione: al run di lunedi' "piscine" va saltato
    da solo (log: riga "A4: topic ... gia' online"). Con la PR #21 c'e' anche

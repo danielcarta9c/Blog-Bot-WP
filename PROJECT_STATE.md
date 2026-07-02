@@ -32,11 +32,11 @@
       Rank Math **88**.
 - [x] **ToC**: plugin ToC installato lato WP (Easy Table of Contents) → check
       Rank Math verde (+2 punti; passa sulla presenza del plugin).
-- [ ] **A4 anti-doppioni + D1 registro storico: in PR #21** (in attesa di
-      merge). Validazione al run di lunedi': il topic "piscine" (gia' online da
-      maggio, la rotazione non lo sapeva) va saltato da solo, e in
-      `ops/articles.csv` compare la prima riga del registro. B2 = CHIUSA
-      (PR #20, art. 5484, Rank Math 85). Poi: immagine inline, nuovi topic.
+- [ ] **A4 anti-doppioni + D1 registro storico: MERGIATI (PR #21)**, validazione
+      al run di lunedi': il topic "piscine" (gia' online da maggio, la rotazione
+      non lo sapeva) va saltato da solo, e in `ops/articles.csv` compare la
+      prima riga del registro. B2 = CHIUSA (PR #20, art. 5484, Rank Math 85).
+      Poi: immagine inline, nuovi topic.
 
 ## Next (backlog prossima release — per priorità)
 
@@ -44,8 +44,8 @@
 > MVP1 / MVP1.1 / MVP3 = FATTI (vedi Done log). MVP2 (email) = saltato (scelta PM).
 
 0. ~~B2 — link interni reali~~ FATTA (PR #20, prova live ok: art. 5484, RM 85).
-   ~~A4 anti-doppioni~~ e ~~D1 registro storico~~ in **PR #21** (da validare al
-   run di lunedi').
+   ~~A4 anti-doppioni~~ e ~~D1 registro storico~~ MERGIATI (**PR #21**, da
+   validare al run di lunedi').
 1. **MVP4 — contenuto**: ~~B1 immagini featured~~ FATTO, ~~D1~~ in PR #21.
    Resta **immagine inline** nel corpo (qualità/engagement; NB: NON dà punti
    Rank Math, il check "alt" è già verde grazie alla featured).

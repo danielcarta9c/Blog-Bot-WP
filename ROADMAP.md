@@ -7,8 +7,8 @@
 
 > **Stato:** ✅ MVP1 · ✅ MVP1.1 · ⏭️ MVP2 saltato (scelta PM) · ✅ MVP3 "slim"
 > (A1+A2) · ✅ MVP4/B1 immagini · ✅ B2 link interni reali (PR #20, prova live
-> ok, RM 85) · 🔶 A4 anti-doppioni + D1 registro storico in PR #21 ·
-> ✅ Rotazione tracciata ·
+> ok, RM 85) · 🔶 A4 anti-doppioni + D1 registro storico mergiati (PR #21,
+> validazione al run di lunedi') · ✅ Rotazione tracciata ·
 > ✅ Polish SEO (keyword corte, power word Rank Math IT, verificatore A3 reporting,
 > density 16-22, paragrafi brevi) · ✅ Scope blog allargato (efficienza energetica +
 > incentivi) · ✅ ToC (plugin WP). Rank Math 88. n8n dismesso. Repo: `Blog-Bot-WP`.
@@ -57,7 +57,7 @@ contenuti senza toccare la logica.
   una checklist ✓/✗ delle regole PRIMA del publish (power word, FK in titolo/
   meta/primi-200/H2, densità, word count, H2, slug, link). Non blocca (c'è la
   finestra di veto). Evoluzione possibile: rigenerazione automatica sotto soglia.
-- **A4** 🔶 IN PR (#21) — Anti-doppioni, promosso da opzionale dopo un doppione
+- **A4** 🔶 MERGIATO (#21, validazione lunedi') — Anti-doppioni, promosso da opzionale dopo un doppione
   reale nel rodaggio: i topic gia' online (anche pubblicati via override, che
   non marca la rotazione) vengono saltati e segnati in rotazione con la data
   del pezzo live. Accettazione: al run di lunedi' "piscine" viene saltato da
@@ -88,7 +88,7 @@ articoli generati.
   fissi se la GET fallisce o mancano candidati. Prova live: art. 5484 con
   5/5 correlati linkati, verificatore 13/13. Resta la conferma del punteggio
   Rank Math dal PM nella finestra di veto.
-- **D1** 🔶 IN PR (#21) — Log storico: `ops/articles.csv` (una riga per
+- **D1** 🔶 MERGIATO (#21, validazione lunedi') — Log storico: `ops/articles.csv` (una riga per
   articolo generato: data, id, titolo, keyword, metriche, origine) committato
   dal workflow + riepilogo nel summary della Action (§35 auto-commit log).
 
