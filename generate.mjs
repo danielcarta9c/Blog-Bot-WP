@@ -152,7 +152,7 @@ function clearOverride() {
       "Compila i 4 campi sotto per forzare UN articolo specifico (es. una novità), poi committa su main: parte un run con quel titolo. A run riuscito il file si SVUOTA da solo e torna la rotazione. Lascia 'titolo' vuoto = rotazione normale. Le righe che iniziano con _ sono solo note di aiuto: non vengono lette dallo script, non toccarle.",
     titolo: "",
     _aiuto_titolo:
-      "Titolo H1 dell'articolo. Metti la parola chiave + una power word italiana di Rank Math usata ESATTAMENTE (invariabile): essenziale, efficace, indispensabile, incredibile, irresistibile, impeccabile. {{year}} diventa l'anno corrente. Es: Elettrificazione dei Carichi con Pompa di Calore: Guida Essenziale {{year}}",
+      "Titolo H1 dell'articolo. Metti la parola chiave + una power word italiana di Rank Math usata ESATTAMENTE (invariabile): essenziale, efficace, indispensabile, incredibile, irresistibile, impeccabile. Se vuoi l'anno nel titolo (serve di rado, solo dove aggiunge valore) scrivi {{year}}: diventa l'anno corrente. Es: Elettrificazione dei Carichi con Pompa di Calore: Guida Essenziale",
     focus_keyword: "",
     _aiuto_focus_keyword:
       "La frase chiave SEO esatta, 2-4 parole, quella per cui vuoi posizionarti su Google. Es: elettrificazione dei carichi",
@@ -456,9 +456,10 @@ ${internalLinksRule}
 - CTA finale con riferimento a Nove C Ingegneria ESCo certificata e link alla pagina servizio
 - Cita le fonti normative PERTINENTI all'argomento: per pompe di calore/termico il D.M. 7 agosto 2025 (Conto Termico 3.0) e lo stato del Portaltermico GSE; per fotovoltaico/autoconsumo/CER i provvedimenti GSE pertinenti. Non forzare riferimenti non attinenti al tema.
 - NON citare anni precedenti all'anno corrente come "attuali"
+- ANNO NEI TITOLI E NELLO SLUG: NON aggiungere l'anno corrente al titolo, al titolo SEO, alla meta description o allo slug, A MENO CHE l'anno non sia gia' nel Titolo H1 proposto qui sopra. Essere aggiornati vale per i CONTENUTI (normativa, cifre, riferimenti), non per l'etichetta dell'anno: "Guida ${ctx.year}" ripetuto su ogni articolo del blog e' un pattern da evitare.
 - TITOLO SEO (campo titolo_seo): deve INIZIARE con la focus keyword esatta "${t.focusKeyword}" e contenere una "power word" italiana riconosciuta da Rank Math. USA ESATTAMENTE una di queste (invariabili, valgono per maschile e femminile, NON declinarle): essenziale, efficace, indispensabile, incredibile, irresistibile, impeccabile, straordinario, definitivo. Esempio: "${t.focusKeyword}: Guida Essenziale".
 - META DESCRIPTION (campo meta_description): 150-160 caratteri e DEVE contenere la focus keyword esatta "${t.focusKeyword}", preferibilmente all'inizio.
-- SLUG: deve contenere la focus keyword completa separata da trattini, max 60 caratteri
+- SLUG: deve contenere la focus keyword completa separata da trattini, max 60 caratteri, senza anno (le URL evergreen invecchiano meglio)
 - IMMAGINE IN EVIDENZA (campo brief_immagine): descrivi in 1-2 frasi la SCENA ideale per l'immagine di QUESTO articolo.
   REGOLA PRINCIPALE: il soggetto e' il TEMA CONCRETO dell'articolo, non il mestiere di chi installa. Esempi: articolo sulle piscine -> la piscina (acqua, vapore, corsie); su villa o condominio -> l'edificio; su risparmio/bollette/comfort -> l'interno di casa vissuto, caldo e accogliente; su fotovoltaico/autoconsumo -> il tetto con i pannelli; sul prodotto o la configurazione -> la pompa di calore ben fotografata nel suo contesto, senza persone.
   VIETATO il tecnico/installatore al lavoro su una pompa di calore, A MENO CHE l'articolo non parli proprio di installazione/cantiere/iter dei lavori: e' un cliche' gia' usato troppe volte su questo blog. Il fatto che l'articolo citi le pompe di calore NON basta per metterci un operaio.
@@ -550,17 +551,18 @@ function hasPowerWord(s) {
 function capFirst(s) {
   return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
 }
-// Titolo SEO con focus keyword all'inizio + una power word.
+// Titolo SEO con focus keyword all'inizio + una power word. NB: qui NON si
+// aggiunge l'anno (feedback PM: "Guida 2026" ovunque stufa; l'anno nel titolo
+// solo dove ha senso, cioe' quando sta gia' nel titolo del topic).
 function buildSeoTitle(titoloSeo, focusKw) {
-  const year = new Date().getFullYear();
   let t = (titoloSeo || "").trim();
   const fk = (focusKw || "").trim();
   if (!fk) return t;
   if (!t.toLowerCase().startsWith(fk.toLowerCase())) {
-    t = t ? `${capFirst(fk)}: ${t}` : `${capFirst(fk)} ${year}`;
+    t = t ? `${capFirst(fk)}: ${t}` : capFirst(fk);
   }
   if (!hasPowerWord(t)) {
-    t = `${t} - Guida ${capFirst(DEFAULT_POWER_WORD)} ${year}`;
+    t = `${t} - Guida ${capFirst(DEFAULT_POWER_WORD)}`;
   }
   return t;
 }
