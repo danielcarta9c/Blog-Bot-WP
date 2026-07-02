@@ -32,11 +32,10 @@
       Rank Math **88**.
 - [x] **ToC**: plugin ToC installato lato WP (Easy Table of Contents) → check
       Rank Math verde (+2 punti; passa sulla presenza del plugin).
-- [x] **B2 — link interni reali: MERGIATA (PR #20) e provata live** (run di
-      prova → art. 5484 programmato: 5 correlati reali proposti e linkati,
-      gemello del topic escluso, verificatore 13/13). Resta la lettura del
-      punteggio Rank Math dal PM (finestra veto). Poi: D1, immagine inline,
-      nuovi topic, A4 (vedi NB doppioni in HANDOFF).
+- [x] **B2 — link interni reali: CHIUSA** (PR #20; prova live art. 5484: 5
+      correlati reali linkati, gemello escluso, verificatore 13/13, **Rank
+      Math 85 confermato dal PM**). Prossimi: A4 anti-doppioni, D1 log
+      storico, immagine inline, nuovi topic.
 
 ## Next (backlog prossima release — per priorità)
 
