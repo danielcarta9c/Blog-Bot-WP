@@ -6,8 +6,8 @@
 > `PROJECT_STATE.md`; qui sta il **cosa** e il **perché**, non il giorno-giorno.
 
 > **Stato:** ✅ MVP1 · ✅ MVP1.1 · ⏭️ MVP2 saltato (scelta PM) · ✅ MVP3 "slim"
-> (A1+A2) · ✅ MVP4/B1 immagini · 🔶 B2 in PR #20 (da validare live) · ⬜ D1 da
-> fare · ✅ Rotazione tracciata ·
+> (A1+A2) · ✅ MVP4/B1 immagini · ✅ B2 link interni reali (PR #20, prova live
+> ok) · ⬜ D1 da fare · ✅ Rotazione tracciata ·
 > ✅ Polish SEO (keyword corte, power word Rank Math IT, verificatore A3 reporting,
 > density 16-22, paragrafi brevi) · ✅ Scope blog allargato (efficienza energetica +
 > incentivi) · ✅ ToC (plugin WP). Rank Math 88. n8n dismesso. Repo: `Blog-Bot-WP`.
@@ -76,12 +76,13 @@ articoli generati.
   alt = focus keyword, `featured_media` dinamico. Non bloccante (fallback
   `5026`). Validato live. Aperto: valutare quality high vs medium; immagine
   anche nel corpo articolo.
-- **B2** 🔶 IN PR (#20, da validare live) — Link interni reali: GET via REST
+- **B2** ✅ FATTO (PR #20, prova live ok) — Link interni reali: GET via REST
   degli articoli pubblicati (cat. 3), selezione dei pertinenti per token in
   comune, 2-3 link contestuali nel corpo al posto dei 2 URL fissi (CTA
-  invariata); fallback sui fissi se la GET fallisce o mancano candidati.
-  Accettazione: al prossimo run l'articolo linka articoli reali del blog e
-  il punteggio Rank Math tiene (~88).
+  invariata); gemello del topic escluso per token dello slug; fallback sui
+  fissi se la GET fallisce o mancano candidati. Prova live: art. 5484 con
+  5/5 correlati linkati, verificatore 13/13. Resta la conferma del punteggio
+  Rank Math dal PM nella finestra di veto.
 - **D1** Log storico: riepilogo nel summary della Action + CSV degli
   articoli generati committato nel repo (§35 auto-commit log).
 

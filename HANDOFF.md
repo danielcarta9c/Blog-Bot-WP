@@ -28,10 +28,10 @@
   alla lista italiana di Rank Math, verificatore pre-publish, density 16-22,
   paragrafi brevi), **scope blog allargato** (efficienza energetica + incentivi,
   non solo CT 3.0), **ToC** (plugin WP). Ultima prova: art. **5480 → Rank Math 88**.
-- **MVP2 (email) saltato**, **power word FATTA**, **ToC FATTO** (plugin WP).
-  **B2 (link interni reali) implementata in PR #20** (da mergiare + validare live).
+- **MVP2 (email) saltato**, **power word FATTA**, **ToC FATTO** (plugin WP),
+  **B2 (link interni reali) FATTA** (PR #20, prova live ok: art. 5484).
   **Restano:** D1 (log storico), immagine inline nel corpo (per l'alt sulle
-  immagini di contenuto), nuovi topic; A4 opzionale.
+  immagini di contenuto), nuovi topic; A4 (vedi NB doppioni sotto).
 - Tutto è su `main`. Branch **`mvp1.1`** = restore-point stabile (pre-MVP4).
 
 ## 2. Lavoro aperto (come riprendere)
@@ -40,15 +40,18 @@ Daniel **usa il sistema in produzione (rodaggio)**, raccoglie bug/feature e
 vuole affrontarli **tutti insieme nella prossima release**. Backlog in
 `PROJECT_STATE.md` → Next. In sintesi:
 
-0. ⭐ **B2 — LINK INTERNI REALI: implementata in PR #20** (secondo la traccia
-   concordata: GET articoli pubblicati → 5 candidati pertinenti → Claude ne
-   linka 2-3 contestuali al posto dei 2 fissi; CTA invariata; fallback NON
-   bloccante sui fissi). **Resta da fare:** merge (chiedi a Daniel) + validazione
-   live al prossimo run: l'articolo deve avere 2-3 link ad articoli reali e il
-   punteggio Rank Math deve tenere (~88). Nel log del run cerca "Articoli
-   correlati" e il check "link interni ad articoli correlati" del verificatore.
-   NB: il gemello del topic (caso LRU) e' escluso per insieme di token dello
-   slug, perche' gli slug live differiscono da quelli dei topic.
+0. ⭐ **B2 — LINK INTERNI REALI: FATTA** (PR #20 mergiata; run di prova ok →
+   art. 5484: 5 correlati reali proposti e linkati, gemello del topic escluso,
+   verificatore 13/13, log `ops/out/20260702T132914Z.log`). Ultima conferma:
+   punteggio Rank Math letto dal PM nella finestra di veto. Dettagli: il
+   gemello (stesso topic gia' live) e' escluso per insieme di token dello slug,
+   perche' gli slug live differiscono da quelli dei topic; fallback NON
+   bloccante sui 2 link fissi se la GET fallisce o i candidati sono <2.
+   **NB emerso dalla prova (→ rafforza A4 anti-doppioni):** sul sito esistono
+   articoli NON tracciati dalla rotazione (es. `pompa-di-calore-ibrida-non-conviene`,
+   `pompa-di-calore-piscina-...`, probabilmente da override `next.json`, che
+   NON marca la rotazione) → l'art. 5484 e' un quasi-doppione editoriale di un
+   pezzo esistente. Daniel decide nel veto; la cura strutturale e' A4.
 1. **MVP4 contenuto**: resta **D1** log storico. **Immagine inline** nel corpo
    = qualità/engagement, ma **NON dà punti Rank Math** (il check "alt" è già verde
    grazie alla featured). Aperto: quality immagine high vs medium.

@@ -32,18 +32,18 @@
       Rank Math **88**.
 - [x] **ToC**: plugin ToC installato lato WP (Easy Table of Contents) → check
       Rank Math verde (+2 punti; passa sulla presenza del plugin).
-- [ ] **B2 — link interni reali: implementata in PR #20**, in attesa di merge +
-      validazione live (al prossimo run: 2-3 link ad articoli reali nel corpo e
-      Rank Math tenuto ~88). Poi: D1 log, immagine inline, nuovi topic.
+- [x] **B2 — link interni reali: MERGIATA (PR #20) e provata live** (run di
+      prova → art. 5484 programmato: 5 correlati reali proposti e linkati,
+      gemello del topic escluso, verificatore 13/13). Resta la lettura del
+      punteggio Rank Math dal PM (finestra veto). Poi: D1, immagine inline,
+      nuovi topic, A4 (vedi NB doppioni in HANDOFF).
 
 ## Next (backlog prossima release — per priorità)
 
 > Roadmap completa con obiettivi e test di accettazione in `ROADMAP.md`.
 > MVP1 / MVP1.1 / MVP3 = FATTI (vedi Done log). MVP2 (email) = saltato (scelta PM).
 
-0. ⭐ **B2 — link interni reali**: FATTA in PR #20 (da mergiare e validare live).
-   Articoli WP reali e pertinenti proposti a Claude al posto dei 2 link fissi;
-   fallback NON bloccante sui fissi se la GET fallisce o mancano candidati.
+0. ~~B2 — link interni reali~~ FATTA (PR #20, prova live ok: art. 5484).
 1. **MVP4 — contenuto**: ~~B1 immagini featured~~ FATTO. Resta **D1** log storico.
    **Immagine inline** nel corpo (qualità/engagement; NB: NON dà punti Rank Math,
    il check "alt" è già verde grazie alla featured).
@@ -57,7 +57,8 @@
 
 ## Done log
 
-- **B2 — link interni reali** (PR #20, da validare live): prima della generazione
+- **B2 — link interni reali** (PR #20, provata live: art. 5484 con 5/5 correlati
+  linkati, gemello escluso, 13/13; resta conferma punteggio RM dal PM): prima della generazione
   GET degli articoli pubblicati (cat. 3, lettura pubblica) + selezione dei 5 piu'
   pertinenti per token in comune tra keyword/titolo del topic e titolo/slug del
   candidato (stopword e boilerplate dei titoli esclusi). Il "gemello" del topic
