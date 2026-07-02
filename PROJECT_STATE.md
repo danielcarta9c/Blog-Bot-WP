@@ -32,17 +32,18 @@
       Rank Math **88**.
 - [x] **ToC**: plugin ToC installato lato WP (Easy Table of Contents) → check
       Rank Math verde (+2 punti; passa sulla presenza del plugin).
-- [ ] **Prossima feature APPROVATA: B2 — link interni reali** (mini-traccia in
-      `HANDOFF.md` §2). Poi: D1 log, immagine inline, nuovi topic. Ripartenza: `HANDOFF.md`.
+- [ ] **B2 — link interni reali: implementata in PR #20**, in attesa di merge +
+      validazione live (al prossimo run: 2-3 link ad articoli reali nel corpo e
+      Rank Math tenuto ~88). Poi: D1 log, immagine inline, nuovi topic.
 
 ## Next (backlog prossima release — per priorità)
 
 > Roadmap completa con obiettivi e test di accettazione in `ROADMAP.md`.
 > MVP1 / MVP1.1 / MVP3 = FATTI (vedi Done log). MVP2 (email) = saltato (scelta PM).
 
-0. ⭐ **B2 — link interni reali** (APPROVATA come prossima). Oggi il prompt mette 2
-   link interni FISSI; sostituirli con articoli WP reali e pertinenti. Mini-traccia
-   in `HANDOFF.md` §2.
+0. ⭐ **B2 — link interni reali**: FATTA in PR #20 (da mergiare e validare live).
+   Articoli WP reali e pertinenti proposti a Claude al posto dei 2 link fissi;
+   fallback NON bloccante sui fissi se la GET fallisce o mancano candidati.
 1. **MVP4 — contenuto**: ~~B1 immagini featured~~ FATTO. Resta **D1** log storico.
    **Immagine inline** nel corpo (qualità/engagement; NB: NON dà punti Rank Math,
    il check "alt" è già verde grazie alla featured).
@@ -56,6 +57,16 @@
 
 ## Done log
 
+- **B2 — link interni reali** (PR #20, da validare live): prima della generazione
+  GET degli articoli pubblicati (cat. 3, lettura pubblica) + selezione dei 5 piu'
+  pertinenti per token in comune tra keyword/titolo del topic e titolo/slug del
+  candidato (stopword e boilerplate dei titoli esclusi). Il "gemello" del topic
+  (caso LRU/rigenerazione) e' escluso per insieme di token dello slug: gli slug
+  live differiscono da quelli dei topic (riscritture, suffissi di WP). Claude
+  linka 2-3 correlati contestuali nel corpo al posto dei 2 link fissi; CTA
+  invariata. Fallback NON bloccante sui 2 fissi (GET fallita o <2 candidati);
+  diagnostica relatedAvailable/relatedUsed + check nel verificatore. Testato
+  offline end-to-end (4 scenari, incluso anti-bot sgcaptcha reale: fallback ok).
 - **Paragrafi brevi** (PR #19): prompt (ogni `<p>` max 3-4 frasi / ~110 parole) +
   check nel verificatore (`maxParaWords`, warning >120) → i paragrafi lunghi si
   vedono nel log pre-publish. Rank Math penalizzava un `<p>` troppo lungo (Daniel

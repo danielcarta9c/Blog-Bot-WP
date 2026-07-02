@@ -29,8 +29,9 @@
   paragrafi brevi), **scope blog allargato** (efficienza energetica + incentivi,
   non solo CT 3.0), **ToC** (plugin WP). Ultima prova: art. **5480 → Rank Math 88**.
 - **MVP2 (email) saltato**, **power word FATTA**, **ToC FATTO** (plugin WP).
-  **Restano:** B2 (link interni reali), D1 (log storico), immagine inline nel
-  corpo (per l'alt sulle immagini di contenuto), nuovi topic; A4 opzionale.
+  **B2 (link interni reali) implementata in PR #20** (da mergiare + validare live).
+  **Restano:** D1 (log storico), immagine inline nel corpo (per l'alt sulle
+  immagini di contenuto), nuovi topic; A4 opzionale.
 - Tutto è su `main`. Branch **`mvp1.1`** = restore-point stabile (pre-MVP4).
 
 ## 2. Lavoro aperto (come riprendere)
@@ -39,22 +40,15 @@ Daniel **usa il sistema in produzione (rodaggio)**, raccoglie bug/feature e
 vuole affrontarli **tutti insieme nella prossima release**. Backlog in
 `PROJECT_STATE.md` → Next. In sintesi:
 
-0. ⭐ **B2 — LINK INTERNI REALI (prossima feature APPROVATA dal PM, falla per prima).**
-   Oggi `buildPrompt()` fa inserire 2 link interni **fissi** (servizio CT + chi-siamo):
-   tutti gli articoli linkano sempre gli stessi. Obiettivo: linkare **articoli WP
-   reali e pertinenti** → cluster tematici (SEO) + UX. **Come farla (traccia
-   concordata):**
-   - Prima della generazione, GET su WP REST degli articoli pubblicati, es.
-     `GET /wp-json/wp/v2/posts?categories=3&per_page=20&_fields=title,link` (o con
-     `search=<token della focus keyword>`). È una lettura → usa `fetchJson` + `WP_UA`.
-   - Scegli 3-5 candidati pertinenti (per keyword/tema in comune), **escludi
-     l'articolo in creazione** (per slug/titolo).
-   - Passali a Claude nel prompt come lista "articoli correlati disponibili:
-     titolo → url" e istruiscilo a inserirne **2-3 come link interni contestuali**
-     nel corpo (al posto della regola dei 2 link fissi). La **CTA finale** resta.
-   - **Fallback**: se la GET fallisce o non ci sono candidati, resta sui 2 link
-     fissi attuali (non deve rompere il run). Aggiorna il check `intLinks` del
-     verificatore se serve. Anti-bot: la GET passa da `/wp-json` (a cadenza normale ok).
+0. ⭐ **B2 — LINK INTERNI REALI: implementata in PR #20** (secondo la traccia
+   concordata: GET articoli pubblicati → 5 candidati pertinenti → Claude ne
+   linka 2-3 contestuali al posto dei 2 fissi; CTA invariata; fallback NON
+   bloccante sui fissi). **Resta da fare:** merge (chiedi a Daniel) + validazione
+   live al prossimo run: l'articolo deve avere 2-3 link ad articoli reali e il
+   punteggio Rank Math deve tenere (~88). Nel log del run cerca "Articoli
+   correlati" e il check "link interni ad articoli correlati" del verificatore.
+   NB: il gemello del topic (caso LRU) e' escluso per insieme di token dello
+   slug, perche' gli slug live differiscono da quelli dei topic.
 1. **MVP4 contenuto**: resta **D1** log storico. **Immagine inline** nel corpo
    = qualità/engagement, ma **NON dà punti Rank Math** (il check "alt" è già verde
    grazie alla featured). Aperto: quality immagine high vs medium.
