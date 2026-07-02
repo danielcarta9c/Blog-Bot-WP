@@ -1,0 +1,20 @@
+Topic (rotazione tracciata): pompa di calore in villa
+Template: how-to-guide
+Brave Search: ok
+Claude: articolo generato
+Diagnostica SEO: {"wordCount":1894,"h2Count":8,"kwCount":16,"kwInFirst":true,"kwInH2":true,"kwDensity":"0.84","extLinks":2,"intLinks":3,"slugLen":56,"powerWordInTitle":true,"warnings":[]}
+VERIFICA REGOLE SEO (pre-publish):
+  [OK] Titolo SEO inizia con la focus keyword
+  [OK] Titolo SEO contiene una power word (Rank Math IT)
+  [OK] Focus keyword nella meta description
+  [OK] Focus keyword nei primi 200 caratteri
+  [OK] Focus keyword in almeno un H2
+  [OK] Densita' focus keyword 0.5-2.5%
+  [OK] Lunghezza articolo >= 1500 parole
+  [OK] Almeno 4 H2
+  [OK] Slug <= 60 caratteri
+  [OK] Almeno 1 link esterno
+  [OK] Almeno 1 link interno
+REGOLE: 11/11 ok - tutto a posto
+Immagine saltata (non bloccante): WordPress (upload media): risposta non-JSON (status 202): <html><head><link rel="icon" href="data:;"><meta http-equiv="refresh" content="0;/.well-known/sgcaptcha/?r=%2Fwp-json%2Fwp%2Fv2%2Fmedia&y=ipc:20.169.72.3:1782987723.703"></meta></head></html>
+ERRORE: WordPress (crea post): risposta non-JSON (status 202): <html><head><link rel="icon" href="data:;"><meta http-equiv="refresh" content="0;/.well-known/sgcaptcha/?r=%2Fwp-json%2Fwp%2Fv2%2Fposts&y=ipc:20.169.72.3:1782987738.070"></meta></head></html>
