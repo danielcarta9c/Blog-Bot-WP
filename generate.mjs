@@ -265,7 +265,7 @@ async function braveSearch(topic, year) {
 function buildPrompt(ctx, braveResults) {
   const t = ctx.topic;
   return `[ISTRUZIONI DI SISTEMA]
-Sei un SEO copywriter esperto di Conto Termico 3.0 (D.M. 7 agosto 2025) per Nove C Ingegneria, ESCo certificata UNI CEI 11352 ed EPC Contractor. Scrivi SEMPRE e SOLO riferendoti al Conto Termico 3.0 (NON 2.0 che e superato). Usa interpretazione restrittiva della normativa. Output JSON stretto, nessun testo extra. Privilegia articoli riferiti all'ambito Privati (appartamenti, ville  e Condomini)
+Sei un SEO copywriter esperto di efficienza energetica e incentivi per il residenziale per Nove C Ingegneria, ESCo certificata UNI CEI 11352 ed EPC Contractor. Il blog copre pompe di calore, fotovoltaico, autoconsumo (collettivo e comunita' energetiche/CER), riqualificazione energetica e i relativi incentivi. REGOLA INCENTIVI: se l'argomento riguarda POMPE DI CALORE o generazione termica, il riferimento e il Conto Termico 3.0 (D.M. 7 agosto 2025, MAI il 2.0 superato) con interpretazione restrittiva della normativa; se riguarda FOTOVOLTAICO, autoconsumo, CER o altri temi, usa il quadro incentivante PERTINENTE (incentivi GSE su autoconsumo/CER, detrazioni, bandi regionali/fondi dove rilevanti) e NON forzare il Conto Termico. Non citare anni precedenti come attuali. Output JSON stretto, nessun testo extra. Privilegia l'ambito Privati (appartamenti, ville e condomini)
 
 [TASK]
 Oggi e ${ctx.today}.
@@ -291,7 +291,7 @@ Requisiti SEO TASSATIVI:
 - LINK ESTERNI OBBLIGATORI: inserisci almeno 2 link esterni dofollow a fonti istituzionali autorevoli. Usa <a href="URL">testo ancora</a> (SENZA rel="nofollow"). Fonti consigliate: https://www.gse.it (Portale GSE Conto Termico), https://www.mase.gov.it (Ministero Ambiente), https://www.gazzettaufficiale.it (Gazzetta Ufficiale per D.M.). Esempio: <a href="https://www.gse.it/servizi-per-te/conto-termico">portale Conto Termico del GSE</a>
 - LINK INTERNI: inserisci almeno 2 link interni a pagine Nove C. Usa: <a href="https://nove-c.com/soluzioni/conto-termico-3-0-incentivi-fino-al-65-senza-anticipo/">scopri il servizio Conto Termico 3.0 di Nove C</a> e <a href="https://nove-c.com/chi-siamo/">Nove C Ingegneria ESCo certificata</a>
 - CTA finale con riferimento a Nove C Ingegneria ESCo certificata e link alla pagina servizio
-- Cita D.M. 7 agosto 2025, articoli rilevanti, stato corrente Portaltermico GSE
+- Cita le fonti normative PERTINENTI all'argomento: per pompe di calore/termico il D.M. 7 agosto 2025 (Conto Termico 3.0) e lo stato del Portaltermico GSE; per fotovoltaico/autoconsumo/CER i provvedimenti GSE pertinenti. Non forzare riferimenti non attinenti al tema.
 - NON citare anni precedenti all'anno corrente come "attuali"
 - TITOLO SEO (campo titolo_seo): deve INIZIARE con la focus keyword esatta "${t.focusKeyword}" e contenere una "power word" italiana riconosciuta da Rank Math. USA ESATTAMENTE una di queste (invariabili, valgono per maschile e femminile, NON declinarle): essenziale, efficace, indispensabile, incredibile, irresistibile, impeccabile, straordinario, definitivo. Esempio: "${t.focusKeyword}: Guida Essenziale".
 - META DESCRIPTION (campo meta_description): 150-160 caratteri e DEVE contenere la focus keyword esatta "${t.focusKeyword}", preferibilmente all'inizio.
