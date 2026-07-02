@@ -32,23 +32,26 @@
       Rank Math **88**.
 - [x] **ToC**: plugin ToC installato lato WP (Easy Table of Contents) → check
       Rank Math verde (+2 punti; passa sulla presenza del plugin).
-- [x] **B2 — link interni reali: CHIUSA** (PR #20; prova live art. 5484: 5
-      correlati reali linkati, gemello escluso, verificatore 13/13, **Rank
-      Math 85 confermato dal PM**). Prossimi: A4 anti-doppioni, D1 log
-      storico, immagine inline, nuovi topic.
+- [ ] **A4 anti-doppioni + D1 registro storico: in PR #21** (in attesa di
+      merge). Validazione al run di lunedi': il topic "piscine" (gia' online da
+      maggio, la rotazione non lo sapeva) va saltato da solo, e in
+      `ops/articles.csv` compare la prima riga del registro. B2 = CHIUSA
+      (PR #20, art. 5484, Rank Math 85). Poi: immagine inline, nuovi topic.
 
 ## Next (backlog prossima release — per priorità)
 
 > Roadmap completa con obiettivi e test di accettazione in `ROADMAP.md`.
 > MVP1 / MVP1.1 / MVP3 = FATTI (vedi Done log). MVP2 (email) = saltato (scelta PM).
 
-0. ~~B2 — link interni reali~~ FATTA (PR #20, prova live ok: art. 5484).
-1. **MVP4 — contenuto**: ~~B1 immagini featured~~ FATTO. Resta **D1** log storico.
-   **Immagine inline** nel corpo (qualità/engagement; NB: NON dà punti Rank Math,
-   il check "alt" è già verde grazie alla featured).
-2. **A4** (opzionale): anti-doppioni (check slug su WP). ~~A3 quality gate~~ =
-   fatto in versione "reporting" (verifyArticle stampa la checklist pre-publish);
-   eventuale evoluzione = rigenerazione automatica sotto soglia.
+0. ~~B2 — link interni reali~~ FATTA (PR #20, prova live ok: art. 5484, RM 85).
+   ~~A4 anti-doppioni~~ e ~~D1 registro storico~~ in **PR #21** (da validare al
+   run di lunedi').
+1. **MVP4 — contenuto**: ~~B1 immagini featured~~ FATTO, ~~D1~~ in PR #21.
+   Resta **immagine inline** nel corpo (qualità/engagement; NB: NON dà punti
+   Rank Math, il check "alt" è già verde grazie alla featured).
+2. ~~A3 quality gate~~ = fatto in versione "reporting" (verifyArticle stampa la
+   checklist pre-publish); eventuale evoluzione = rigenerazione automatica
+   sotto soglia. ~~A4~~ → PR #21 (promosso da opzionale: doppione reale dal rodaggio).
 3. **Nuovi topic** (idee sul tavolo): CER, fotovoltaico condominio, accumulo,
    colonnine ricarica, bandi regionali; raffrescamento estivo, PdC in appartamento,
    "Conto Termico 3.0 come funziona" (pilastro). Aggiungere in `topics.json`.
@@ -56,6 +59,15 @@
 
 ## Done log
 
+- **A4 anti-doppioni + D1 registro storico** (PR #21, da validare al run di
+  lunedi'): prima della scelta del topic lo script legge gli articoli live
+  (una GET sola, riusata per i correlati B2) e salta i topic gia' online anche
+  se la rotazione non lo sa (es. pubblicati via override), segnandoli con la
+  data del pezzo live (stato auto-riparante). Gemello = token slug + titolo
+  identico + titolo keyword-led; stemming minimo IT (piscina/piscine). LRU
+  conta i doppioni con la data live. Non bloccante. D1: ops/articles.csv (una
+  riga per articolo, committata dal workflow) + riepilogo nel summary della
+  Action. Testato offline sui 17 articoli live reali.
 - **B2 — link interni reali** (PR #20, provata live: art. 5484 con 5/5 correlati
   linkati, gemello escluso, 13/13; resta conferma punteggio RM dal PM): prima della generazione
   GET degli articoli pubblicati (cat. 3, lettura pubblica) + selezione dei 5 piu'

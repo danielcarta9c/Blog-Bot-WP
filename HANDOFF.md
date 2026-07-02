@@ -29,9 +29,10 @@
   paragrafi brevi), **scope blog allargato** (efficienza energetica + incentivi,
   non solo CT 3.0), **ToC** (plugin WP). Ultima prova: art. **5480 → Rank Math 88**.
 - **MVP2 (email) saltato**, **power word FATTA**, **ToC FATTO** (plugin WP),
-  **B2 (link interni reali) FATTA** (PR #20, prova live ok: art. 5484).
-  **Restano:** D1 (log storico), immagine inline nel corpo (per l'alt sulle
-  immagini di contenuto), nuovi topic; A4 (vedi NB doppioni sotto).
+  **B2 (link interni reali) FATTA** (PR #20, prova live ok: art. 5484, RM 85).
+  **A4 (anti-doppioni) + D1 (registro storico) in PR #21** (da validare al run
+  di lunedi'). **Restano:** immagine inline nel corpo (per l'alt sulle
+  immagini di contenuto), nuovi topic.
 - Tutto è su `main`. Branch **`mvp1.1`** = restore-point stabile (pre-MVP4).
 
 ## 2. Lavoro aperto (come riprendere)
@@ -47,20 +48,25 @@ vuole affrontarli **tutti insieme nella prossima release**. Backlog in
    gemello (stesso topic gia' live) e' escluso per insieme di token dello slug,
    perche' gli slug live differiscono da quelli dei topic; fallback NON
    bloccante sui 2 link fissi se la GET fallisce o i candidati sono <2.
-   **NB emerso dalla prova (→ rafforza A4 anti-doppioni):** sul sito esistono
-   articoli NON tracciati dalla rotazione (es. `pompa-di-calore-ibrida-non-conviene`,
-   `pompa-di-calore-piscina-...`, probabilmente da override `next.json`, che
-   NON marca la rotazione) → l'art. 5484 e' un quasi-doppione editoriale di un
-   pezzo esistente. Daniel decide nel veto; la cura strutturale e' A4.
-1. **MVP4 contenuto**: resta **D1** log storico. **Immagine inline** nel corpo
-   = qualità/engagement, ma **NON dà punti Rank Math** (il check "alt" è già verde
-   grazie alla featured). Aperto: quality immagine high vs medium.
+   **NB emerso dalla prova:** sul sito esistono articoli NON tracciati dalla
+   rotazione (es. `pompa-di-calore-ibrida-non-conviene`, `pompa-di-calore-piscina-...`,
+   probabilmente da override `next.json`, che NON marca la rotazione) → l'art.
+   5484 era un quasi-doppione editoriale. **Cura strutturale = A4, in PR #21:**
+   topic gia' online saltati e segnati in rotazione con la data del pezzo live
+   (stato auto-riparante). Validazione: al run di lunedi' "piscine" va saltato
+   da solo (log: riga "A4: topic ... gia' online"). Con la PR #21 c'e' anche
+   **D1**: registro `ops/articles.csv` (una riga per articolo) + riepilogo nel
+   summary della Action.
+1. **MVP4 contenuto**: ~~D1 log storico~~ in PR #21. Resta **immagine inline**
+   nel corpo = qualità/engagement, ma **NON dà punti Rank Math** (il check "alt"
+   è già verde grazie alla featured). Aperto: quality immagine high vs medium.
 2. **Nuovi topic** (idee col PM, ora che il blog è allargato): CER, fotovoltaico
    condominio, accumulo/batteria, colonnine ricarica, bandi regionali; PdC
    raffrescamento estivo, PdC in appartamento, "Conto Termico 3.0 come funziona"
    (pilastro). Aggiungere in `topics.json` (keyword corte, slug distinti, `_regole`).
-3. **A4** opzionale: anti-doppioni (check slug su WP). ~~A3~~ = fatto in versione
-   "reporting" (`verifyArticle()`); evoluzione = rigenerazione automatica sotto soglia.
+3. ~~A4 anti-doppioni~~ → in PR #21 (promosso da opzionale: doppione reale nel
+   rodaggio). ~~A3~~ = fatto in versione "reporting" (`verifyArticle()`);
+   evoluzione = rigenerazione automatica sotto soglia.
 4. Bug/feature dal rodaggio (da raccogliere).
 
 **FATTO in questa sessione (non è più lavoro aperto):** rotazione tracciata
