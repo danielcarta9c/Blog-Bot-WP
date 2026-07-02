@@ -146,7 +146,7 @@ function clearOverride() {
       "Compila i 4 campi sotto per forzare UN articolo specifico (es. una novità), poi committa su main: parte un run con quel titolo. A run riuscito il file si SVUOTA da solo e torna la rotazione. Lascia 'titolo' vuoto = rotazione normale. Le righe che iniziano con _ sono solo note di aiuto: non vengono lette dallo script, non toccarle.",
     titolo: "",
     _aiuto_titolo:
-      "Titolo H1 dell'articolo. Metti una power word (Guida, Conviene, Completa, Definitiva...) e la parola chiave. {{year}} diventa l'anno corrente. Es: Elettrificazione dei Carichi con Pompa di Calore: Perche Conviene {{year}}",
+      "Titolo H1 dell'articolo. Metti la parola chiave + una power word italiana di Rank Math usata ESATTAMENTE (invariabile): essenziale, efficace, indispensabile, incredibile, irresistibile, impeccabile. {{year}} diventa l'anno corrente. Es: Elettrificazione dei Carichi con Pompa di Calore: Guida Essenziale {{year}}",
     focus_keyword: "",
     _aiuto_focus_keyword:
       "La frase chiave SEO esatta, 2-4 parole, quella per cui vuoi posizionarti su Google. Es: elettrificazione dei carichi",
@@ -293,7 +293,7 @@ Requisiti SEO TASSATIVI:
 - CTA finale con riferimento a Nove C Ingegneria ESCo certificata e link alla pagina servizio
 - Cita D.M. 7 agosto 2025, articoli rilevanti, stato corrente Portaltermico GSE
 - NON citare anni precedenti all'anno corrente come "attuali"
-- TITOLO SEO (campo titolo_seo): deve INIZIARE con la focus keyword esatta "${t.focusKeyword}" e contenere una "power word" persuasiva (Guida, Completa, Definitiva, Conviene, Risparmi, Novita...). Esempio: "${t.focusKeyword}: Guida Completa".
+- TITOLO SEO (campo titolo_seo): deve INIZIARE con la focus keyword esatta "${t.focusKeyword}" e contenere una "power word" italiana riconosciuta da Rank Math. USA ESATTAMENTE una di queste (invariabili, valgono per maschile e femminile, NON declinarle): essenziale, efficace, indispensabile, incredibile, irresistibile, impeccabile, straordinario, definitivo. Esempio: "${t.focusKeyword}: Guida Essenziale".
 - META DESCRIPTION (campo meta_description): 150-160 caratteri e DEVE contenere la focus keyword esatta "${t.focusKeyword}", preferibilmente all'inizio.
 - SLUG: deve contenere la focus keyword completa separata da trattini, max 60 caratteri
 - IMMAGINE IN EVIDENZA (campo brief_immagine): descrivi in 1-2 frasi la SCENA ideale per l'immagine dell'articolo, scegliendo il REGISTRO piu adatto a QUESTO pezzo (varia in base all'articolo, non fare sempre lo stesso tipo):
@@ -327,7 +327,7 @@ async function callClaude(prompt) {
           input_schema: {
             type: "object",
             properties: {
-              titolo_seo: { type: "string", description: "Titolo SEO che INIZIA con la focus keyword esatta e contiene una power word (Guida, Completa, Conviene...)" },
+              titolo_seo: { type: "string", description: "Titolo SEO che INIZIA con la focus keyword esatta e contiene una power word italiana di Rank Math usata ESATTAMENTE (invariabile): essenziale, efficace, indispensabile, incredibile, irresistibile, impeccabile, straordinario, definitivo" },
               focus_keyword: { type: "string", description: "Focus keyword esatta" },
               meta_description: { type: "string", description: "Meta description 150-160 caratteri che CONTIENE la focus keyword esatta, preferibilmente all'inizio" },
               slug: { type: "string", description: "Slug con la focus keyword, max 60 caratteri" },
@@ -351,10 +351,41 @@ async function callClaude(prompt) {
 // focus keyword nel titolo SEO / meta: qui lo forziamo in modo deterministico.
 // NB: ottimizziamo SOLO il titolo SEO (tag <title>), non il titolo visibile.
 // ---------------------------------------------------------------------------
-const POWER_WORDS = ["guida", "completa", "definitiva", "essenziale", "esclusiva", "vantaggi", "risparmi", "risparmiare", "segreti", "novità", "novita", "conviene", "scopri", "quanto"];
+// Lista power word ITALIANE di Rank Math (fonte: rankmath.com/blog/power-words,
+// sezione Italian). Rank Math usa una lista interna per lingua: il titolo passa
+// il check solo se contiene una parola di QUESTA lista (con la lingua del sito
+// WordPress = Italiano). Teniamo la lista allineata a quella o il check resta rosso.
+const POWER_WORDS = [
+  "abile", "affascinante", "autentico", "avanguardia", "avventuroso", "bello", "brillante",
+  "carismatico", "chiaro", "completamente", "coraggio", "coraggioso", "creativo", "definitivo",
+  "degno", "delizioso", "determinato", "di successo", "dimostrare", "dinamico", "efficace",
+  "esclusivo", "essenziale", "favoloso", "felicità", "fenomenale", "fiducia", "formidabile",
+  "garanzia", "geniale", "glorioso", "grandioso", "gratuito", "illimitato", "impeccabile",
+  "impressionante", "inarrestabile", "incredibile", "infallibile", "infinitamente", "influente",
+  "ingegnoso", "indimenticabile", "indispensabile", "insostituibile", "intenso", "innovativo",
+  "inaspettato", "irresistibile", "ispiratore", "leader", "leggendario", "libertà", "luminoso",
+  "lusso", "lussuoso", "maestro", "magico", "magnifico", "maestoso", "memorabile", "meraviglioso",
+  "miracoloso", "motivante", "necessario", "notevole", "nuovo", "ufficiale", "perfetto",
+  "persuasivo", "piacere", "pioniere", "popolare", "potente", "potere", "prestigioso", "prezioso",
+  "prodigioso", "profondo", "progresso", "prospero", "qualità", "radiante", "riconosciuto",
+  "rinnovato", "riservato", "rivoluzionario", "saggezza", "soddisfazione", "soddisfatto",
+  "sicurezza", "sicuro", "sensazionale", "sereno", "serenità", "spettacolare", "splendido",
+  "straordinario", "sublime", "superamento", "superiore", "talento", "talentuoso", "terrificante",
+  "trascendente", "trasformativo", "trionfante", "trionfo", "unico", "ultra", "valore", "veramente",
+  "veloce", "vibrante", "vigoroso", "vittoria", "vittorioso", "vivace", "visionario", "volontà",
+  "vitale", "zelante"
+];
+// Power word di DEFAULT da iniettare se il titolo non ne ha: invariabile
+// (uguale maschile/femminile) per non rischiare mismatch di genere con la lista.
+const DEFAULT_POWER_WORD = "essenziale";
+// Match per PAROLA INTERA (confini non-lettera, unicode) per evitare falsi
+// positivi da sottostringhe (es. "unico" dentro "comunico").
 function hasPowerWord(s) {
   const l = (s || "").toLowerCase();
-  return POWER_WORDS.some((p) => l.includes(p));
+  return POWER_WORDS.some((p) => {
+    const esc = p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`(^|[^\\p{L}])${esc}([^\\p{L}]|$)`, "iu").test(l);
+  });
 }
 function capFirst(s) {
   return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
@@ -369,7 +400,7 @@ function buildSeoTitle(titoloSeo, focusKw) {
     t = t ? `${capFirst(fk)}: ${t}` : `${capFirst(fk)} ${year}`;
   }
   if (!hasPowerWord(t)) {
-    t = `${t} - Guida ${year}`;
+    t = `${t} - Guida ${capFirst(DEFAULT_POWER_WORD)} ${year}`;
   }
   return t;
 }
@@ -411,6 +442,8 @@ function parseArticle(message) {
   const wordCount = plainText.split(" ").filter(Boolean).length;
   const h2Count = (html.match(/<h2/gi) || []).length;
   const focusKw = parsed.focus_keyword || "";
+  const h2Texts = (html.match(/<h2[^>]*>([\s\S]*?)<\/h2>/gi) || []).map((x) => x.replace(/<[^>]+>/g, "").toLowerCase());
+  const kwInH2 = focusKw ? h2Texts.some((h) => h.includes(focusKw.toLowerCase())) : false;
   const kwRegex = focusKw ? new RegExp(focusKw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi") : null;
   const kwCount = kwRegex ? (plainText.match(kwRegex) || []).length : 0;
   const first200 = plainText.substring(0, 200).toLowerCase();
@@ -458,7 +491,9 @@ function parseArticle(message) {
     brief_immagine: (parsed.brief_immagine || "").trim(),
     patch_body: patch_body,
     diagnostics: {
-      wordCount, h2Count, kwCount, kwInFirst, kwDensity, extLinks, intLinks,
+      wordCount, h2Count, kwCount, kwInFirst, kwInH2, kwDensity, extLinks, intLinks,
+      slugLen: slug.length,
+      powerWordInTitle: hasPowerWord(seoTitle),
       warnings: [
         wordCount < 1500 ? "Word count basso: " + wordCount : null,
         h2Count < 4 ? "H2 insufficienti: " + h2Count : null,
@@ -469,6 +504,38 @@ function parseArticle(message) {
       ].filter(Boolean)
     }
   };
+}
+
+// ---------------------------------------------------------------------------
+// Verificatore pre-publish (quality gate A3, "reporting"): stampa una checklist
+// PASS/FAIL delle regole SEO PRIMA di creare il post, cosi' a ogni run si vede
+// a colpo d'occhio se qualcosa non torna. Non blocca (l'articolo esce comunque
+// programmato, con la finestra di veto di Daniel): serve a NON pubblicare alla
+// cieca. Le regole deterministiche (power word, FK in titolo/meta) sono gia'
+// forzate a monte, quindi qui devono risultare sempre verdi.
+// NB fuori portata dello script: alt-text immagini nel corpo (i nostri articoli
+// hanno solo la featured) e Table of Contents (plugin WordPress).
+function verifyArticle(article) {
+  const d = article.diagnostics;
+  const fk = article.focus_keyword || "";
+  const checks = [
+    ["Titolo SEO inizia con la focus keyword", article.seo_title.toLowerCase().startsWith(fk.toLowerCase())],
+    ["Titolo SEO contiene una power word (Rank Math IT)", d.powerWordInTitle],
+    ["Focus keyword nella meta description", article.meta_description.toLowerCase().includes(fk.toLowerCase())],
+    ["Focus keyword nei primi 200 caratteri", d.kwInFirst],
+    ["Focus keyword in almeno un H2", d.kwInH2],
+    ["Densita' focus keyword 0.5-2.5%", parseFloat(d.kwDensity) >= 0.5 && parseFloat(d.kwDensity) <= 2.5],
+    ["Lunghezza articolo >= 1500 parole", d.wordCount >= 1500],
+    ["Almeno 4 H2", d.h2Count >= 4],
+    ["Slug <= 60 caratteri", d.slugLen <= 60],
+    ["Almeno 1 link esterno", d.extLinks >= 1],
+    ["Almeno 1 link interno", d.intLinks >= 1]
+  ];
+  const failed = checks.filter(([, ok]) => !ok);
+  console.log("VERIFICA REGOLE SEO (pre-publish):");
+  for (const [label, ok] of checks) console.log(`  [${ok ? "OK" : "XX"}] ${label}`);
+  console.log(`REGOLE: ${checks.length - failed.length}/${checks.length} ok${failed.length ? " (rivedi i punti XX)" : " - tutto a posto"}`);
+  return failed.length;
 }
 
 // ---------------------------------------------------------------------------
@@ -567,6 +634,7 @@ async function main() {
 
   const article = parseArticle(message);
   console.log("Diagnostica SEO:", JSON.stringify(article.diagnostics));
+  verifyArticle(article);
 
   // Immagine in evidenza (non bloccante): se generazione/upload falliscono,
   // l'articolo esce comunque con l'immagine fallback.

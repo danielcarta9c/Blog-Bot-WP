@@ -1,7 +1,7 @@
 {
   "_leggimi": "Compila i 4 campi sotto per forzare UN articolo specifico (es. una novità), poi committa su main: parte un run con quel titolo. A run riuscito il file si SVUOTA da solo e torna la rotazione. Lascia 'titolo' vuoto = rotazione normale. Le righe che iniziano con _ sono solo note di aiuto: non vengono lette dallo script, non toccarle.",
   "titolo": "",
-  "_aiuto_titolo": "Titolo H1 dell'articolo. Metti una power word (Guida, Conviene, Completa, Definitiva...) e la parola chiave. {{year}} diventa l'anno corrente. Es: Elettrificazione dei Carichi con Pompa di Calore: Perche Conviene {{year}}",
+  "_aiuto_titolo": "Titolo H1 dell'articolo. Metti la parola chiave + una power word italiana di Rank Math usata ESATTAMENTE (invariabile): essenziale, efficace, indispensabile, incredibile, irresistibile, impeccabile. {{year}} diventa l'anno corrente. Es: Elettrificazione dei Carichi con Pompa di Calore: Guida Essenziale {{year}}",
   "focus_keyword": "",
   "_aiuto_focus_keyword": "La frase chiave SEO esatta, 2-4 parole, quella per cui vuoi posizionarti su Google. Es: elettrificazione dei carichi",
   "brief": "",
