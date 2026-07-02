@@ -39,17 +39,32 @@ Daniel **usa il sistema in produzione (rodaggio)**, raccoglie bug/feature e
 vuole affrontarli **tutti insieme nella prossima release**. Backlog in
 `PROJECT_STATE.md` → Next. In sintesi:
 
-0. **MVP4 contenuto**: ~~B1 immagini~~ FATTO. Restano **B2** link interni reali
-   (dalla REST WP, al posto dei 2 fissi) e **D1** log storico. **Immagine inline**
-   nel corpo → chiuderebbe il check Rank Math "keyword nell'alt" (oggi c'è solo la
-   featured). Aperto: quality immagine high vs medium.
-1. **Nuovi topic** (idee col PM, ora che il blog è allargato): CER, fotovoltaico
+0. ⭐ **B2 — LINK INTERNI REALI (prossima feature APPROVATA dal PM, falla per prima).**
+   Oggi `buildPrompt()` fa inserire 2 link interni **fissi** (servizio CT + chi-siamo):
+   tutti gli articoli linkano sempre gli stessi. Obiettivo: linkare **articoli WP
+   reali e pertinenti** → cluster tematici (SEO) + UX. **Come farla (traccia
+   concordata):**
+   - Prima della generazione, GET su WP REST degli articoli pubblicati, es.
+     `GET /wp-json/wp/v2/posts?categories=3&per_page=20&_fields=title,link` (o con
+     `search=<token della focus keyword>`). È una lettura → usa `fetchJson` + `WP_UA`.
+   - Scegli 3-5 candidati pertinenti (per keyword/tema in comune), **escludi
+     l'articolo in creazione** (per slug/titolo).
+   - Passali a Claude nel prompt come lista "articoli correlati disponibili:
+     titolo → url" e istruiscilo a inserirne **2-3 come link interni contestuali**
+     nel corpo (al posto della regola dei 2 link fissi). La **CTA finale** resta.
+   - **Fallback**: se la GET fallisce o non ci sono candidati, resta sui 2 link
+     fissi attuali (non deve rompere il run). Aggiorna il check `intLinks` del
+     verificatore se serve. Anti-bot: la GET passa da `/wp-json` (a cadenza normale ok).
+1. **MVP4 contenuto**: resta **D1** log storico. **Immagine inline** nel corpo
+   = qualità/engagement, ma **NON dà punti Rank Math** (il check "alt" è già verde
+   grazie alla featured). Aperto: quality immagine high vs medium.
+2. **Nuovi topic** (idee col PM, ora che il blog è allargato): CER, fotovoltaico
    condominio, accumulo/batteria, colonnine ricarica, bandi regionali; PdC
    raffrescamento estivo, PdC in appartamento, "Conto Termico 3.0 come funziona"
    (pilastro). Aggiungere in `topics.json` (keyword corte, slug distinti, `_regole`).
-2. **A4** opzionale: anti-doppioni (check slug su WP). ~~A3~~ = fatto in versione
+3. **A4** opzionale: anti-doppioni (check slug su WP). ~~A3~~ = fatto in versione
    "reporting" (`verifyArticle()`); evoluzione = rigenerazione automatica sotto soglia.
-3. Bug/feature dal rodaggio (da raccogliere).
+4. Bug/feature dal rodaggio (da raccogliere).
 
 **FATTO in questa sessione (non è più lavoro aperto):** rotazione tracciata
 (`ops/rotation-state.json`), keyword corte, **power word** allineate a Rank Math IT

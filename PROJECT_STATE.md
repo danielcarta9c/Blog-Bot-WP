@@ -32,17 +32,20 @@
       Rank Math **88**.
 - [x] **ToC**: plugin ToC installato lato WP (Easy Table of Contents) → check
       Rank Math verde (+2 punti; passa sulla presenza del plugin).
-- [ ] Rodaggio → prossima release: B2 link interni, D1 log, immagine inline
-      (per alt su immagini nel corpo). Ripartenza: `HANDOFF.md`.
+- [ ] **Prossima feature APPROVATA: B2 — link interni reali** (mini-traccia in
+      `HANDOFF.md` §2). Poi: D1 log, immagine inline, nuovi topic. Ripartenza: `HANDOFF.md`.
 
 ## Next (backlog prossima release — per priorità)
 
 > Roadmap completa con obiettivi e test di accettazione in `ROADMAP.md`.
 > MVP1 / MVP1.1 / MVP3 = FATTI (vedi Done log). MVP2 (email) = saltato (scelta PM).
 
-1. **MVP4 — contenuto**: ~~B1 immagini featured~~ FATTO. Restano: **B2** link
-   interni reali (da REST WP), **D1** log storico. **Immagine inline** nel corpo
-   (chiuderebbe il check Rank Math "keyword nell'alt" sulle immagini di contenuto).
+0. ⭐ **B2 — link interni reali** (APPROVATA come prossima). Oggi il prompt mette 2
+   link interni FISSI; sostituirli con articoli WP reali e pertinenti. Mini-traccia
+   in `HANDOFF.md` §2.
+1. **MVP4 — contenuto**: ~~B1 immagini featured~~ FATTO. Resta **D1** log storico.
+   **Immagine inline** nel corpo (qualità/engagement; NB: NON dà punti Rank Math,
+   il check "alt" è già verde grazie alla featured).
 2. **A4** (opzionale): anti-doppioni (check slug su WP). ~~A3 quality gate~~ =
    fatto in versione "reporting" (verifyArticle stampa la checklist pre-publish);
    eventuale evoluzione = rigenerazione automatica sotto soglia.
