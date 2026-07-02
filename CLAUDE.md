@@ -37,9 +37,11 @@ issue automatica su fallimento, garanzie SEO su titolo/meta, retry HTTP),
 MVP4/B1 (immagine in evidenza generata OpenAI + alt), publish programmato +
 URL corta, **rotazione argomenti tracciata** (`ops/rotation-state.json`),
 **polish SEO** (keyword corte 2-4 parole, power word allineate alla lista
-italiana di Rank Math, verificatore pre-publish, density 16-22). **MVP2 (email)
-saltato** e **power word FATTA** (scelte PM). Restano: ToC (plugin WP), B2/D1,
-immagine inline. Dettagli in `ROADMAP.md` / `HANDOFF.md`.
+italiana di Rank Math, verificatore pre-publish, density 16-22, paragrafi brevi),
+**scope blog allargato** (efficienza energetica + incentivi, non solo Conto
+Termico), **ToC** (plugin WP). **MVP2 (email) saltato**, **power word e ToC
+FATTI** (scelte PM). Rank Math **88**. Restano: B2/D1, immagine inline, nuovi
+topic. Dettagli in `ROADMAP.md` / `HANDOFF.md`.
 
 ## Stack effettivo
 

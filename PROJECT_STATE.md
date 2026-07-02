@@ -24,12 +24,14 @@
 
 ## Now (max 3)
 
-- [x] **In produzione e validati live**: Release 1 (n8n staccato) + MVP4/B1
-      (immagine) + **publish PROGRAMMATO** + **URL corta** + **rotazione
-      argomenti TRACCIATA** + **polish SEO** (keyword corte, power word Rank
-      Math IT, verificatore pre-publish). Ultima prova: art. 5473, Rank Math **82**.
-- [ ] **Da fare lato WP (Daniel)**: installare un plugin ToC riconosciuto
-      (es. Easy Table of Contents) → chiude l'ultimo check Rank Math.
+- [x] **In produzione e validati live**: Release 1 (n8n staccato) + MVP4/B1 +
+      publish PROGRAMMATO + URL corta + **rotazione tracciata** + **polish SEO**
+      (keyword corte, power word Rank Math IT, verificatore, density 16-22,
+      paragrafi brevi) + **scope blog allargato** (efficienza energetica +
+      incentivi, non solo CT 3.0) + ToC (plugin WP). Ultima prova: art. 5480 →
+      Rank Math **88**.
+- [x] **ToC**: plugin ToC installato lato WP (Easy Table of Contents) → check
+      Rank Math verde (+2 punti; passa sulla presenza del plugin).
 - [ ] Rodaggio → prossima release: B2 link interni, D1 log, immagine inline
       (per alt su immagini nel corpo). Ripartenza: `HANDOFF.md`.
 
@@ -38,20 +40,32 @@
 > Roadmap completa con obiettivi e test di accettazione in `ROADMAP.md`.
 > MVP1 / MVP1.1 / MVP3 = FATTI (vedi Done log). MVP2 (email) = saltato (scelta PM).
 
-0. **ToC (lato WP, Daniel)**: installare/attivare un plugin ToC riconosciuto da
-   Rank Math (es. Easy Table of Contents) → chiude il check "Table of Contents".
-   Rank Math passa sulla sola presenza del plugin (non serve che l'indice si
-   veda; se lo si vuole visibile serve una modifica al template ACF — a parte).
 1. **MVP4 — contenuto**: ~~B1 immagini featured~~ FATTO. Restano: **B2** link
    interni reali (da REST WP), **D1** log storico. **Immagine inline** nel corpo
    (chiuderebbe il check Rank Math "keyword nell'alt" sulle immagini di contenuto).
 2. **A4** (opzionale): anti-doppioni (check slug su WP). ~~A3 quality gate~~ =
    fatto in versione "reporting" (verifyArticle stampa la checklist pre-publish);
    eventuale evoluzione = rigenerazione automatica sotto soglia.
-3. **Bug/feature dal rodaggio**: raccogliere quanto emerge dall'uso reale.
+3. **Nuovi topic** (idee sul tavolo): CER, fotovoltaico condominio, accumulo,
+   colonnine ricarica, bandi regionali; raffrescamento estivo, PdC in appartamento,
+   "Conto Termico 3.0 come funziona" (pilastro). Aggiungere in `topics.json`.
+4. **Bug/feature dal rodaggio**: raccogliere quanto emerge dall'uso reale.
 
 ## Done log
 
+- **Paragrafi brevi** (PR #19): prompt (ogni `<p>` max 3-4 frasi / ~110 parole) +
+  check nel verificatore (`maxParaWords`, warning >120) → i paragrafi lunghi si
+  vedono nel log pre-publish. Rank Math penalizzava un `<p>` troppo lungo (Daniel
+  l'aveva corretto a mano → **88**).
+- **Scope blog allargato + 3 topic** (PR #18): il prompt non è più "solo Conto
+  Termico 3.0" ma **efficienza energetica + incentivi residenziali**; CT 3.0 resta
+  il riferimento per pompe di calore/termico, per fotovoltaico/autoconsumo/CER/
+  altro si usa il quadro incentivante pertinente. +3 topic in fondo: autoconsumo
+  collettivo condominio (FV), obiezioni pompa di calore, sostituzione generatore CT 3.0.
+- **ToC** (lato WP): plugin ToC (Easy Table of Contents) installato → check Rank
+  Math verde. Nota: SiteGround "Anti-Bot AI" non è nel piano; lo snippet PHP
+  `rest_authentication_errors` NON risolve il sgcaptcha (agisce a valle del WAF);
+  a cadenza normale l'anti-bot non scatta (5480/5473 pubblicati ok).
 - **Polish SEO — density** (PR #16): target focus keyword nel prompt alzato da
   12-18 a **16-22** occorrenze (~1.0-1.5%), per non lasciare punti sul density
   (era 0.62 verde ma bassino). Effetto dal prossimo run.

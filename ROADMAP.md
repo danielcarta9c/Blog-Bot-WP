@@ -7,8 +7,9 @@
 
 > **Stato:** ✅ MVP1 · ✅ MVP1.1 · ⏭️ MVP2 saltato (scelta PM) · ✅ MVP3 "slim"
 > (A1+A2) · ✅ MVP4/B1 immagini · ⬜ MVP4 B2+D1 da fare · ✅ Rotazione tracciata ·
-> ✅ Polish SEO (keyword corte, power word Rank Math IT, verificatore A3 reporting) ·
-> ⬜ ToC (plugin WP). n8n dismesso. Repo: `Blog-Bot-WP`.
+> ✅ Polish SEO (keyword corte, power word Rank Math IT, verificatore A3 reporting,
+> density 16-22, paragrafi brevi) · ✅ Scope blog allargato (efficienza energetica +
+> incentivi) · ✅ ToC (plugin WP). Rank Math 88. n8n dismesso. Repo: `Blog-Bot-WP`.
 
 ## MVP1 — Bozza su WordPress (core) — ✅ FATTO
 
@@ -96,12 +97,24 @@ power word) emersi dal rodaggio.
 
 **Fatto:** focus keyword accorciate a 2-4 parole (`topics.json`, slug invariati);
 `POWER_WORDS` allineata alla lista italiana di Rank Math (default invariabile,
-match per parola intera); target density alzato a 16-22; verificatore pre-publish
-`verifyArticle()` (= A3 reporting); regole editoriali in `topics.json` (`_regole`).
-Config lato WP: lingua sito Italiano + fuso Europe/Rome. Validato: art. 5473 → 82.
+match per parola intera); target density alzato a 16-22; **paragrafi brevi**
+(prompt + check nel verificatore); verificatore pre-publish `verifyArticle()`
+(= A3 reporting); regole editoriali in `topics.json` (`_regole`). Config lato WP:
+lingua sito Italiano + fuso Europe/Rome + plugin ToC. Validato: art. 5480 → **88**.
 
-**Resta aperto (SEO):** ToC (plugin WP riconosciuto), immagine inline nel corpo
-(per l'alt sulle immagini di contenuto).
+## Scope blog allargato — ✅ FATTO
+
+**Obiettivo:** il blog non è solo Conto Termico: è efficienza energetica +
+incentivi per il residenziale (pompe di calore, fotovoltaico, autoconsumo/CER,
+riqualificazione, bandi/fondi).
+
+**Fatto:** prompt aggiornato → CT 3.0 resta il riferimento per pompe di calore/
+termico; per fotovoltaico/autoconsumo/CER/altro si usa il quadro incentivante
+pertinente senza forzare il CT. Citazione fonti resa condizionale al tema.
+
+**Resta aperto (SEO):** immagine inline nel corpo (per l'alt sulle immagini di
+contenuto); nuovi topic (CER, FV condominio, accumulo, colonnine, bandi;
+raffrescamento, PdC appartamento, "CT 3.0 come funziona").
 
 ## Fuori scope (anti-overengineering, §13)
 

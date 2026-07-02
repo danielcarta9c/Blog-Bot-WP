@@ -25,11 +25,12 @@
   titolo/meta, retry HTTP), MVP4/**B1** (immagine + alt = focus keyword),
   **publish programmato + URL corta** (slug ≤60), **rotazione argomenti
   TRACCIATA**, **polish SEO** (keyword corte 2-4 parole, power word allineate
-  alla lista italiana di Rank Math, verificatore pre-publish, density 16-22).
-  Ultima prova: art. **5473 → Rank Math 82/100** (da 72).
-- **MVP2 (email) saltato**, **power word FATTA**. **Restano:** ToC (plugin WP,
-  lato Daniel), B2 (link interni reali), D1 (log storico), immagine inline nel
-  corpo (per l'alt sulle immagini di contenuto); A4 opzionale.
+  alla lista italiana di Rank Math, verificatore pre-publish, density 16-22,
+  paragrafi brevi), **scope blog allargato** (efficienza energetica + incentivi,
+  non solo CT 3.0), **ToC** (plugin WP). Ultima prova: art. **5480 → Rank Math 88**.
+- **MVP2 (email) saltato**, **power word FATTA**, **ToC FATTO** (plugin WP).
+  **Restano:** B2 (link interni reali), D1 (log storico), immagine inline nel
+  corpo (per l'alt sulle immagini di contenuto), nuovi topic; A4 opzionale.
 - Tutto è su `main`. Branch **`mvp1.1`** = restore-point stabile (pre-MVP4).
 
 ## 2. Lavoro aperto (come riprendere)
@@ -38,25 +39,24 @@ Daniel **usa il sistema in produzione (rodaggio)**, raccoglie bug/feature e
 vuole affrontarli **tutti insieme nella prossima release**. Backlog in
 `PROJECT_STATE.md` → Next. In sintesi:
 
-0. ⭐ **ToC (lato Daniel, WordPress)**: installare/attivare un plugin ToC
-   riconosciuto da Rank Math (es. **Easy Table of Contents**). Rank Math passa il
-   check "Table of Contents" sulla **sola presenza** del plugin (un ToC scritto a
-   mano in HTML NON conta). Se lo si vuole anche **visibile** ai lettori serve una
-   modifica al template ACF (il corpo articolo sta in `acf.titoli.testo`, un plugin
-   che aggancia `the_content` potrebbe non renderizzarlo): lavoro a parte.
-1. **MVP4 contenuto**: ~~B1 immagini~~ FATTO. Restano **B2** link interni reali
+0. **MVP4 contenuto**: ~~B1 immagini~~ FATTO. Restano **B2** link interni reali
    (dalla REST WP, al posto dei 2 fissi) e **D1** log storico. **Immagine inline**
    nel corpo → chiuderebbe il check Rank Math "keyword nell'alt" (oggi c'è solo la
    featured). Aperto: quality immagine high vs medium.
+1. **Nuovi topic** (idee col PM, ora che il blog è allargato): CER, fotovoltaico
+   condominio, accumulo/batteria, colonnine ricarica, bandi regionali; PdC
+   raffrescamento estivo, PdC in appartamento, "Conto Termico 3.0 come funziona"
+   (pilastro). Aggiungere in `topics.json` (keyword corte, slug distinti, `_regole`).
 2. **A4** opzionale: anti-doppioni (check slug su WP). ~~A3~~ = fatto in versione
    "reporting" (`verifyArticle()`); evoluzione = rigenerazione automatica sotto soglia.
 3. Bug/feature dal rodaggio (da raccogliere).
 
 **FATTO in questa sessione (non è più lavoro aperto):** rotazione tracciata
 (`ops/rotation-state.json`), keyword corte, **power word** allineate a Rank Math IT
-(+ lingua sito su Italiano), verificatore pre-publish, density 16-22, fuso WP
-Europe/Rome. Restore-point pre-sessione: `main` a `0ea53ba` non c'è più senso, i
-punti stabili sono i merge PR #13/#15/#16.
+(+ lingua sito su Italiano), verificatore pre-publish, density 16-22, **paragrafi
+brevi**, **scope blog allargato** (efficienza energetica + incentivi, non solo
+CT 3.0), **+3 topic**, **ToC** (plugin WP), fuso WP Europe/Rome. Punti stabili:
+merge PR #13/#15/#16/#18/#19. Risultato Rank Math: **88** (art. 5480).
 
 ### Come funziona il sistema (così non chiedi a Daniel)
 
@@ -65,10 +65,15 @@ punti stabili sono i merge PR #13/#15/#16.
   **`.github/workflows/seo-blog.yml`**.
 - **Pipeline** (replica i 7 nodi n8n, l'export storico è in `n8nesistente`):
   scegli argomento → ricerca Brave → articolo con Claude (`claude-sonnet-4-6`,
-  via **tool use** `pubblica_articolo`) → diagnostica SEO → [immagine OpenAI +
-  upload WP] → crea post WP (`POST /wp-json/wp/v2/posts`, **`status:future`** +
-  `date_gmt`, `categories:[3]`, `template:single-blog-nuovo.php`) → meta Rank Math
-  (`POST /wp-json/rankmath/v1/updateMeta`).
+  via **tool use** `pubblica_articolo`) → diagnostica SEO + **verificatore** →
+  [immagine OpenAI + upload WP] → crea post WP (`POST /wp-json/wp/v2/posts`,
+  **`status:future`** + `date_gmt`, `categories:[3]`, `template:single-blog-nuovo.php`)
+  → meta Rank Math (`POST /wp-json/rankmath/v1/updateMeta`).
+- **Scope editoriale** (prompt in `generate.mjs`): il blog è **efficienza
+  energetica + incentivi residenziali**, NON solo Conto Termico. Regola nel
+  prompt: per pompe di calore/termico → riferimento CT 3.0 (D.M. 7/8/2025); per
+  fotovoltaico/autoconsumo/CER/altro → quadro incentivante pertinente, senza
+  forzare il CT. Paragrafi tenuti brevi (≤~110 parole) per la leggibilità Rank Math.
 - **Segreti** (GitHub → Settings → Secrets → Actions): `ANTHROPIC_API_KEY`,
   `BRAVE_API_KEY`, `WP_USER` (= username WP, non email), `WP_APP_PASSWORD`
   (= Application Password di WordPress, non la password di login),
@@ -91,7 +96,8 @@ punti stabili sono i merge PR #13/#15/#16.
   Regole per scrivere bene i topic in `topics.json` → campo `_regole`.
 - **Verificatore pre-publish** (`verifyArticle()`): prima di creare il post stampa
   nel log una checklist ✓/✗ delle regole SEO (power word nel titolo, FK in
-  titolo/meta/primi-200/H2, densità, word count, H2, slug, link). Non blocca.
+  titolo/meta/primi-200/H2, densità, word count, H2, slug, link, **paragrafi
+  brevi** ≤120 parole). Non blocca (c'è la finestra di veto).
 - **Articolo "su richiesta"**: `next.json`. Si compilano `titolo`,
   `focus_keyword`, `brief`, `stile`; si committa → parte un run con quel
   titolo; a run riuscito il file **si svuota da solo** (no stale state sul
@@ -148,8 +154,14 @@ poi `git pull` e leggi il log. Per le Actions puoi usare i tool MCP
   `<html>...sgcaptcha...`" NON è il codice: è l'hosting che scambia le API per un
   bot quando ci sono **troppi run ravvicinati** (l'IP del runner viene flaggato).
   A cadenza normale (1/settimana) non scatta. Se stai testando: **dirada i run**
-  (aspetta qualche minuto) e riprova. Fix durevole: whitelist `/wp-json/`
-  nell'Anti-Bot di SiteGround. (Era la causa anche della vecchia issue #7.)
+  (aspetta qualche minuto) e riprova. (Era la causa anche della vecchia issue #7.)
+  - **Piano SiteGround senza "Anti-Bot AI"** (è su GrowBig+): niente toggle di
+    whitelist in Site Tools. Il `sgcaptcha` è comunque servito a livello **server/
+    WAF**, PRIMA di WordPress → **uno snippet PHP NON lo risolve** (es.
+    `rest_authentication_errors` agisce dentro WP, a valle del WAF, e riguarda
+    l'auth, non l'anti-bot). Unica via per testare a raffica: **ticket supporto
+    SiteGround** per escludere `/wp-json/` dalla protezione bot lato server. **Per
+    la produzione non serve**: a 1 run/settimana pubblica sempre (5480/5473 ok).
 - **Publish PROGRAMMATO, non draft**: il post nasce `status: future` con
   `date_gmt` alle prossime 09:00 UTC → va online da solo a metà mattina, veto di
   Daniel nella finestra. NON reintrodurre `status: draft` o `publish` immediato.
