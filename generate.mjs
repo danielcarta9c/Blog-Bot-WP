@@ -12,13 +12,17 @@
 // MVP4/B1: immagine in evidenza generata (OpenAI) + upload su WP con alt text.
 // MVP4/B2: link interni REALI: articoli WP pubblicati e pertinenti al topic
 //          proposti a Claude al posto dei 2 link fissi (fallback sui fissi).
+// A4:      anti-doppioni: un topic gia' online (anche se la rotazione non lo
+//          sa, es. pubblicato via override) viene saltato e segnato in rotazione.
+// D1:      registro storico: una riga per articolo in ops/articles.csv
+//          (committato dal workflow) + riepilogo nel summary della Action.
 // Stack: solo `fetch` nativo (Node 20+), nessuna dipendenza npm.
 //
 // Segreti letti da env (GitHub Secrets):
 //   ANTHROPIC_API_KEY, BRAVE_API_KEY, WP_USER, WP_APP_PASSWORD
 //   OPENAI_API_KEY (opzionale: se manca, immagine saltata, articolo comunque ok)
 
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, appendFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -189,19 +193,36 @@ function writeRotationState(state) {
 }
 
 // Sceglie il topic: primo in ordine di lista il cui slug NON e' ancora usato.
+// A4: un topic non-usato ma GIA' online (gemello live trovato, es. pubblicato
+// via override che non tocca la rotazione) viene saltato e raccolto in
+// `doppioni` (a fine run verra' segnato in rotazione con la data del pezzo
+// live, cosi' lo stato si auto-ripara e il salto non si ripete). Con posts
+// null (lettura fallita) il controllo doppioni e' saltato: run come prima.
 // Se sono tutti usati -> LRU (data piu' vecchia; tie-break: ordine di lista) e
 // segnala esaurito=true. Slug orfani (topic rimossi) sono ignorati: iteriamo
 // solo la lista corrente.
-function pickTopic(topics, state) {
+function pickTopic(topics, state, posts) {
   const usati = state.usati || {};
-  const unused = topics.find((t) => !(t.slug in usati));
-  if (unused) return { topic: { ...unused }, esaurito: false };
+  const doppioni = [];
+  for (const t of topics) {
+    if (t.slug in usati) continue;
+    const twin = posts ? findLiveTwin(posts, t) : null;
+    if (twin) {
+      doppioni.push({ slug: t.slug, date: (twin.date || "").slice(0, 10), link: twin.link });
+      continue;
+    }
+    return { topic: { ...t }, esaurito: false, doppioni };
+  }
+  // Esauriti (o rimasti solo doppioni): LRU sulla data effettiva, contando i
+  // doppioni appena trovati con la data del loro pezzo live.
+  const eff = { ...usati };
+  for (const d of doppioni) eff[d.slug] = d.date || new Date().toISOString().slice(0, 10);
   let best = null;
   for (const t of topics) {
-    const d = usati[t.slug] || "";
-    if (best === null || d < best.date) best = { topic: t, date: d };
+    const dd = eff[t.slug] || "";
+    if (best === null || dd < best.date) best = { topic: t, date: dd };
   }
-  return { topic: { ...best.topic }, esaurito: true };
+  return { topic: { ...best.topic }, esaurito: true, doppioni };
 }
 
 // ---------------------------------------------------------------------------
@@ -212,7 +233,7 @@ function pickTopic(topics, state) {
 //         lo STILE resta su `weekNumber % stili.length` (la ripetizione di stile
 //         non crea cannibalizzazione, quindi non si traccia).
 // ---------------------------------------------------------------------------
-function selectTopic() {
+function selectTopic(posts) {
   const data = JSON.parse(readFileSync(TOPICS_PATH, "utf8"));
   const topics = data.topics;
   const stili = data.stili;
@@ -237,10 +258,10 @@ function selectTopic() {
   }
 
   const state = readRotationState();
-  const { topic, esaurito } = pickTopic(topics, state);
+  const { topic, esaurito, doppioni } = pickTopic(topics, state, posts);
   const template = stili[weekNumber % stili.length];
   topic.title = topic.title.replace("{{year}}", year);
-  return { topic, template, year, weekNumber, today, override: false, state, esaurito };
+  return { topic, template, year, weekNumber, today, override: false, state, esaurito, doppioni };
 }
 
 // ---------------------------------------------------------------------------
@@ -262,16 +283,17 @@ async function braveSearch(topic, year) {
 }
 
 // ---------------------------------------------------------------------------
-// B2 — Link interni REALI: legge dal blog (WP REST, categoria 3) gli articoli
-// gia' pubblicati e sceglie i piu' pertinenti al topic. Claude li ricevera' nel
-// prompt come candidati per i link interni contestuali, al posto dei 2 link
-// fissi -> cluster tematici (SEO) + UX. NON bloccante: se la GET fallisce o i
-// candidati sono meno di 2, si resta sui 2 link fissi di sempre (fallback).
+// B2 + A4 — una sola lettura del blog (WP REST, categoria 3) alimenta due cose:
+//   B2: i link interni REALI (articoli pertinenti proposti a Claude al posto
+//       dei 2 link fissi; fallback sui fissi se la GET fallisce o <2 candidati);
+//   A4: l'anti-doppioni (un topic gia' online viene saltato e segnato in
+//       rotazione, anche se la rotazione non lo sapeva, es. da override).
+// Tutto NON bloccante: senza lettura il run procede come prima di B2/A4.
 // ---------------------------------------------------------------------------
 // Parole vuote per il match di pertinenza: grammaticali + boilerplate dei
 // nostri titoli SEO (guida/power word/anno compaiono quasi ovunque e
 // creerebbero pertinenza finta tra articoli che non c'entrano nulla).
-const RELATED_STOPWORDS = new Set([
+const RELATED_STOPWORDS = [
   "del", "dello", "della", "dei", "degli", "delle", "dal", "dallo", "dalla",
   "dai", "dagli", "dalle", "nel", "nello", "nella", "nei", "negli", "nelle",
   "sul", "sullo", "sulla", "sui", "sugli", "sulle", "con", "per", "tra", "fra",
@@ -281,31 +303,63 @@ const RELATED_STOPWORDS = new Set([
   "guida", "completa", "completo", "essenziale", "efficace", "indispensabile",
   "incredibile", "irresistibile", "impeccabile", "straordinario", "definitivo",
   "definitiva"
-]);
+];
 
-// Token "significativi" di una frase: minuscolo, senza accenti, niente
-// stopword, niente numeri puri (l'anno nei titoli non e' un tema).
+// Stemming MINIMO per l'italiano: tronca l'ultima vocale delle parole >=5
+// lettere, cosi' singolare/plurale/genere collassano sullo stesso token
+// (piscina/piscine -> piscin, pompa/pompe -> pomp, risparmio/risparmia ->
+// risparmi). Senza questo il gemello "piscina" di un topic "piscine" sfugge.
+function stemToken(w) {
+  return w.length >= 5 ? w.replace(/[aeiou]$/, "") : w;
+}
+const RELATED_STOP_STEMS = new Set(RELATED_STOPWORDS.map(stemToken));
+
+// Token "significativi" di una frase, gia' stemmati: minuscolo, senza accenti,
+// niente stopword, niente numeri puri (l'anno nei titoli non e' un tema).
 function relatedTokens(s) {
   return (s || "")
     .toLowerCase()
     .normalize("NFD").replace(/[̀-ͯ]/g, "")
     .replace(/[^a-z0-9]+/g, " ")
     .split(" ")
-    .filter((w) => w.length >= 3 && !/^\d+$/.test(w) && !RELATED_STOPWORDS.has(w));
+    .filter((w) => w.length >= 3 && !/^\d+$/.test(w))
+    .map(stemToken)
+    .filter((w) => !RELATED_STOP_STEMS.has(w));
 }
 
-// "Stesso argomento" tra slug candidato e slug del topic in creazione (caso
-// LRU/rigenerazione: il pezzo gemello e' gia' live e NON va proposto come
-// correlato). Lo slug pubblicato differisce spesso da quello del topic
-// (riscritture di Claude, "con-la" in mezzo, suffissi -2/-5 di WP): il match
-// esatto non basta, confrontiamo gli INSIEMI di token significativi
-// (uguali o l'uno contenuto nell'altro -> stesso argomento).
+// "Stesso argomento" tra slug candidato e slug del topic. Lo slug pubblicato
+// differisce spesso da quello del topic (riscritture di Claude, "con-la" in
+// mezzo, suffissi -2/-5 di WP): il match esatto non basta, confrontiamo gli
+// INSIEMI di token significativi (uguali o contenuti -> stesso argomento).
 function sameTopicSlug(candSlug, topicSlug) {
   const a = new Set(relatedTokens(candSlug));
   const b = new Set(relatedTokens(topicSlug));
   if (!a.size || !b.size) return false;
   const [small, big] = a.size <= b.size ? [a, b] : [b, a];
   return [...small].every((w) => big.has(w));
+}
+
+// Il post live p e' il "gemello" del topic in creazione? Tre segnali:
+//   1) slug con gli stessi token (vedi sameTopicSlug);
+//   2) titolo identico;
+//   3) titolo che INIZIA con la focus keyword del topic (i nostri titoli SEO
+//      sono keyword-led: se un pezzo live apre con la stessa keyword, compete
+//      sulla stessa SERP anche se il resto del titolo e' diverso).
+// Usato sia da A4 (salta il topic) sia da B2 (mai proporre il gemello come
+// link correlato, caso LRU dove il topic si ripubblica apposta).
+function isTopicTwin(p, topic) {
+  if (sameTopicSlug(p.slug, topic.slug)) return true;
+  if ((p.title || "").toLowerCase() === (topic.title || "").toLowerCase()) return true;
+  const fk = relatedTokens(topic.focusKeyword);
+  if (fk.length >= 2) {
+    const tt = relatedTokens(p.title);
+    if (fk.every((w, i) => tt[i] === w)) return true;
+  }
+  return false;
+}
+
+function findLiveTwin(posts, topic) {
+  return (posts || []).find((p) => isTopicTwin(p, topic)) || null;
 }
 
 // I titoli WP arrivano con entita' HTML (es. &#8217;): decodifica minima.
@@ -317,35 +371,44 @@ function decodeEntities(s) {
     .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&nbsp;/g, " ");
 }
 
-// Legge gli articoli pubblicati (lettura pubblica: niente auth, meno modi di
-// fallire) e ritorna i 5 piu' pertinenti come {title, link}. Pertinenza =
-// token in comune tra keyword+titolo del topic e titolo+slug del candidato;
-// l'articolo in creazione e' escluso per slug/titolo (caso LRU: stesso topic
-// gia' pubblicato in passato). A parita' di punteggio vince il piu' recente
-// (WP ordina per data, il sort e' stabile).
-async function fetchRelatedPosts(topic) {
+// Legge gli articoli pubblicati del blog (lettura pubblica: niente auth, meno
+// modi di fallire) e li normalizza in {title, link, slug, date}.
+async function fetchPublishedPosts() {
   const params = new URLSearchParams({
     categories: "3",
-    per_page: "50", // 1 articolo/settimana: una chiamata copre anni di storico
+    // 1 articolo/settimana: 100 copre ~2 anni di storico in una chiamata.
+    // Quando il blog li supera, servira' la paginazione (dolore futuro, §13).
+    per_page: "100",
     status: "publish",
-    _fields: "title,link,slug"
+    _fields: "title,link,slug,date"
   });
   const posts = await fetchJson(
     `${WP_BASE}/wp-json/wp/v2/posts?${params}`,
     { headers: { "Accept": "application/json", "User-Agent": WP_UA } },
-    "WordPress (articoli correlati)"
+    "WordPress (articoli live)"
   );
-  if (!Array.isArray(posts)) throw new Error("WordPress (articoli correlati): risposta inattesa");
+  if (!Array.isArray(posts)) throw new Error("WordPress (articoli live): risposta inattesa");
+  return posts
+    .map((p) => ({
+      title: decodeEntities((p.title && p.title.rendered) || "").trim(),
+      link: p.link || "",
+      slug: p.slug || "",
+      date: p.date || ""
+    }))
+    .filter((p) => p.title && p.link);
+}
 
+// B2 — sceglie i 5 articoli live piu' pertinenti come {title, link}.
+// Pertinenza = token in comune tra keyword+titolo del topic e titolo+slug del
+// candidato; il gemello del topic e' escluso (caso LRU: si ripubblica apposta).
+// A parita' di punteggio vince il piu' recente (WP ordina per data, sort stabile).
+function pickRelatedPosts(posts, topic) {
   const topicToks = new Set([...relatedTokens(topic.focusKeyword), ...relatedTokens(topic.title)]);
   const scored = [];
   for (const p of posts) {
-    const title = decodeEntities((p.title && p.title.rendered) || "").trim();
-    const slug = p.slug || "";
-    if (!title || !p.link) continue;
-    if (sameTopicSlug(slug, topic.slug) || title.toLowerCase() === (topic.title || "").toLowerCase()) continue;
-    const score = relatedTokens(`${title} ${slug}`).filter((w) => topicToks.has(w)).length;
-    if (score >= 1) scored.push({ title, link: p.link, score });
+    if (isTopicTwin(p, topic)) continue;
+    const score = relatedTokens(`${p.title} ${p.slug}`).filter((w) => topicToks.has(w)).length;
+    if (score >= 1) scored.push({ title: p.title, link: p.link, score });
   }
   scored.sort((a, b) => b.score - a.score);
   return scored.slice(0, 5).map(({ title, link }) => ({ title, link }));
@@ -650,7 +713,49 @@ function verifyArticle(article) {
   console.log("VERIFICA REGOLE SEO (pre-publish):");
   for (const [label, ok] of checks) console.log(`  [${ok ? "OK" : "XX"}] ${label}`);
   console.log(`REGOLE: ${checks.length - failed.length}/${checks.length} ok${failed.length ? " (rivedi i punti XX)" : " - tutto a posto"}`);
-  return failed.length;
+  return { ok: checks.length - failed.length, total: checks.length };
+}
+
+// ---------------------------------------------------------------------------
+// D1 — Registro storico: una riga per articolo generato in ops/articles.csv
+// (ri-committato su main dal workflow insieme a log e stato rotazione) +
+// riepilogo leggibile nel summary della Action (se disponibile).
+// ---------------------------------------------------------------------------
+const ARTICLES_CSV_PATH = join(ROOT, "ops", "articles.csv");
+const ARTICLES_CSV_HEADER =
+  "data_run,post_id,titolo,focus_keyword,slug,parole,regole_ok,correlati_usati,immagine,publish_gmt,origine";
+
+// Campo CSV: virgolette solo se serve (virgole/virgolette/a-capo nel valore).
+function csvField(v) {
+  const s = String(v ?? "");
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+function appendArticleLog(fields) {
+  let prefix = "";
+  try {
+    if (!readFileSync(ARTICLES_CSV_PATH, "utf8").trim()) prefix = ARTICLES_CSV_HEADER + "\n";
+  } catch {
+    prefix = ARTICLES_CSV_HEADER + "\n"; // file assente: crealo con l'header
+  }
+  appendFileSync(ARTICLES_CSV_PATH, prefix + fields.map(csvField).join(",") + "\n");
+}
+
+// Riepilogo nel summary della Action (GITHUB_STEP_SUMMARY e' il file magico
+// di GitHub Actions; fuori da Actions la variabile manca e non si scrive nulla).
+function writeStepSummary(article, post, regole, origine) {
+  if (!process.env.GITHUB_STEP_SUMMARY) return;
+  const d = article.diagnostics;
+  appendFileSync(process.env.GITHUB_STEP_SUMMARY, [
+    "## Articolo generato",
+    "",
+    `**${article.patch_body.title}**`,
+    "",
+    `- Post WP: [${post.id}](${WP_BASE}/wp-admin/post.php?post=${post.id}&action=edit) — publish ${article.patch_body.date_gmt} UTC (${origine})`,
+    `- Focus keyword: ${article.focus_keyword}`,
+    `- Parole: ${d.wordCount} · Regole SEO: ${regole.ok}/${regole.total} · Link correlati: ${d.relatedUsed}/${d.relatedAvailable}`,
+    ""
+  ].join("\n"));
 }
 
 // ---------------------------------------------------------------------------
@@ -731,9 +836,25 @@ async function uploadFeaturedImage(pngBuffer, focusKeyword, slug) {
 // Orchestrazione
 // ---------------------------------------------------------------------------
 async function main() {
-  const ctx = selectTopic();
+  // B2 + A4 — una sola lettura del blog: alimenta anti-doppioni e correlati.
+  // NON bloccante: se fallisce (es. anti-bot) si procede come prima di B2/A4.
+  let posts = null;
+  try {
+    posts = await fetchPublishedPosts();
+    console.log(`Articoli live sul blog: ${posts.length}`);
+  } catch (e) {
+    console.error(`Lettura articoli live fallita (${e.message}): controllo doppioni saltato, link interni fissi`);
+  }
+
+  const ctx = selectTopic(posts);
+  for (const d of ctx.doppioni || []) {
+    console.log(`A4: topic "${d.slug}" gia' online (${d.link}) -> saltato, verra' segnato in rotazione`);
+  }
   if (ctx.override) {
     console.log(`Override one-off (next.json): "${ctx.topic.title}"`);
+    // A4 sull'override: solo avviso (se Daniel forza un titolo, comanda lui).
+    const twin = posts ? findLiveTwin(posts, ctx.topic) : null;
+    if (twin) console.log(`A4 (avviso): un pezzo simile e' gia' online: ${twin.link}`);
   } else if (ctx.esaurito) {
     console.log(`Topic (rotazione, ARGOMENTI ESAURITI -> LRU): ${ctx.topic.focusKeyword}`);
   } else {
@@ -744,14 +865,8 @@ async function main() {
   const braveResults = await braveSearch(ctx.topic, ctx.year);
   console.log("Brave Search: ok");
 
-  // B2 — articoli correlati per i link interni. NON bloccante: su errore o
-  // candidati insufficienti si torna ai 2 link fissi (il run prosegue sempre).
-  let related = [];
-  try {
-    related = await fetchRelatedPosts(ctx.topic);
-  } catch (e) {
-    console.error(`Articoli correlati: lettura fallita (${e.message})`);
-  }
+  // B2 — articoli correlati per i link interni, dagli articoli live gia' letti.
+  let related = posts ? pickRelatedPosts(posts, ctx.topic) : [];
   if (related.length >= 2) {
     console.log(`Articoli correlati (candidati link interni): ${related.length}`);
     for (const r of related) console.log(`  - ${r.title} -> ${r.link}`);
@@ -765,7 +880,7 @@ async function main() {
 
   const article = parseArticle(message, related);
   console.log("Diagnostica SEO:", JSON.stringify(article.diagnostics));
-  verifyArticle(article);
+  const regole = verifyArticle(article);
 
   // Immagine in evidenza (non bloccante): se generazione/upload falliscono,
   // l'articolo esce comunque con l'immagine fallback.
@@ -786,6 +901,24 @@ async function main() {
   await updateRankMath(post.id, article);
   console.log("Rank Math: meta impostati");
 
+  // D1 — registro storico + riepilogo nella Action (solo a run riuscito).
+  const origine = ctx.override ? "override" : (ctx.esaurito ? "lru" : "rotazione");
+  appendArticleLog([
+    new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+    post.id,
+    article.patch_body.title,
+    article.focus_keyword,
+    article.slug,
+    article.diagnostics.wordCount,
+    `${regole.ok}/${regole.total}`,
+    `${article.diagnostics.relatedUsed}/${article.diagnostics.relatedAvailable}`,
+    article.patch_body.featured_media === FEATURED_MEDIA_FALLBACK ? "fallback" : article.patch_body.featured_media,
+    article.patch_body.date_gmt,
+    origine
+  ]);
+  console.log("Registro storico aggiornato: ops/articles.csv");
+  writeStepSummary(article, post, regole, origine);
+
   // Override consumato solo a run riuscito: svuota next.json (il workflow
   // committa il file ripulito). Su errore l'override resta per il retry.
   if (ctx.override) {
@@ -796,6 +929,12 @@ async function main() {
     // su errore il topic resta disponibile per il retry. Lo stato viene
     // ri-committato su main dal workflow (come next.json / log).
     ctx.state.usati = ctx.state.usati || {};
+    // A4: i doppioni saltati vengono segnati con la data del pezzo live, cosi'
+    // la rotazione si auto-ripara e il salto non si ripete a ogni run.
+    for (const d of ctx.doppioni || []) {
+      ctx.state.usati[d.slug] = d.date || new Date().toISOString().slice(0, 10);
+      console.log(`Rotazione: "${d.slug}" segnato come gia' pubblicato (${ctx.state.usati[d.slug]}, doppione live).`);
+    }
     ctx.state.usati[ctx.topic.slug] = new Date().toISOString().slice(0, 10);
     writeRotationState(ctx.state);
     console.log(`Rotazione: "${ctx.topic.slug}" segnato come usato.`);
