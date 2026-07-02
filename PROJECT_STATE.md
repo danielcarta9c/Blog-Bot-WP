@@ -59,6 +59,12 @@
 
 ## Done log
 
+- **Fix "Guida 2026" ovunque** (PR #24, feedback PM): {{year}} tolto da 12
+  titoli su 13 in topics.json (resta solo su "Quanto si Risparmia", dove
+  tariffe/bollette lo giustificano; slug invariati = rotazione intatta);
+  buildSeoTitle non appende piu' l'anno; regola anti-anno nel prompt (titolo,
+  titolo SEO, meta, slug) salvo anno gia' nell'H1 proposto; esempio next.json
+  senza anno. L'aggiornamento all'anno resta nei CONTENUTI.
 - **Fix immagini "sempre operai"** (PR #23, bug dal rodaggio segnalato dal PM,
   da validare al prossimo run): le immagini generate convergevano sempre su
   "tecnico che monta la PdC" (verificate: 2 su 2) e venivano sostituite a mano.
