@@ -285,7 +285,7 @@ Scrivi un articolo di 1500-2000 parole in HTML puro (solo tag ammessi: p, h2, st
 Requisiti SEO TASSATIVI:
 - Focus keyword ESATTA "${t.focusKeyword}" nel primo paragrafo (primi 100 caratteri)
 - Focus keyword in almeno 2 H2 su 5-6 totali
-- DENSITA FOCUS KEYWORD: la focus keyword esatta deve comparire almeno 12-18 volte nel testo (target 0.8-1.5%). Ripetila naturalmente in ogni sezione. Questo e CRITICO per il punteggio Rank Math.
+- DENSITA FOCUS KEYWORD: la focus keyword esatta deve comparire almeno 16-22 volte nel testo (target circa 1.0-1.5%). Ripetila naturalmente in ogni sezione (intro, ogni H2, FAQ, conclusione). Questo e CRITICO per il punteggio Rank Math: non scendere sotto le 16 occorrenze.
 - Almeno 4 H2 distinte
 - 1 H2 "Domande frequenti" con 4-5 Q&A in <p><strong>...</strong></p>
 - LINK ESTERNI OBBLIGATORI: inserisci almeno 2 link esterni dofollow a fonti istituzionali autorevoli. Usa <a href="URL">testo ancora</a> (SENZA rel="nofollow"). Fonti consigliate: https://www.gse.it (Portale GSE Conto Termico), https://www.mase.gov.it (Ministero Ambiente), https://www.gazzettaufficiale.it (Gazzetta Ufficiale per D.M.). Esempio: <a href="https://www.gse.it/servizi-per-te/conto-termico">portale Conto Termico del GSE</a>
