@@ -17,38 +17,60 @@
 | Immagini | API OpenAI | OpenAI | — | OpenAI Platform | `OPENAI_API_KEY` (Secret) | `gpt-image-1`, quality medium; immagine in evidenza |
 | ~~n8n~~ | ~~cloud n8n~~ | ~~n8n (a pagamento)~~ | — | **DISMESSO** | — | flusso staccato; canone da disdire/disdetto |
 
-> **Stato: Release 1 + MVP4/B1 + publish programmato, in produzione.** Il sistema
-> gira su **GitHub Actions** (cron settimanale → articolo PROGRAMMATO su WordPress
-> con immagine) ed è validato live. n8n staccato. `n8nesistente` = riferimento storico.
+> **Stato: Release 1 + MVP4/B1 + publish programmato + rotazione tracciata +
+> polish SEO, in produzione.** Il sistema gira su **GitHub Actions** (cron
+> settimanale → articolo PROGRAMMATO su WordPress con immagine) ed è validato
+> live. n8n staccato. `n8nesistente` = riferimento storico.
 
 ## Now (max 3)
 
 - [x] **In produzione e validati live**: Release 1 (n8n staccato) + MVP4/B1
-      (immagine in evidenza) + **publish PROGRAMMATO** (status future, veto la
-      mattina) + **URL corta** (slug ≤60). Articolo 5466 programmato = prova ok.
-- [ ] **Prossima feature (spec pronta)**: rotazione argomenti tracciata →
-      `docs/feature-rotazione-tracciata.md`. Sviluppo demandato a nuova sessione.
-- [ ] Rodaggio → prossima release (B2 link interni, D1 log). Ripartenza: `HANDOFF.md`.
+      (immagine) + **publish PROGRAMMATO** + **URL corta** + **rotazione
+      argomenti TRACCIATA** + **polish SEO** (keyword corte, power word Rank
+      Math IT, verificatore pre-publish). Ultima prova: art. 5473, Rank Math **82**.
+- [ ] **Da fare lato WP (Daniel)**: installare un plugin ToC riconosciuto
+      (es. Easy Table of Contents) → chiude l'ultimo check Rank Math.
+- [ ] Rodaggio → prossima release: B2 link interni, D1 log, immagine inline
+      (per alt su immagini nel corpo). Ripartenza: `HANDOFF.md`.
 
 ## Next (backlog prossima release — per priorità)
 
 > Roadmap completa con obiettivi e test di accettazione in `ROADMAP.md`.
 > MVP1 / MVP1.1 / MVP3 = FATTI (vedi Done log). MVP2 (email) = saltato (scelta PM).
 
-0. ⭐ **Rotazione argomenti TRACCIATA** — la **prima** cosa alla ripresa. Spec
-   pronta: `docs/feature-rotazione-tracciata.md`. Oggi la scelta topic è
-   `weekNumber % len` (cieca → ripete ogni ~10 settimane → cannibalizzazione
-   SEO). Progettata col PM, sviluppo demandato a una nuova sessione.
-1. **Bug/feature dal rodaggio**: raccogliere quanto emerge dall'uso reale e
-   affrontarlo in blocco (richiesta esplicita del PM).
-2. **MVP4 — contenuto**: ~~B1 immagini featured~~ FATTO. Restano: B2 link
-   interni reali (da REST WP), D1 log storico. Eventuale scelta quality high vs medium.
-3. **A3 / A4** (opzionali): quality gate SEO con rigenerazione; anti-doppioni
-   (check slug su WP). NB: il flag "keyword già usata" lo risolve la rotazione tracciata.
-4. **Power word Rank Math** (config WP di Daniel) + allineo lista codice.
+0. **ToC (lato WP, Daniel)**: installare/attivare un plugin ToC riconosciuto da
+   Rank Math (es. Easy Table of Contents) → chiude il check "Table of Contents".
+   Rank Math passa sulla sola presenza del plugin (non serve che l'indice si
+   veda; se lo si vuole visibile serve una modifica al template ACF — a parte).
+1. **MVP4 — contenuto**: ~~B1 immagini featured~~ FATTO. Restano: **B2** link
+   interni reali (da REST WP), **D1** log storico. **Immagine inline** nel corpo
+   (chiuderebbe il check Rank Math "keyword nell'alt" sulle immagini di contenuto).
+2. **A4** (opzionale): anti-doppioni (check slug su WP). ~~A3 quality gate~~ =
+   fatto in versione "reporting" (verifyArticle stampa la checklist pre-publish);
+   eventuale evoluzione = rigenerazione automatica sotto soglia.
+3. **Bug/feature dal rodaggio**: raccogliere quanto emerge dall'uso reale.
 
 ## Done log
 
+- **Polish SEO — density** (PR #16): target focus keyword nel prompt alzato da
+  12-18 a **16-22** occorrenze (~1.0-1.5%), per non lasciare punti sul density
+  (era 0.62 verde ma bassino). Effetto dal prossimo run.
+- **Polish SEO — keyword + power word + verificatore** (PR #15, validato live art.
+  5473 → Rank Math **82**, da 72): focusKeyword accorciate a 2-4 parole in
+  `topics.json` (slug invariati → rotazione intatta); `POWER_WORDS` allineata alla
+  **lista italiana di Rank Math** (match per parola intera, default invariabile
+  "essenziale") + prompt/schema aggiornati → il check power word passa; **verificatore
+  pre-publish** `verifyArticle()` (quality gate A3 "reporting": checklist ✓/✗ nel
+  log); blocco `_regole` in `topics.json`. Config lato WP: **lingua sito = Italiano**
+  (così Rank Math usa le power word IT) e **fuso Europe/Rome** (publish programmato
+  puntuale). Nota: alt-immagini nel corpo e ToC restano aperti (immagine inline / plugin WP).
+- **Rotazione argomenti TRACCIATA** (PR #13, validato live art. 5473): stato in
+  `ops/rotation-state.json` (slug → data ultimo uso), ri-committato su main dal
+  workflow; selezione = primo topic non-usato in ordine `topics.json` (l'ordine è
+  la leva del PM); LRU + issue a esaurimento; marcatura "usato" solo a publish
+  riuscito; `next.json` invariato e prioritario. Stato **seedato** con lo storico
+  (settimane 21-25). Sostituisce la vecchia rotazione cieca `weekNumber % len`
+  (cannibalizzazione SEO). Spec: `docs/feature-rotazione-tracciata.md`.
 - **Publish programmato + URL corta** (validato live, articolo 5466): patch_body
   `status: future` + `date_gmt` = prossime 09:00 UTC (≥4h) → l'articolo va online
   da solo a metà mattina, con finestra di veto per Daniel (mai più solo draft,

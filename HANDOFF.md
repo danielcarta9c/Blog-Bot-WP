@@ -22,10 +22,14 @@
   Daniel ha la finestra del mattino per cestinarlo. Mai publish immediato.
 - **Fatto e validato live:** MVP1, MVP1.1 (argomenti editabili + override
   one-off), MVP3 "slim" (output strutturato, issue su fallimento, garanzie SEO
-  titolo/meta, retry HTTP) → **Rank Math 80/100**, MVP4/**B1** (immagine +
-  alt = focus keyword), **publish programmato + URL corta** (slug ≤60).
-- **MVP2 (email) saltato** per scelta del PM. **Restano B2 (link interni reali),
-  D1 (log storico), power word (config Rank Math); A3/A4 opzionali.**
+  titolo/meta, retry HTTP), MVP4/**B1** (immagine + alt = focus keyword),
+  **publish programmato + URL corta** (slug ≤60), **rotazione argomenti
+  TRACCIATA**, **polish SEO** (keyword corte 2-4 parole, power word allineate
+  alla lista italiana di Rank Math, verificatore pre-publish, density 16-22).
+  Ultima prova: art. **5473 → Rank Math 82/100** (da 72).
+- **MVP2 (email) saltato**, **power word FATTA**. **Restano:** ToC (plugin WP,
+  lato Daniel), B2 (link interni reali), D1 (log storico), immagine inline nel
+  corpo (per l'alt sulle immagini di contenuto); A4 opzionale.
 - Tutto è su `main`. Branch **`mvp1.1`** = restore-point stabile (pre-MVP4).
 
 ## 2. Lavoro aperto (come riprendere)
@@ -34,21 +38,25 @@ Daniel **usa il sistema in produzione (rodaggio)**, raccoglie bug/feature e
 vuole affrontarli **tutti insieme nella prossima release**. Backlog in
 `PROJECT_STATE.md` → Next. In sintesi:
 
-0. ⭐ **PROSSIMA FEATURE, spec pronta: rotazione argomenti TRACCIATA** →
-   `docs/feature-rotazione-tracciata.md`. Oggi la scelta topic è `weekNumber %
-   len` (cieca, ripete ogni ~10 settimane → cannibalizzazione SEO). La spec
-   descrive tutto (stato in `ops/rotation-state.json`, selezione "primo non
-   usato", issue a esaurimento, `next.json` invariato e prioritario).
-   Implementala per prima (la sessione è stata chiusa apposta per svilupparla a fresco).
-1. Bug/feature dal rodaggio (da raccogliere).
-2. **Power word Rank Math**: Daniel aggiunge la lista power word ITALIANE nelle
-   impostazioni di Rank Math (di default sono inglesi → il check resta rosso);
-   poi allinea la lista `POWER_WORDS` nel codice a quella.
-3. **MVP4**: ~~B1 immagini~~ FATTO. Restano **B2** link interni reali (dalla REST
-   WP, al posto dei 2 fissi) e **D1** log storico. Aperto: quality immagine high
-   vs medium; immagine anche nel corpo articolo.
-4. **A3/A4** opzionali: quality gate SEO con rigenerazione (chiuderebbe il warning
-   "densità bassa" su keyword lunghe); anti-doppioni (check slug su WP).
+0. ⭐ **ToC (lato Daniel, WordPress)**: installare/attivare un plugin ToC
+   riconosciuto da Rank Math (es. **Easy Table of Contents**). Rank Math passa il
+   check "Table of Contents" sulla **sola presenza** del plugin (un ToC scritto a
+   mano in HTML NON conta). Se lo si vuole anche **visibile** ai lettori serve una
+   modifica al template ACF (il corpo articolo sta in `acf.titoli.testo`, un plugin
+   che aggancia `the_content` potrebbe non renderizzarlo): lavoro a parte.
+1. **MVP4 contenuto**: ~~B1 immagini~~ FATTO. Restano **B2** link interni reali
+   (dalla REST WP, al posto dei 2 fissi) e **D1** log storico. **Immagine inline**
+   nel corpo → chiuderebbe il check Rank Math "keyword nell'alt" (oggi c'è solo la
+   featured). Aperto: quality immagine high vs medium.
+2. **A4** opzionale: anti-doppioni (check slug su WP). ~~A3~~ = fatto in versione
+   "reporting" (`verifyArticle()`); evoluzione = rigenerazione automatica sotto soglia.
+3. Bug/feature dal rodaggio (da raccogliere).
+
+**FATTO in questa sessione (non è più lavoro aperto):** rotazione tracciata
+(`ops/rotation-state.json`), keyword corte, **power word** allineate a Rank Math IT
+(+ lingua sito su Italiano), verificatore pre-publish, density 16-22, fuso WP
+Europe/Rome. Restore-point pre-sessione: `main` a `0ea53ba` non c'è più senso, i
+punti stabili sono i merge PR #13/#15/#16.
 
 ### Come funziona il sistema (così non chiedi a Daniel)
 
@@ -75,8 +83,15 @@ vuole affrontarli **tutti insieme nella prossima release**. Backlog in
   medium; `uploadFeaturedImage()` carica su WP media + `alt_text` = focus keyword
   → `featured_media`. Non bloccante (try/catch: l'articolo esce comunque).
 - **URL corta**: `shortenSlug()` taglia lo slug a ≤60 char su confine di parola.
-- **Argomenti**: `topics.json` (lista rotazione settimanale + 5 "stili" di
-  scrittura). Daniel lo edita per cambiare i temi.
+- **Argomenti (rotazione TRACCIATA)**: `topics.json` (lista + 5 "stili"). La
+  scelta è il **primo topic il cui `slug` non è ancora in `ops/rotation-state.json`**
+  (mappa slug → data), in ordine di lista → **l'ordine è la leva editoriale**. A
+  esaurimento: LRU + issue "argomenti esauriti". Lo `slug` è la chiave: non
+  rinominarlo su topic già usati. Lo stato è ri-committato su `main` dal workflow.
+  Regole per scrivere bene i topic in `topics.json` → campo `_regole`.
+- **Verificatore pre-publish** (`verifyArticle()`): prima di creare il post stampa
+  nel log una checklist ✓/✗ delle regole SEO (power word nel titolo, FK in
+  titolo/meta/primi-200/H2, densità, word count, H2, slug, link). Non blocca.
 - **Articolo "su richiesta"**: `next.json`. Si compilano `titolo`,
   `focus_keyword`, `brief`, `stile`; si committa → parte un run con quel
   titolo; a run riuscito il file **si svuota da solo** (no stale state sul
@@ -90,8 +105,11 @@ vuole affrontarli **tutti insieme nella prossima release**. Backlog in
   **ricommitta su `main`** (con `[skip ci]`) → leggi l'esito con `git pull`.
   Su **fallimento** il workflow apre **una issue GitHub** automatica (A2).
 - **Garanzie SEO** (in `generate.mjs`): `buildSeoTitle()` forza la focus
-  keyword a inizio titolo SEO + una power word; `ensureKwInMeta()` forza la
-  focus keyword nella meta. Il **titolo visibile** del post resta naturale;
+  keyword a inizio titolo SEO + una **power word** (se manca inietta "essenziale");
+  `POWER_WORDS` = lista italiana ufficiale di Rank Math, match per parola intera,
+  power word invariabili per non sbagliare genere. **Serve la lingua del sito WP =
+  Italiano** o Rank Math controlla contro la lista inglese. `ensureKwInMeta()` forza
+  la focus keyword nella meta. Il **titolo visibile** del post resta naturale;
   si ottimizza solo il `<title>` (rank_math_title). `fetchJson()` ritenta su
   glitch transitori (5xx/429/HTML) ed esce con errori chiari.
 
@@ -104,11 +122,28 @@ poi `git pull` e leggi il log. Per le Actions puoi usare i tool MCP
 
 ## 3. Cosa NON ripetere (trappole già pagate)
 
-- **Repo rinominato `n8n`→`Blog-Bot-WP`**: `git push` fallisce (proxy sessione
-  sul vecchio nome). Scrivi su GitHub **via MCP** (`push_files`/
-  `create_or_update_file`/`delete_file`, con `repo:"n8n"` che redirige). Le
-  letture (`git fetch`/`pull`) funzionano ancora. Trigger di un run = commit su
-  `ops/run.trigger` via MCP (i commit API autore Daniel FANNO da trigger).
+- **Repo rinominato `n8n`→`Blog-Bot-WP`**: in ALCUNE sessioni `git push` è tornato
+  a funzionare (proxy ok), in altre falliva → in quel caso scrivi via MCP
+  (`push_files`/`create_or_update_file`/`delete_file`). **Le letture funzionano
+  sempre.** NB per i tool MCP GitHub di questa piattaforma usa `repo:"blog-bot-wp"`
+  (il vecchio `n8n` dà "not configured for this session").
+- ⚠️ **`next.json` è un path-trigger, non solo `ops/run.trigger`**: qualunque
+  push su `main` che modifica `next.json` (anche il **merge di una PR** che tocca
+  una nota `_aiuto` in `next.json`) **fa partire un run**. Combinato con un
+  file-trigger manuale → più run in coda → **più articoli pubblicati** (cascata).
+  In questa sessione è successo (art. 5471 codice vecchio + 5473 codice nuovo).
+  Se devi fare merge + run: fai UNA cosa sola, o metti in conto la coda.
+- **Annullare un run in coda**: `mcp__github__actions_run_trigger` con
+  `method:"cancel_workflow_run"` FUNZIONA via MCP (il *dispatch* invece dà 403).
+- **Validare una FEATURE prima del merge**: il workflow fa `checkout ref: main`
+  e ri-committa il log su `main`, quindi esegue sempre il codice di `main`. Per
+  provare un branch in isolamento si può rinstradare temporaneamente checkout +
+  push del log sul branch (`github.ref_name`) e ripristinare prima del merge —
+  ma è fragile (occhio al `git push HEAD:main` del commit-log). Alternativa più
+  semplice: merge in main e prima vera prova al cron (c'è la finestra di veto).
+- **Fuso orario WordPress**: il publish programmato usa `date_gmt`; se il fuso del
+  sito è sbagliato (era UTC invece di **Europe/Rome +2**) l'orario "9:00" del post
+  slitta. Impostazioni → Generali → Fuso orario = Roma. (Risolto.)
 - **Anti-bot SiteGround (sgcaptcha)**: se un run fallisce con "risposta non-JSON
   `<html>...sgcaptcha...`" NON è il codice: è l'hosting che scambia le API per un
   bot quando ci sono **troppi run ravvicinati** (l'IP del runner viene flaggato).
@@ -142,9 +177,13 @@ poi `git pull` e leggi il log. Per le Actions puoi usare i tool MCP
 - **Niente MCP-server-di-prodotto** (valutato e scartato col PM: overkill, §13).
   Niente dipendenze/astrazioni "per il futuro". (Nota: i tool MCP di GitHub li
   usiamo solo come tramite git per via del rename, non è un pattern di prodotto.)
-- **Flag Rank Math non-bug**: "keyword già usata" compare se più post usano
-  la stessa focus keyword (sarà risolto dalla feature rotazione tracciata).
-  Non è una regressione.
+- **Flag Rank Math non-bug**: "keyword già usata" compariva se più post usavano
+  la stessa focus keyword → mitigato dalla **rotazione tracciata** (non ripete i
+  topic) + keyword tutte diverse in `topics.json`. Non è una regressione.
+- **ToC e alt-immagini (check Rank Math che restano)**: il check "Table of
+  Contents" vuole un **plugin** ToC attivo (non basta HTML); il check "keyword
+  nell'alt" vuole immagini **nel corpo** (noi abbiamo solo la featured, il cui
+  alt è già impostato). Entrambi non sono forzabili solo dallo script.
 
 ## 4. Profilo del PM (Daniel) — per tarare comunicazione e autonomia
 

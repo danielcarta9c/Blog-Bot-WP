@@ -35,8 +35,11 @@ prima era "solo bozza"; ora publish differito con veto).
 override one-off `next.json`), MVP3 slim (output strutturato via tool use,
 issue automatica su fallimento, garanzie SEO su titolo/meta, retry HTTP),
 MVP4/B1 (immagine in evidenza generata OpenAI + alt), publish programmato +
-URL corta. **MVP2 (email) saltato** per scelta del PM. Restano B2/D1 e la
-power word (config Rank Math). Dettagli in `ROADMAP.md` / `HANDOFF.md`.
+URL corta, **rotazione argomenti tracciata** (`ops/rotation-state.json`),
+**polish SEO** (keyword corte 2-4 parole, power word allineate alla lista
+italiana di Rank Math, verificatore pre-publish, density 16-22). **MVP2 (email)
+saltato** e **power word FATTA** (scelte PM). Restano: ToC (plugin WP), B2/D1,
+immagine inline. Dettagli in `ROADMAP.md` / `HANDOFF.md`.
 
 ## Stack effettivo
 

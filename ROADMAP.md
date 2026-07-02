@@ -6,7 +6,9 @@
 > `PROJECT_STATE.md`; qui sta il **cosa** e il **perché**, non il giorno-giorno.
 
 > **Stato:** ✅ MVP1 · ✅ MVP1.1 · ⏭️ MVP2 saltato (scelta PM) · ✅ MVP3 "slim"
-> (A1+A2) · ✅ MVP4/B1 immagini · ⬜ MVP4 B2+D1 da fare. n8n dismesso. Repo: `Blog-Bot-WP`.
+> (A1+A2) · ✅ MVP4/B1 immagini · ⬜ MVP4 B2+D1 da fare · ✅ Rotazione tracciata ·
+> ✅ Polish SEO (keyword corte, power word Rank Math IT, verificatore A3 reporting) ·
+> ⬜ ToC (plugin WP). n8n dismesso. Repo: `Blog-Bot-WP`.
 
 ## MVP1 — Bozza su WordPress (core) — ✅ FATTO
 
@@ -48,8 +50,10 @@ contenuti senza toccare la logica.
   JSON.parse del testo. Eliminata la fragilità del parsing.
 - **A2** ✅ Su fallimento del run il workflow apre una **issue GitHub**
   (niente email, come da preferenza PM) con link al run + coda di log.
-- **A3** _(opzionale, rimandato)_ Quality gate SEO: rigenera una volta se
-  la diagnostica è sotto soglia.
+- **A3** ✅ _(versione "reporting")_ Quality gate SEO: `verifyArticle()` stampa
+  una checklist ✓/✗ delle regole PRIMA del publish (power word, FK in titolo/
+  meta/primi-200/H2, densità, word count, H2, slug, link). Non blocca (c'è la
+  finestra di veto). Evoluzione possibile: rigenerazione automatica sotto soglia.
 - **A4** _(opzionale, rimandato)_ Anti-doppioni: check slug su WP prima di creare.
 - ~~**C1** `topics.json` editabile~~ → anticipato a **MVP1.1** (fatto).
 - ~~**C2** override one-off della rotazione~~ → anticipato a **MVP1.1**
@@ -74,6 +78,30 @@ articoli generati.
   `nove-c.com`, al posto dei 2 URL fissi.
 - **D1** Log storico: riepilogo nel summary della Action + CSV degli
   articoli generati committato nel repo (§35 auto-commit log).
+
+## Rotazione argomenti tracciata — ✅ FATTO
+
+**Obiettivo:** basta rotazione cieca (`weekNumber % len`) che ripete le keyword
+e cannibalizza la SEO; scelta guidata e con memoria di cosa è già uscito.
+
+**Fatto:** stato in `ops/rotation-state.json` (slug → data), selezione = primo
+topic non-usato in ordine `topics.json` (l'ordine è la leva editoriale), LRU +
+issue a esaurimento, marcatura solo a publish riuscito, `next.json` invariato e
+prioritario. Stato seedato con lo storico. Spec: `docs/feature-rotazione-tracciata.md`.
+
+## Polish SEO (keyword + power word + verificatore) — ✅ FATTO
+
+**Obiettivo:** chiudere gli errori Rank Math ricorrenti (densità, URL lungo,
+power word) emersi dal rodaggio.
+
+**Fatto:** focus keyword accorciate a 2-4 parole (`topics.json`, slug invariati);
+`POWER_WORDS` allineata alla lista italiana di Rank Math (default invariabile,
+match per parola intera); target density alzato a 16-22; verificatore pre-publish
+`verifyArticle()` (= A3 reporting); regole editoriali in `topics.json` (`_regole`).
+Config lato WP: lingua sito Italiano + fuso Europe/Rome. Validato: art. 5473 → 82.
+
+**Resta aperto (SEO):** ToC (plugin WP riconosciuto), immagine inline nel corpo
+(per l'alt sulle immagini di contenuto).
 
 ## Fuori scope (anti-overengineering, §13)
 
