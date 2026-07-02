@@ -190,8 +190,15 @@ poi `git pull` e leggi il log. Per le Actions puoi usare i tool MCP
   fai validare il punteggio su una bozza **prima** di considerare chiuso.
 - **Immagini AI**: i primi che "sanno di finto" sono i volti in primo piano e
   le scene troppo ravvicinate/in posa. Persone di spalle o di 3/4 da dietro, a
-  media/lunga distanza. Preferisci il beneficio/emozione (interni, cantiere)
-  al prodotto; e varia il registro per articolo (non sempre pompe di calore).
+  media/lunga distanza. **Bug pagato (segnalato dal PM): il soggetto convergeva
+  SEMPRE su "operaio che monta la pompa di calore"** — il menu dei registri
+  mappava how-to/iter -> installatore, quasi tutti i pezzi citano PdC e Claude
+  non ha memoria tra run: 2 immagini bot su 2 verificate erano operai, e Daniel
+  le sostituiva a mano sui post live. Fix: soggetto = TEMA CONCRETO
+  dell'articolo (piscina -> piscina, edificio, interno casa, tetto FV,
+  prodotto), installatore VIETATO salvo articoli proprio su installazione/
+  cantiere; `brief_immagine` ora stampato nel log del run per vedere subito
+  se i soggetti tornano monotoni.
 - **Git tag NON si pushano** su questo remoto (proxy del sandbox): "remote end
   hung up". Per un restore-point usa un **branch** (es. `mvp1.1`), non un tag.
 - **Dispatch dei workflow via MCP/API → 403** ("Resource not accessible by

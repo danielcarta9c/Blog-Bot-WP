@@ -59,6 +59,12 @@
 
 ## Done log
 
+- **Fix immagini "sempre operai"** (PR #23, bug dal rodaggio segnalato dal PM,
+  da validare al prossimo run): le immagini generate convergevano sempre su
+  "tecnico che monta la PdC" (verificate: 2 su 2) e venivano sostituite a mano.
+  Ora il prompt impone soggetto = TEMA CONCRETO dell'articolo (piscina,
+  edificio, interno, tetto FV, prodotto), installatore VIETATO salvo articoli
+  su installazione/cantiere; brief_immagine stampato nel log del run.
 - **A4 anti-doppioni + D1 registro storico** (PR #21, da validare al run di
   lunedi'): prima della scelta del topic lo script legge gli articoli live
   (una GET sola, riusata per i correlati B2) e salta i topic gia' online anche

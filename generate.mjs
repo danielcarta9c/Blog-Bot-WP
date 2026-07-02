@@ -459,13 +459,10 @@ ${internalLinksRule}
 - TITOLO SEO (campo titolo_seo): deve INIZIARE con la focus keyword esatta "${t.focusKeyword}" e contenere una "power word" italiana riconosciuta da Rank Math. USA ESATTAMENTE una di queste (invariabili, valgono per maschile e femminile, NON declinarle): essenziale, efficace, indispensabile, incredibile, irresistibile, impeccabile, straordinario, definitivo. Esempio: "${t.focusKeyword}: Guida Essenziale".
 - META DESCRIPTION (campo meta_description): 150-160 caratteri e DEVE contenere la focus keyword esatta "${t.focusKeyword}", preferibilmente all'inizio.
 - SLUG: deve contenere la focus keyword completa separata da trattini, max 60 caratteri
-- IMMAGINE IN EVIDENZA (campo brief_immagine): descrivi in 1-2 frasi la SCENA ideale per l'immagine dell'articolo, scegliendo il REGISTRO piu adatto a QUESTO pezzo (varia in base all'articolo, non fare sempre lo stesso tipo):
-  * installazione/tecnico-umano (es. un installatore che monta la pompa di calore, cantiere, gesto di lavoro) -> per articoli how-to / iter / installazione;
-  * comfort/vendita (interno di casa caldo e accogliente, benessere, serenita) -> per articoli su risparmio / comfort;
-  * prodotto (la pompa di calore ben fotografata) -> quando l'articolo e sul prodotto/configurazione;
-  * architettura (villa o condominio) -> per articoli su edifici;
-  * fiducia/professionale (tecnici al lavoro in centrale termica) -> per articoli su ESCo / perche sceglierci.
-  Orienta la scena all'EMOZIONE e al beneficio per il cliente, non al tecnicismo. NON descrivere lo stile fotografico (luci, obiettivo, ecc.): a quello pensa il sistema.
+- IMMAGINE IN EVIDENZA (campo brief_immagine): descrivi in 1-2 frasi la SCENA ideale per l'immagine di QUESTO articolo.
+  REGOLA PRINCIPALE: il soggetto e' il TEMA CONCRETO dell'articolo, non il mestiere di chi installa. Esempi: articolo sulle piscine -> la piscina (acqua, vapore, corsie); su villa o condominio -> l'edificio; su risparmio/bollette/comfort -> l'interno di casa vissuto, caldo e accogliente; su fotovoltaico/autoconsumo -> il tetto con i pannelli; sul prodotto o la configurazione -> la pompa di calore ben fotografata nel suo contesto, senza persone.
+  VIETATO il tecnico/installatore al lavoro su una pompa di calore, A MENO CHE l'articolo non parli proprio di installazione/cantiere/iter dei lavori: e' un cliche' gia' usato troppe volte su questo blog. Il fatto che l'articolo citi le pompe di calore NON basta per metterci un operaio.
+  Persone: facoltative e di contorno, mai il soggetto principale. Orienta la scena all'EMOZIONE e al beneficio per il cliente (comfort, relax, orgoglio della casa), non al tecnicismo. NON descrivere lo stile fotografico (luci, obiettivo, ecc.): a quello pensa il sistema.
 
 Per restituire l'articolo CHIAMA il tool "pubblica_articolo" compilando TUTTI i suoi campi. La focus_keyword deve essere esattamente "${t.focusKeyword}" e l'h1 esattamente "${t.title}". Non scrivere altro testo fuori dal tool.`;
 }
@@ -497,7 +494,7 @@ async function callClaude(prompt) {
               estratto: { type: "string", description: "Estratto 120-160 caratteri" },
               h1: { type: "string", description: "Titolo H1" },
               content_html: { type: "string", description: "Corpo dell'articolo in HTML puro (solo tag p, h2, strong, em, ul, li, a)" },
-              brief_immagine: { type: "string", description: "Scena per l'immagine in evidenza (1-2 frasi), registro adatto all'articolo, orientata all'emozione/beneficio. NON descrivere lo stile fotografico." }
+              brief_immagine: { type: "string", description: "Scena per l'immagine in evidenza (1-2 frasi). Soggetto = il tema concreto dell'articolo (piscina, edificio, interno casa, tetto fotovoltaico, prodotto), orientato all'emozione/beneficio. NIENTE tecnico/installatore salvo articoli su installazione/cantiere. NON descrivere lo stile fotografico." }
             },
             required: ["titolo_seo", "focus_keyword", "meta_description", "slug", "estratto", "h1", "content_html", "brief_immagine"]
           }
@@ -883,8 +880,10 @@ async function main() {
   const regole = verifyArticle(article);
 
   // Immagine in evidenza (non bloccante): se generazione/upload falliscono,
-  // l'articolo esce comunque con l'immagine fallback.
+  // l'articolo esce comunque con l'immagine fallback. Il brief va nel log:
+  // e' il modo per accorgersi se i soggetti tornano monotoni (bug operaio).
   if (article.brief_immagine) {
+    console.log(`Brief immagine: ${article.brief_immagine}`);
     try {
       const png = await generateImage(article.brief_immagine);
       const mediaId = await uploadFeaturedImage(png, article.focus_keyword, article.slug);
