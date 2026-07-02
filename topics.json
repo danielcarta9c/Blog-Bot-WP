@@ -1,39 +1,45 @@
 {
   "_come_si_usa": "Lista degli argomenti della rotazione settimanale ('topics') e degli stili di scrittura ('stili'). Aggiungi/togli/riordina i 'topics' liberamente: ogni settimana ne viene scelto uno a rotazione. {{year}} nei titoli viene sostituito con l'anno corrente. Per forzare un titolo specifico una tantum NON toccare qui: usa next.json.",
+  "_regole": [
+    "focusKeyword CORTA, 2-4 parole. Le keyword lunghe abbassano la densita' (impossibile ripeterle abbastanza) e allungano l'URL: entrambe fanno calare il punteggio Rank Math.",
+    "Ogni focusKeyword DIVERSA dalle altre della lista: due articoli sulla stessa keyword competono tra loro (cannibalizzazione SEO).",
+    "Il 'title' deve contenere una POWER WORD italiana riconosciuta da Rank Math. Sicure perche' invariabili (maschile/femminile uguale): essenziale, efficace, indispensabile, incredibile, irresistibile, impeccabile. La lingua del sito WordPress deve essere Italiano, altrimenti Rank Math controlla contro la lista inglese.",
+    "'slug' e' la CHIAVE della rotazione tracciata (stato in ops/rotation-state.json): NON rinominarlo su un topic gia' pubblicato o si perde la traccia (verrebbe ripubblicato). Aggiungere/riordinare topic e' invece sicuro."
+  ],
   "topics": [
     {
       "slug": "sostituzione-caldaia-pompa-di-calore-villa",
-      "focusKeyword": "sostituzione caldaia con pompa di calore villa",
+      "focusKeyword": "pompa di calore in villa",
       "title": "Sostituire la Caldaia con una Pompa di Calore in Villa: Guida {{year}}",
       "angle": "Iter completo per villa indipendente: verifica fattibilità, dimensionamento, sostituzione del generatore, integrazione con i radiatori esistenti, sconto in fattura sempre garantito CT 3.0 fino a 15.000€. Il cliente paga solo il netto, l'incentivo lo gestiamo noi. Tempistiche reali dalla firma all'incasso (circa 2,5 mesi)."
     },
     {
       "slug": "pompa-di-calore-condominio-caldaia-centralizzata",
-      "focusKeyword": "pompa di calore condominio caldaia centralizzata",
+      "focusKeyword": "pompa di calore condominio",
       "title": "Pompa di Calore in Condominio: Sostituire la Caldaia Centralizzata {{year}}",
       "angle": "Sostituzione della caldaia centralizzata con pompa di calore idronica in condominio, a Milano e a Roma. Iter assemblea condominiale, dimensionamento sui consumi reali (non su tabelle), integrazione con i radiatori esistenti, sconto in fattura applicato al condominio, ruolo dell'amministratore nel processo. Casi reali nel milanese."
     },
     {
       "slug": "sconto-in-fattura-pompa-di-calore-privati",
-      "focusKeyword": "sconto in fattura pompa di calore",
+      "focusKeyword": "sconto in fattura",
       "title": "Sconto in Fattura Pompa di Calore: Cosa Paga Davvero il Cliente {{year}}",
       "angle": "Lo sconto in fattura sempre garantito da ESCo certificata: il cliente paga solo il netto, l'incentivo GSE lo gestisce direttamente Nove C. Differenza tra sconto in fattura e cessione del credito, perché serve un Soggetto Responsabile certificato UNI CEI 11352, cosa anticipa il cliente e cosa no, in quanti giorni si chiude la pratica."
     },
     {
       "slug": "pompa-di-calore-acqua-acqua-falda",
-      "focusKeyword": "pompa di calore acqua-acqua falda",
+      "focusKeyword": "pompa di calore acqua-acqua",
       "title": "Pompa di Calore Acqua-Acqua con Acqua di Falda: Quando Conviene {{year}}",
       "angle": "Pompa di calore geotermica a ciclo aperto su falda. COP elevati e stabili tutto l'anno (4,5-5,5), iter autorizzativo provinciale, costi dei pozzi vs risparmio energetico, applicazioni residenziali e per il terziario. Quando ha senso davvero a Roma e Milano (Pianura Padana, Lazio costiero)."
     },
     {
       "slug": "quanto-si-risparmia-pompa-di-calore-villa",
-      "focusKeyword": "quanto si risparmia con la pompa di calore",
+      "focusKeyword": "risparmio pompa di calore",
       "title": "Quanto si Risparmia Davvero con la Pompa di Calore in Villa {{year}}",
       "angle": "Confronto bolletta gas vs pompa di calore su villa 180-250 mq. COP stagionale reale, costo del kWh elettrico vs gas a tariffa attuale, payback con e senza CT 3.0, esempio numerico completo. Numeri-first: cifre prima, narrazione dopo."
     },
     {
       "slug": "pompa-di-calore-condominio-centrale-termica-interrata",
-      "focusKeyword": "pompa di calore condominio centrale termica interrata",
+      "focusKeyword": "centrale termica interrata",
       "title": "Pompa di Calore in Condominio con Centrale Termica Interrata: Le Due Soluzioni {{year}}",
       "angle": "Quando la centrale termica condominiale è in un locale interrato e portare una dorsale fino alle unità esterne in copertura non è fattibile o non conviene, ci sono due soluzioni che funzionano davvero. Soluzione 1: piccole pompe di calore aria-acqua esterne abbinate a un booster acqua-acqua installato nella centrale interrata, che lavora a temperatura più alta verso i radiatori. Soluzione 2: pompe di calore aria-acqua installate direttamente nel locale interrato e canalizzate per gestire l'aria di rinnovo e l'espulsione. Quando scegliere l'una o l'altra, vincoli di rumorosità e ricambi d'aria, sicurezza refrigerante (EN 378), sconto in fattura sempre garantito anche su queste configurazioni."
     },
@@ -45,7 +51,7 @@
     },
     {
       "slug": "pompa-di-calore-ibrida-perche-non-conviene",
-      "focusKeyword": "pompa di calore ibrida non conviene",
+      "focusKeyword": "pompa di calore ibrida",
       "title": "Perché la Pompa di Calore Ibrida Non Conviene Più: Il Full Electric è Sempre Possibile {{year}}",
       "angle": "L'ibrido viene venduto come compromesso quando il full electric \"non è fattibile\". Non è vero. Tre problemi reali dell'ibrido: il gas continua a costare tantissimo e tutto fa pensare che continuerà così; la logica di switch automatico in molti impianti reali finisce per privilegiare il gas più di quanto dovrebbe, vanificando il risparmio promesso; il cliente paga due generatori invece di uno e ne mantiene due. La soluzione full electric esiste sempre: pompe di calore aria-acqua più piccole, in cascata o in parallelo, abbinate a un booster acqua-acqua che usa il circuito delle aria-acqua come sorgente. Si raggiungono le temperature di mandata necessarie ai radiatori esistenti, senza bruciare un grammo di gas. Esempio reale e configurazione tipica."
     },
@@ -57,7 +63,7 @@
     },
     {
       "slug": "esco-certificata-pompa-di-calore-perche",
-      "focusKeyword": "ESCo certificata pompa di calore",
+      "focusKeyword": "ESCo pompa di calore",
       "title": "Perché Affidare la Pompa di Calore a una ESCo Certificata {{year}}",
       "angle": "Differenza tra installatore, studio tecnico ed ESCo certificata UNI CEI 11352. Solo l'ESCo può essere Soggetto Responsabile CT 3.0, gestire la pratica GSE in modo diretto e garantire al cliente lo sconto in fattura sempre, senza incertezze sui tempi del GSE. Cosa rischia il cliente che si affida a chi non è ESCo: incentivo non riconosciuto, lavori sospesi, costi imprevisti."
     }
