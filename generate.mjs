@@ -10,6 +10,8 @@
 //         in next.json, consumato e svuotato dopo il run (C2).
 // MVP3:   output strutturato (tool use) + garanzie SEO titolo/meta + retry HTTP.
 // MVP4/B1: immagine in evidenza generata (OpenAI) + upload su WP con alt text.
+// MVP4/B2: link interni REALI: articoli WP pubblicati e pertinenti al topic
+//          proposti a Claude al posto dei 2 link fissi (fallback sui fissi).
 // Stack: solo `fetch` nativo (Node 20+), nessuna dipendenza npm.
 //
 // Segreti letti da env (GitHub Secrets):
@@ -260,10 +262,106 @@ async function braveSearch(topic, year) {
 }
 
 // ---------------------------------------------------------------------------
+// B2 — Link interni REALI: legge dal blog (WP REST, categoria 3) gli articoli
+// gia' pubblicati e sceglie i piu' pertinenti al topic. Claude li ricevera' nel
+// prompt come candidati per i link interni contestuali, al posto dei 2 link
+// fissi -> cluster tematici (SEO) + UX. NON bloccante: se la GET fallisce o i
+// candidati sono meno di 2, si resta sui 2 link fissi di sempre (fallback).
+// ---------------------------------------------------------------------------
+// Parole vuote per il match di pertinenza: grammaticali + boilerplate dei
+// nostri titoli SEO (guida/power word/anno compaiono quasi ovunque e
+// creerebbero pertinenza finta tra articoli che non c'entrano nulla).
+const RELATED_STOPWORDS = new Set([
+  "del", "dello", "della", "dei", "degli", "delle", "dal", "dallo", "dalla",
+  "dai", "dagli", "dalle", "nel", "nello", "nella", "nei", "negli", "nelle",
+  "sul", "sullo", "sulla", "sui", "sugli", "sulle", "con", "per", "tra", "fra",
+  "gli", "una", "uno", "che", "chi", "cosa", "come", "quando", "dove", "quanto",
+  "perche", "piu", "meno", "non", "anche", "tutto", "tutti", "tutte", "senza",
+  "ecco", "verso", "sono", "essere", "questa", "questo", "questi", "queste",
+  "guida", "completa", "completo", "essenziale", "efficace", "indispensabile",
+  "incredibile", "irresistibile", "impeccabile", "straordinario", "definitivo",
+  "definitiva"
+]);
+
+// Token "significativi" di una frase: minuscolo, senza accenti, niente
+// stopword, niente numeri puri (l'anno nei titoli non e' un tema).
+function relatedTokens(s) {
+  return (s || "")
+    .toLowerCase()
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .split(" ")
+    .filter((w) => w.length >= 3 && !/^\d+$/.test(w) && !RELATED_STOPWORDS.has(w));
+}
+
+// "Stesso argomento" tra slug candidato e slug del topic in creazione (caso
+// LRU/rigenerazione: il pezzo gemello e' gia' live e NON va proposto come
+// correlato). Lo slug pubblicato differisce spesso da quello del topic
+// (riscritture di Claude, "con-la" in mezzo, suffissi -2/-5 di WP): il match
+// esatto non basta, confrontiamo gli INSIEMI di token significativi
+// (uguali o l'uno contenuto nell'altro -> stesso argomento).
+function sameTopicSlug(candSlug, topicSlug) {
+  const a = new Set(relatedTokens(candSlug));
+  const b = new Set(relatedTokens(topicSlug));
+  if (!a.size || !b.size) return false;
+  const [small, big] = a.size <= b.size ? [a, b] : [b, a];
+  return [...small].every((w) => big.has(w));
+}
+
+// I titoli WP arrivano con entita' HTML (es. &#8217;): decodifica minima.
+function decodeEntities(s) {
+  return (s || "")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
+    .replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&apos;/g, "'")
+    .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&nbsp;/g, " ");
+}
+
+// Legge gli articoli pubblicati (lettura pubblica: niente auth, meno modi di
+// fallire) e ritorna i 5 piu' pertinenti come {title, link}. Pertinenza =
+// token in comune tra keyword+titolo del topic e titolo+slug del candidato;
+// l'articolo in creazione e' escluso per slug/titolo (caso LRU: stesso topic
+// gia' pubblicato in passato). A parita' di punteggio vince il piu' recente
+// (WP ordina per data, il sort e' stabile).
+async function fetchRelatedPosts(topic) {
+  const params = new URLSearchParams({
+    categories: "3",
+    per_page: "50", // 1 articolo/settimana: una chiamata copre anni di storico
+    status: "publish",
+    _fields: "title,link,slug"
+  });
+  const posts = await fetchJson(
+    `${WP_BASE}/wp-json/wp/v2/posts?${params}`,
+    { headers: { "Accept": "application/json", "User-Agent": WP_UA } },
+    "WordPress (articoli correlati)"
+  );
+  if (!Array.isArray(posts)) throw new Error("WordPress (articoli correlati): risposta inattesa");
+
+  const topicToks = new Set([...relatedTokens(topic.focusKeyword), ...relatedTokens(topic.title)]);
+  const scored = [];
+  for (const p of posts) {
+    const title = decodeEntities((p.title && p.title.rendered) || "").trim();
+    const slug = p.slug || "";
+    if (!title || !p.link) continue;
+    if (sameTopicSlug(slug, topic.slug) || title.toLowerCase() === (topic.title || "").toLowerCase()) continue;
+    const score = relatedTokens(`${title} ${slug}`).filter((w) => topicToks.has(w)).length;
+    if (score >= 1) scored.push({ title, link: p.link, score });
+  }
+  scored.sort((a, b) => b.score - a.score);
+  return scored.slice(0, 5).map(({ title, link }) => ({ title, link }));
+}
+
+// ---------------------------------------------------------------------------
 // NODO: "Message a model" — generazione articolo con Claude
 // ---------------------------------------------------------------------------
-function buildPrompt(ctx, braveResults) {
+function buildPrompt(ctx, braveResults, related = []) {
   const t = ctx.topic;
+  // B2: se abbiamo articoli correlati reali, i link interni si scelgono da li'
+  // (2-3 contestuali nel corpo); altrimenti restano i 2 link fissi storici.
+  const internalLinksRule = related.length >= 2
+    ? `- LINK INTERNI OBBLIGATORI: inserisci ${related.length >= 3 ? "2-3" : "2"} link interni contestuali nel corpo dell'articolo scegliendo SOLO tra questi articoli correlati gia' pubblicati sul blog Nove C. Usa l'URL ESATTO cosi' com'e' (non inventare altri URL), ancora ogni link a un testo naturale e pertinente al punto in cui compare, e distribuiscili in sezioni diverse dell'articolo:
+${related.map((r) => `  * "${r.title}" -> ${r.link}`).join("\n")}`
+    : `- LINK INTERNI: inserisci almeno 2 link interni a pagine Nove C. Usa: <a href="https://nove-c.com/soluzioni/conto-termico-3-0-incentivi-fino-al-65-senza-anticipo/">scopri il servizio Conto Termico 3.0 di Nove C</a> e <a href="https://nove-c.com/chi-siamo/">Nove C Ingegneria ESCo certificata</a>`;
   return `[ISTRUZIONI DI SISTEMA]
 Sei un SEO copywriter esperto di efficienza energetica e incentivi per il residenziale per Nove C Ingegneria, ESCo certificata UNI CEI 11352 ed EPC Contractor. Il blog copre pompe di calore, fotovoltaico, autoconsumo (collettivo e comunita' energetiche/CER), riqualificazione energetica e i relativi incentivi. REGOLA INCENTIVI: se l'argomento riguarda POMPE DI CALORE o generazione termica, il riferimento e il Conto Termico 3.0 (D.M. 7 agosto 2025, MAI il 2.0 superato) con interpretazione restrittiva della normativa; se riguarda FOTOVOLTAICO, autoconsumo, CER o altri temi, usa il quadro incentivante PERTINENTE (incentivi GSE su autoconsumo/CER, detrazioni, bandi regionali/fondi dove rilevanti) e NON forzare il Conto Termico. Non citare anni precedenti come attuali. Output JSON stretto, nessun testo extra. Privilegia l'ambito Privati (appartamenti, ville e condomini)
 
@@ -291,7 +389,7 @@ Requisiti SEO TASSATIVI:
 - Almeno 4 H2 distinte
 - 1 H2 "Domande frequenti" con 4-5 Q&A in <p><strong>...</strong></p>
 - LINK ESTERNI OBBLIGATORI: inserisci almeno 2 link esterni dofollow a fonti istituzionali autorevoli. Usa <a href="URL">testo ancora</a> (SENZA rel="nofollow"). Fonti consigliate: https://www.gse.it (Portale GSE Conto Termico), https://www.mase.gov.it (Ministero Ambiente), https://www.gazzettaufficiale.it (Gazzetta Ufficiale per D.M.). Esempio: <a href="https://www.gse.it/servizi-per-te/conto-termico">portale Conto Termico del GSE</a>
-- LINK INTERNI: inserisci almeno 2 link interni a pagine Nove C. Usa: <a href="https://nove-c.com/soluzioni/conto-termico-3-0-incentivi-fino-al-65-senza-anticipo/">scopri il servizio Conto Termico 3.0 di Nove C</a> e <a href="https://nove-c.com/chi-siamo/">Nove C Ingegneria ESCo certificata</a>
+${internalLinksRule}
 - CTA finale con riferimento a Nove C Ingegneria ESCo certificata e link alla pagina servizio
 - Cita le fonti normative PERTINENTI all'argomento: per pompe di calore/termico il D.M. 7 agosto 2025 (Conto Termico 3.0) e lo stato del Portaltermico GSE; per fotovoltaico/autoconsumo/CER i provvedimenti GSE pertinenti. Non forzare riferimenti non attinenti al tema.
 - NON citare anni precedenti all'anno corrente come "attuali"
@@ -422,7 +520,7 @@ function ensureKwInMeta(meta, focusKw) {
 // A1 (MVP3): l'articolo arriva come tool_use.input gia' parsato dall'API,
 // quindi niente piu' strip fence / swap virgolette / JSON.parse del testo.
 // ---------------------------------------------------------------------------
-function parseArticle(message) {
+function parseArticle(message, related = []) {
   const block = Array.isArray(message.content)
     ? message.content.find((b) => b.type === "tool_use" && b.name === "pubblica_articolo")
     : null;
@@ -453,6 +551,8 @@ function parseArticle(message) {
   const kwDensity = wordCount > 0 ? (kwCount / wordCount * 100).toFixed(2) : "0.00";
   const extLinks = (html.match(/<a\s[^>]*href=["']https?:\/\/(?!nove-c\.com)[^"']+["'][^>]*>/gi) || []).length;
   const intLinks = (html.match(/<a\s[^>]*href=["']https?:\/\/nove-c\.com[^"']*["'][^>]*>/gi) || []).length;
+  // B2: quanti degli articoli correlati proposti sono stati linkati davvero.
+  const relatedUsed = related.filter((r) => r.link && html.includes(r.link)).length;
   // Paragrafo piu' lungo (parole): Rank Math penalizza i <p> troppo lunghi.
   const paraWords = (html.match(/<p[^>]*>([\s\S]*?)<\/p>/gi) || [])
     .map((p) => p.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().split(" ").filter(Boolean).length);
@@ -498,6 +598,7 @@ function parseArticle(message) {
     patch_body: patch_body,
     diagnostics: {
       wordCount, h2Count, kwCount, kwInFirst, kwInH2, kwDensity, extLinks, intLinks,
+      relatedAvailable: related.length, relatedUsed,
       slugLen: slug.length, maxParaWords,
       powerWordInTitle: hasPowerWord(seoTitle),
       warnings: [
@@ -507,6 +608,7 @@ function parseArticle(message) {
         (parseFloat(kwDensity) < 0.5 || parseFloat(kwDensity) > 2.5) ? "Densita: " + kwDensity + "%" : null,
         extLinks < 1 ? "No link esterni" : null,
         intLinks < 1 ? "No link interni" : null,
+        related.length >= 2 && relatedUsed < 2 ? "Link correlati usati: " + relatedUsed + "/" + related.length : null,
         maxParaWords > 120 ? "Paragrafo troppo lungo: " + maxParaWords + " parole" : null
       ].filter(Boolean)
     }
@@ -537,6 +639,11 @@ function verifyArticle(article) {
     ["Slug <= 60 caratteri", d.slugLen <= 60],
     ["Almeno 1 link esterno", d.extLinks >= 1],
     ["Almeno 1 link interno", d.intLinks >= 1],
+    // B2: solo quando abbiamo proposto articoli correlati reali (>=2), pretendi
+    // che almeno 2 siano stati linkati; in fallback il check non compare.
+    ...(d.relatedAvailable >= 2
+      ? [[`Almeno 2 link interni ad articoli correlati reali (usati ${d.relatedUsed}/${d.relatedAvailable})`, d.relatedUsed >= 2]]
+      : []),
     [`Paragrafi brevi (piu' lungo: ${d.maxParaWords} parole, max 120)`, d.maxParaWords <= 120]
   ];
   const failed = checks.filter(([, ok]) => !ok);
@@ -637,10 +744,26 @@ async function main() {
   const braveResults = await braveSearch(ctx.topic, ctx.year);
   console.log("Brave Search: ok");
 
-  const message = await callClaude(buildPrompt(ctx, braveResults));
+  // B2 — articoli correlati per i link interni. NON bloccante: su errore o
+  // candidati insufficienti si torna ai 2 link fissi (il run prosegue sempre).
+  let related = [];
+  try {
+    related = await fetchRelatedPosts(ctx.topic);
+  } catch (e) {
+    console.error(`Articoli correlati: lettura fallita (${e.message})`);
+  }
+  if (related.length >= 2) {
+    console.log(`Articoli correlati (candidati link interni): ${related.length}`);
+    for (const r of related) console.log(`  - ${r.title} -> ${r.link}`);
+  } else {
+    related = [];
+    console.log("Articoli correlati: candidati insufficienti -> fallback sui 2 link interni fissi");
+  }
+
+  const message = await callClaude(buildPrompt(ctx, braveResults, related));
   console.log("Claude: articolo generato");
 
-  const article = parseArticle(message);
+  const article = parseArticle(message, related);
   console.log("Diagnostica SEO:", JSON.stringify(article.diagnostics));
   verifyArticle(article);
 
