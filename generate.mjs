@@ -282,6 +282,8 @@ ${JSON.stringify(braveResults)}
 
 Scrivi un articolo di 1500-2000 parole in HTML puro (solo tag ammessi: p, h2, strong, em, ul, li, a). Negli attributi HTML usa pure le normali virgolette doppie (es: <a href="https://url">): l'output passa da un tool strutturato, quindi non ci sono problemi di escaping.
 
+PARAGRAFI BREVI (importante per Rank Math): ogni <p> deve essere corto, MASSIMO 3-4 frasi e comunque MAI oltre ~110 parole. Spezza i blocchi lunghi in piu' <p> separati. I muri di testo abbassano il punteggio di leggibilita'.
+
 Requisiti SEO TASSATIVI:
 - Focus keyword ESATTA "${t.focusKeyword}" nel primo paragrafo (primi 100 caratteri)
 - Focus keyword in almeno 2 H2 su 5-6 totali
@@ -451,6 +453,10 @@ function parseArticle(message) {
   const kwDensity = wordCount > 0 ? (kwCount / wordCount * 100).toFixed(2) : "0.00";
   const extLinks = (html.match(/<a\s[^>]*href=["']https?:\/\/(?!nove-c\.com)[^"']+["'][^>]*>/gi) || []).length;
   const intLinks = (html.match(/<a\s[^>]*href=["']https?:\/\/nove-c\.com[^"']*["'][^>]*>/gi) || []).length;
+  // Paragrafo piu' lungo (parole): Rank Math penalizza i <p> troppo lunghi.
+  const paraWords = (html.match(/<p[^>]*>([\s\S]*?)<\/p>/gi) || [])
+    .map((p) => p.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().split(" ").filter(Boolean).length);
+  const maxParaWords = paraWords.length ? Math.max(...paraWords) : 0;
 
   // Slug from focus keyword if too short
   let slug = parsed.slug || "";
@@ -492,7 +498,7 @@ function parseArticle(message) {
     patch_body: patch_body,
     diagnostics: {
       wordCount, h2Count, kwCount, kwInFirst, kwInH2, kwDensity, extLinks, intLinks,
-      slugLen: slug.length,
+      slugLen: slug.length, maxParaWords,
       powerWordInTitle: hasPowerWord(seoTitle),
       warnings: [
         wordCount < 1500 ? "Word count basso: " + wordCount : null,
@@ -500,7 +506,8 @@ function parseArticle(message) {
         !kwInFirst ? "FK assente nei primi 200 char" : null,
         (parseFloat(kwDensity) < 0.5 || parseFloat(kwDensity) > 2.5) ? "Densita: " + kwDensity + "%" : null,
         extLinks < 1 ? "No link esterni" : null,
-        intLinks < 1 ? "No link interni" : null
+        intLinks < 1 ? "No link interni" : null,
+        maxParaWords > 120 ? "Paragrafo troppo lungo: " + maxParaWords + " parole" : null
       ].filter(Boolean)
     }
   };
@@ -529,7 +536,8 @@ function verifyArticle(article) {
     ["Almeno 4 H2", d.h2Count >= 4],
     ["Slug <= 60 caratteri", d.slugLen <= 60],
     ["Almeno 1 link esterno", d.extLinks >= 1],
-    ["Almeno 1 link interno", d.intLinks >= 1]
+    ["Almeno 1 link interno", d.intLinks >= 1],
+    [`Paragrafi brevi (piu' lungo: ${d.maxParaWords} parole, max 120)`, d.maxParaWords <= 120]
   ];
   const failed = checks.filter(([, ok]) => !ok);
   console.log("VERIFICA REGOLE SEO (pre-publish):");
