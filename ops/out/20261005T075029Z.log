@@ -1,0 +1,24 @@
+Lettura articoli live fallita (WordPress (articoli live): risposta non-JSON (status 202): <html><head><link rel="icon" href="data:;"><meta http-equiv="refresh" content="0;/.well-known/sgcaptcha/?r=%2Fwp-json%2Fwp%2Fv2%2Fposts%3Fcategories%3D3%26per_page%3D100%26status%3Dpublish%26_fields%3): controllo doppioni saltato, link interni fissi
+Topic (rotazione tracciata): fotovoltaico e colonnina
+Template: comparison
+Brave Search: ok
+Articoli correlati: candidati insufficienti -> fallback sui 2 link interni fissi
+Claude: articolo generato
+Diagnostica SEO: {"wordCount":1561,"h2Count":7,"kwCount":13,"kwInFirst":false,"kwInH2":true,"kwDensity":"0.83","extLinks":2,"intLinks":2,"relatedAvailable":0,"relatedUsed":0,"slugLen":43,"maxParaWords":83,"powerWordInTitle":true,"warnings":["FK assente nei primi 200 char"]}
+VERIFICA REGOLE SEO (pre-publish):
+  [OK] Titolo SEO inizia con la focus keyword
+  [OK] Titolo SEO contiene una power word (Rank Math IT)
+  [OK] Focus keyword nella meta description
+  [XX] Focus keyword nei primi 200 caratteri
+  [OK] Focus keyword in almeno un H2
+  [OK] Densita' focus keyword 0.5-2.5%
+  [OK] Lunghezza articolo >= 1500 parole
+  [OK] Almeno 4 H2
+  [OK] Slug <= 60 caratteri
+  [OK] Almeno 1 link esterno
+  [OK] Almeno 1 link interno
+  [OK] Paragrafi brevi (piu' lungo: 83 parole, max 120)
+REGOLE: 11/12 ok (rivedi i punti XX)
+Brief immagine: Un'auto elettrica bianca parcheggiata nel garage di una casa moderna, collegata a una wallbox a parete, con il tetto ricoperto di pannelli fotovoltaici visibile attraverso la finestra aperta sul cortile soleggiato. La scena trasmette autonomia energetica e risparmio quotidiano.
+Immagine saltata (non bloccante): WordPress (upload media): risposta non-JSON (status 202): <html><head><link rel="icon" href="data:;"><meta http-equiv="refresh" content="0;/.well-known/sgcaptcha/?r=%2Fwp-json%2Fwp%2Fv2%2Fmedia&y=ipc:52.173.179.38:1791186756.141"></meta></head></html>
+ERRORE: WordPress (crea post): risposta non-JSON (status 202): <html><head><link rel="icon" href="data:;"><meta http-equiv="refresh" content="0;/.well-known/sgcaptcha/?r=%2Fwp-json%2Fwp%2Fv2%2Fposts&y=ipc:52.173.179.38:1791186769.890"></meta></head></html>
