@@ -6,7 +6,8 @@ name: NoveC SEO Blog
 # Lancio (pattern §35 del Playbook Nove C):
 #   - schedule cron: lunedì 02:00 UTC (~03-04 ora IT), notte dom->lun;
 #     l'articolo e' pronto per la revisione del lunedì mattina.
-#   - workflow_dispatch: run manuale dal tab Actions.
+#   - workflow_dispatch: run manuale dal tab Actions. Lo usa anche il retry
+#     anti-bot: se WP blocca il runner, il run si rilancia da solo (vedi sotto).
 #   - push su ops/run.trigger: l'agente lancia il workflow committando/
 #     bumpando quel file, senza bisogno del permesso di dispatch.
 #
@@ -17,6 +18,11 @@ on:
   schedule:
     - cron: "0 2 * * 1"
   workflow_dispatch:
+    inputs:
+      tentativo:
+        description: "Uso interno (retry anti-bot): lascia 1"
+        required: false
+        default: "1"
   push:
     # SOLO main: senza questo filtro qualunque push di un BRANCH che tocca i
     # path sotto (anche nel diff di un force-push) faceva partire un run di
@@ -28,9 +34,11 @@ on:
       - "next.json"
 
 # contents: ricommit del log su main. issues: apre una issue su fallimento (A2).
+# actions: il run si rilancia da solo se l'anti-bot SiteGround blocca il runner.
 permissions:
   contents: write
   issues: write
+  actions: write
 
 # Un solo run alla volta: evita code/stallo sul free tier (§35).
 concurrency:
@@ -40,6 +48,13 @@ concurrency:
 jobs:
   generate:
     runs-on: ubuntu-latest
+    # Retry anti-bot: l'sgcaptcha di SiteGround blocca alcuni IP dei runner
+    # GitHub (~2 su 5, misurato 2026-10-06) gia' alla prima richiesta. Ogni run
+    # nuovo = macchina nuova = IP nuovo, quindi rilanciare funziona.
+    # TENTATIVO arriva dall'input del rilancio (cron/push/manuale = 1).
+    env:
+      TENTATIVO: ${{ inputs.tentativo || '1' }}
+      TENTATIVI_MAX: "4"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -104,6 +119,23 @@ jobs:
             echo "push respinto, retry $i"; sleep $((2 ** i))
           done
           echo "push del log fallito dopo 3 tentativi"; exit 1
+
+      # Retry anti-bot: se lo script ha segnalato WP_BLOCCATO (WordPress non
+      # raggiungibile da QUESTO runner, fermato prima di spendere su Claude/
+      # OpenAI), rilancia il workflow: il nuovo run gira su un'altra macchina.
+      # Pausa di 5 minuti per non martellare il sito. Il nuovo run parte quando
+      # questo finisce (concurrency). Solo workflow_dispatch puo' rilanciarsi
+      # col GITHUB_TOKEN. All'ultimo tentativo lo script non emette il marker.
+      - name: Rilancia da un altro runner se WordPress ha bloccato
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          grep -q "WP_BLOCCATO" "$OUT" 2>/dev/null || exit 0
+          NEXT=$((TENTATIVO + 1))
+          echo "WordPress ha bloccato questo runner: tentativo $NEXT/$TENTATIVI_MAX tra 5 minuti." | tee -a "$GITHUB_STEP_SUMMARY"
+          sleep 300
+          gh workflow run seo-blog.yml --repo "${{ github.repository }}" --ref main -f tentativo="$NEXT"
 
       # A2 (MVP3): se il run fallisce, apri una issue cosi' Daniel viene
       # notificato da GitHub (niente email). Si attiva solo on failure.

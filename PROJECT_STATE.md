@@ -12,7 +12,7 @@
 | Scheduler | GitHub Actions | GitHub | `main` (cron) | repo pubblico | GitHub Secrets repo | cron settimanale + run manuale; Actions illimitate |
 | AI | API Anthropic | Anthropic | — | Claude Pro Max / API | `ANTHROPIC_API_KEY` (Secret) | modello `claude-sonnet-4-6` |
 | Ricerca | Brave Search API | Brave | — | — | `BRAVE_API_KEY` (Secret) | header `X-Subscription-Token` |
-| CMS | nove-c.com (WP REST + Rank Math) | WordPress | produzione | — | `WP_USER` + `WP_APP_PASSWORD` (Secret) | publish PROGRAMMATO (status future, cat. 3). ⚠️ hosting SiteGround: l'anti-bot (sgcaptcha) puo' sfidare le API sotto molti run ravvicinati |
+| CMS | nove-c.com (WP REST + Rank Math) | WordPress | produzione | — | `WP_USER` + `WP_APP_PASSWORD` (Secret) | publish PROGRAMMATO (status future, cat. 3). ⚠️ hosting SiteGround: l'anti-bot (sgcaptcha) blocca a caso alcuni IP dei runner GitHub (~2 su 5) → retry automatico su runner nuovo (fino a 4 tentativi) |
 | Repo | github.com/danielcarta9c/**Blog-Bot-WP** | GitHub | `main` | pubblico | — | rinominato da `n8n`. ⚠️ il git proxy di sessione resta agganciato al vecchio nome: scritture via API GitHub (MCP), non `git push` |
 | Immagini | API OpenAI | OpenAI | — | OpenAI Platform | `OPENAI_API_KEY` (Secret) | `gpt-image-1`, quality medium; immagine in evidenza |
 | ~~n8n~~ | ~~cloud n8n~~ | ~~n8n (a pagamento)~~ | — | **DISMESSO** | — | flusso staccato; canone da disdire/disdetto |
@@ -59,6 +59,14 @@
 
 ## Done log
 
+- **Retry anti-bot SiteGround** (2026-10-06): 2 articoli saltati (28/9 e 5/10,
+  issue #33/#34) e 3 ad agosto. Causa misurata: l'sgcaptcha blocca per **IP del
+  runner** (sonda da 5 runner: 2 bloccati alla prima richiesta, anche su
+  robots.txt), NON per frequenza → la vecchia nota "a cadenza normale non scatta"
+  era sbagliata. Fix: la lettura iniziale di WP fa da sonda; se fallisce, il run
+  si ferma PRIMA di spendere (Brave/Claude/OpenAI) e il workflow si rilancia da
+  un runner nuovo (5 min di pausa, max 4 tentativi; all'ultimo comportamento di
+  prima). Storico: 6/6 run con GET fallita = nessun articolo; 0 casi GET ko/post ok.
 - **Pausa blog fino al 20/7** (`BLOG_START_DATE`, scelta PM): prima del 20/7 il
   cron non genera dalla rotazione (escono i 2 articoli di prova gia' programmati);
   un override `next.json` pubblica comunque. La scaletta riparte lun 20/7 da

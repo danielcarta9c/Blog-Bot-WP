@@ -62,3 +62,8 @@ mattina. Nessuna pubblicazione automatica: lo stato è sempre `draft`.
 
 > Se un run **fallisce**, il workflow apre in automatico una **issue** sul repo
 > (con link al run e coda di log): GitHub ti notifica, niente email da gestire.
+
+> Se l'anti-bot dell'hosting blocca il server di GitHub, il run si ferma senza
+> spendere e **riparte da solo** da un altro server (fino a 4 tentativi, 5 minuti
+> l'uno dall'altro). Nel tab Actions vedrai quindi più run lo stesso lunedì: è
+> normale. La issue arriva solo se falliscono tutti.

@@ -197,17 +197,23 @@ poi `git pull` e leggi il log. Per le Actions puoi usare i tool MCP
   sito è sbagliato (era UTC invece di **Europe/Rome +2**) l'orario "9:00" del post
   slitta. Impostazioni → Generali → Fuso orario = Roma. (Risolto.)
 - **Anti-bot SiteGround (sgcaptcha)**: se un run fallisce con "risposta non-JSON
-  `<html>...sgcaptcha...`" NON è il codice: è l'hosting che scambia le API per un
-  bot quando ci sono **troppi run ravvicinati** (l'IP del runner viene flaggato).
-  A cadenza normale (1/settimana) non scatta. Se stai testando: **dirada i run**
-  (aspetta qualche minuto) e riprova. (Era la causa anche della vecchia issue #7.)
+  `<html>...sgcaptcha...`" NON è il codice: è l'hosting che blocca l'**IP del runner
+  GitHub** (datacenter Azure). ⚠️ **Smentita (2026-10-06)** la vecchia idea "scatta
+  solo con troppi run ravvicinati": una sonda da 5 runner ha visto **2 IP su 5
+  bloccati alla PRIMA richiesta** (anche `robots.txt`), e 5 cron settimanali su 12
+  sono falliti (3 captcha, 1 rete, 1 errore 500 del sito). È una lotteria per IP.
+  **Fix in produzione**: la GET iniziale degli articoli live fa da sonda; se
+  fallisce e non è l'ultimo tentativo, lo script stampa `WP_BLOCCATO` ed esce
+  PRIMA di spendere; il workflow si rilancia via `workflow_dispatch` (input
+  `tentativo`, `TENTATIVI_MAX=4`, pausa 5 min) → runner nuovo = IP nuovo.
+  All'ultimo tentativo la GET torna non bloccante (comportamento storico).
+  Anche la sandbox di Claude Code viene bloccata: non puoi testare WP da qui.
   - **Piano SiteGround senza "Anti-Bot AI"** (è su GrowBig+): niente toggle di
-    whitelist in Site Tools. Il `sgcaptcha` è comunque servito a livello **server/
-    WAF**, PRIMA di WordPress → **uno snippet PHP NON lo risolve** (es.
-    `rest_authentication_errors` agisce dentro WP, a valle del WAF, e riguarda
-    l'auth, non l'anti-bot). Unica via per testare a raffica: **ticket supporto
-    SiteGround** per escludere `/wp-json/` dalla protezione bot lato server. **Per
-    la produzione non serve**: a 1 run/settimana pubblica sempre (5480/5473 ok).
+    whitelist in Site Tools. Il `sgcaptcha` è servito a livello **server/WAF**,
+    PRIMA di WordPress → **uno snippet PHP NON lo risolve**. Whitelist per IP
+    impraticabile (i runner GitHub cambiano IP). Fix lato hosting possibile solo
+    via **ticket SiteGround** (escludere `/wp-json/` dalla protezione bot): da
+    valutare solo se il retry non basta.
 - **Publish PROGRAMMATO, non draft**: il post nasce `status: future` con
   `date_gmt` alle prossime 09:00 UTC → va online da solo a metà mattina, veto di
   Daniel nella finestra. NON reintrodurre `status: draft` o `publish` immediato.
