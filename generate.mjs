@@ -48,6 +48,14 @@ const MODEL = "claude-sonnet-4-6";
 // COMUNQUE. Passata la data, la guardia e' inerte. Svuotare (stringa vuota) o
 // rimuovere quando non serve piu'.
 const BLOG_START_DATE = process.env.BLOG_START_DATE || "2026-07-20";
+// Retry su runner nuovo (anti-bot SiteGround). L'sgcaptcha scatta per IP del
+// runner GitHub (lotteria: ~2 su 5 bloccati alla PRIMA richiesta, misurato il
+// 2026-10-06), non per frequenza. Se la lettura iniziale di WP fallisce e non
+// e' l'ultimo tentativo, il run si ferma PRIMA di spendere (Brave/Claude/OpenAI)
+// e il workflow rilancia da un runner nuovo (IP nuovo). All'ultimo tentativo si
+// procede come prima (lettura non bloccante). Valori passati dal workflow.
+const TENTATIVO = Number(process.env.TENTATIVO || 1);
+const TENTATIVI_MAX = Number(process.env.TENTATIVI_MAX || 1);
 // Template del post (Attributi articolo -> Template = "Blog Post (Nuovo)").
 // Valore = filename del template come esposto dalla REST API WP.
 const WP_POST_TEMPLATE = "single-blog-nuovo.php";
@@ -856,12 +864,20 @@ async function main() {
   }
 
   // B2 + A4 — una sola lettura del blog: alimenta anti-doppioni e correlati.
-  // NON bloccante: se fallisce (es. anti-bot) si procede come prima di B2/A4.
+  // Fa anche da sonda: nello storico, ogni volta che questa GET e' fallita
+  // (anti-bot, 500, rete) sono falliti anche upload e crea post. Se non e'
+  // l'ultimo tentativo -> marker WP_BLOCCATO, uscita pulita, il workflow rilancia.
+  // All'ultimo tentativo resta NON bloccante (si procede come prima di B2/A4).
   let posts = null;
   try {
     posts = await fetchPublishedPosts();
     console.log(`Articoli live sul blog: ${posts.length}`);
   } catch (e) {
+    if (TENTATIVO < TENTATIVI_MAX) {
+      console.error(`WordPress non raggiungibile da questo runner (${e.message.slice(0, 160)})`);
+      console.log(`WP_BLOCCATO: tentativo ${TENTATIVO}/${TENTATIVI_MAX} fermato prima di generare (nessuna spesa API). Il workflow rilancia da un altro runner.`);
+      return;
+    }
     console.error(`Lettura articoli live fallita (${e.message}): controllo doppioni saltato, link interni fissi`);
   }
 
