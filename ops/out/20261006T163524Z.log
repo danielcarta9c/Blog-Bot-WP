@@ -1,0 +1,37 @@
+Articoli live sul blog: 22
+Topic (rotazione tracciata): fotovoltaico e colonnina
+Template: comparison
+Brave Search: ok
+Articoli correlati (candidati link interni): 5
+  - Batteria di Accumulo per il Fotovoltaico: Conviene Aggiungerla -> https://nove-c.com/blog/bonus-accumulo-fotovoltaico-batteria/
+  - Quanto Aumenta il Valore della Casa dopo la Riqualificazione Energetica -> https://nove-c.com/blog/valore-immobiliare-casa-riqualificazione-energetica/
+  - Mutuo Green: Come Abbassare la Rata Riqualificando Casa -> https://nove-c.com/blog/mutuo-green-abbassare-rata-riqualificando-casa/
+  - La Pompa di Calore che Raffresca Casa d’Estate: Come Funziona -> https://nove-c.com/blog/pompa-di-calore-raffrescamento/
+  - Elettrificazione dei Carichi con Pompa di Calore: Guida indispensabile Anche Senza Fotovoltaico -> https://nove-c.com/blog/elettrificazione-dei-carichi-pompa-di-calore/
+Claude: articolo generato
+Diagnostica SEO: {"wordCount":1786,"h2Count":8,"kwCount":12,"kwInFirst":false,"kwInH2":true,"kwDensity":"0.67","extLinks":2,"intLinks":3,"relatedAvailable":5,"relatedUsed":3,"slugLen":48,"maxParaWords":89,"powerWordInTitle":true,"warnings":["FK assente nei primi 200 char"]}
+VERIFICA REGOLE SEO (pre-publish):
+  [OK] Titolo SEO inizia con la focus keyword
+  [OK] Titolo SEO contiene una power word (Rank Math IT)
+  [OK] Focus keyword nella meta description
+  [XX] Focus keyword nei primi 200 caratteri
+  [OK] Focus keyword in almeno un H2
+  [OK] Densita' focus keyword 0.5-2.5%
+  [OK] Lunghezza articolo >= 1500 parole
+  [OK] Almeno 4 H2
+  [OK] Slug <= 60 caratteri
+  [OK] Almeno 1 link esterno
+  [OK] Almeno 1 link interno
+  [OK] Almeno 2 link interni ad articoli correlati reali (usati 3/5)
+  [OK] Paragrafi brevi (piu' lungo: 89 parole, max 120)
+REGOLE: 12/13 ok (rivedi i punti XX)
+Brief immagine: Un'auto elettrica parcheggiata nel garage di una villetta moderna, collegata a una wallbox a parete, con i pannelli fotovoltaici visibili sul tetto attraverso la finestra aperta del garage. La scena trasmette autonomia energetica e libertà di movimento.
+Immagine in evidenza generata: media id 5544
+Articolo creato (future): id 5545, publish previsto 2026-10-07T09:00:00 UTC
+Rank Math: meta impostati
+Registro storico aggiornato: ops/articles.csv
+Rotazione: "fotovoltaico-colonnina-ricarica-auto" segnato come usato.
+
+Fatto. Articolo programmato (rivedi o cestina entro la mattina):
+  Admin:     https://nove-c.com/wp-admin/post.php?post=5545&action=edit
+  Anteprima: https://nove-c.com/?p=5545&preview=true
