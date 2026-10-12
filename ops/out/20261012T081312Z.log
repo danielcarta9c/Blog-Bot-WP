@@ -1,0 +1,35 @@
+Articoli live sul blog: 23
+Topic (rotazione tracciata): colonnina condominio
+Template: problem-solution
+Brave Search: ok
+Articoli correlati (candidati link interni): 3
+  - Fotovoltaico e Colonnina di Ricarica: l’Impianto che Alimenta Casa e Auto -> https://nove-c.com/blog/fotovoltaico-e-colonnina-ricarica-auto-elettrica/
+  - Autoconsumo Collettivo in Condominio: la Guida Essenziale -> https://nove-c.com/blog/autoconsumo-collettivo-condominio/
+  - Pompa di Calore Condominio Centrale Termica Interrata: Guida Completa alle Due Soluzioni principali -> https://nove-c.com/blog/pompa-di-calore-in-centrale-termica-interrata/
+Claude: articolo generato
+Diagnostica SEO: {"wordCount":1669,"h2Count":7,"kwCount":14,"kwInFirst":true,"kwInH2":true,"kwDensity":"0.84","extLinks":2,"intLinks":3,"relatedAvailable":3,"relatedUsed":3,"slugLen":45,"maxParaWords":67,"powerWordInTitle":true,"warnings":[]}
+VERIFICA REGOLE SEO (pre-publish):
+  [OK] Titolo SEO inizia con la focus keyword
+  [OK] Titolo SEO contiene una power word (Rank Math IT)
+  [OK] Focus keyword nella meta description
+  [OK] Focus keyword nei primi 200 caratteri
+  [OK] Focus keyword in almeno un H2
+  [OK] Densita' focus keyword 0.5-2.5%
+  [OK] Lunghezza articolo >= 1500 parole
+  [OK] Almeno 4 H2
+  [OK] Slug <= 60 caratteri
+  [OK] Almeno 1 link esterno
+  [OK] Almeno 1 link interno
+  [OK] Almeno 2 link interni ad articoli correlati reali (usati 3/3)
+  [OK] Paragrafi brevi (piu' lungo: 67 parole, max 120)
+REGOLE: 13/13 ok - tutto a posto
+Brief immagine: Un parcheggio sotterraneo condominiale moderno e ben illuminato, con una wallbox montata su colonna accanto a un posto auto numerato; in primo piano una berlina elettrica collegata al cavo di ricarica, che trasmette praticità e autonomia quotidiana.
+Immagine in evidenza generata: media id 5550
+Articolo creato (future): id 5551, publish previsto 2026-10-13T09:00:00 UTC
+Rank Math: meta impostati
+Registro storico aggiornato: ops/articles.csv
+Rotazione: "colonnina-ricarica-condominio" segnato come usato.
+
+Fatto. Articolo programmato (rivedi o cestina entro la mattina):
+  Admin:     https://nove-c.com/wp-admin/post.php?post=5551&action=edit
+  Anteprima: https://nove-c.com/?p=5551&preview=true
