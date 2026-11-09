@@ -1,0 +1,45 @@
+Articoli live sul blog: 27
+Topic (rotazione, ARGOMENTI ESAURITI -> LRU): pompa di calore condominio
+Template: comparison
+Brave Search: ok
+Articoli correlati (candidati link interni): 5
+  - Pompa di Calore per Piscine e Strutture Sportive -> https://nove-c.com/blog/pompa-di-calore-piscina/
+  - La Pompa di Calore che Raffresca Casa d’Estate: Come Funziona -> https://nove-c.com/blog/pompa-di-calore-raffrescamento/
+  - Pompa di Calore: Tutte le Obiezioni Smantellate, Guida Essenziale -> https://nove-c.com/blog/obiezioni-pompa-di-calore-guida-essenziale/
+  - ESCo Pompa di Calore: Guida Definitiva al Conto Termico 3.0 senza Rischi -> https://nove-c.com/blog/esco-pompa-di-calore-conto-termico/
+  - Pompa di Calore Piscina: Guida Definitiva per Circoli e Strutture Sportive 2026 -> https://nove-c.com/blog/pompa-di-calore-piscina-strutture-sportive-2026/
+Claude: articolo generato
+Diagnostica SEO: {"wordCount":2604,"h2Count":10,"kwCount":20,"kwInFirst":true,"kwInH2":true,"kwDensity":"0.77","extLinks":3,"intLinks":4,"relatedAvailable":5,"relatedUsed":3,"slugLen":26,"maxParaWords":102,"powerWordInTitle":true,"warnings":[]}
+VERIFICA REGOLE SEO (pre-publish):
+  [OK] Titolo SEO inizia con la focus keyword
+  [OK] Titolo SEO contiene una power word (Rank Math IT)
+  [OK] Focus keyword nella meta description
+  [OK] Focus keyword nei primi 200 caratteri
+  [OK] Focus keyword in almeno un H2
+  [OK] Densita' focus keyword 0.5-2.5%
+  [OK] Lunghezza articolo >= 1500 parole
+  [OK] Almeno 4 H2
+  [OK] Slug <= 60 caratteri
+  [OK] Almeno 1 link esterno
+  [OK] Almeno 1 link interno
+  [OK] Almeno 2 link interni ad articoli correlati reali (usati 3/5)
+  [OK] Paragrafi brevi (piu' lungo: 102 parole, max 120)
+REGOLE: 13/13 ok - tutto a posto
+Brief immagine: Un palazzo residenziale di città, tipico condominio milanese degli anni '60-'70, ripreso dalla strada in una mattina invernale con le finestre illuminate e un senso di calore domestico visibile dall'esterno. L'edificio è il soggetto principale, con un'atmosfera di comfort urbano che trasmette l'idea di efficienza e benessere per tutti i suoi abitanti.
+Immagine saltata (non bloccante): OpenAI immagine ha risposto 400: {
+  "error": {
+    "message": "The model 'gpt-image-1' does not exist.",
+    "type": "image_generation_user_error",
+    "param": "model",
+    "code": "invalid_value"
+  }
+}
+Articolo creato (future): id 5565, publish previsto 2026-11-10T09:00:00 UTC
+Rank Math: meta impostati
+Registro storico aggiornato: ops/articles.csv
+Rotazione: "pompa-di-calore-condominio-caldaia-centralizzata" segnato come usato.
+ARGOMENTI_ESAURITI: tutti i topic sono gia' stati pubblicati; ripubblicato il meno recente (LRU). Aggiungi nuovi topic a topics.json.
+
+Fatto. Articolo programmato (rivedi o cestina entro la mattina):
+  Admin:     https://nove-c.com/wp-admin/post.php?post=5565&action=edit
+  Anteprima: https://nove-c.com/?p=5565&preview=true
